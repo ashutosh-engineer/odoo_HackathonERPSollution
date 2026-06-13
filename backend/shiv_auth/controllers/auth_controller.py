@@ -372,7 +372,7 @@ class ShivAuthController(http.Controller):
             body = json.loads(request.httprequest.data or '{}')
         except json.JSONDecodeError:
             return error('Invalid JSON body.', code='INVALID_JSON', status=400)
-
+#Here the real logic is written to check with 5 old passwords.
         current_password = body.get('current_password', '')
         new_password = body.get('new_password', '')
         confirm_password = body.get('confirm_password', '')
@@ -405,7 +405,7 @@ class ShivAuthController(http.Controller):
         except ValidationError as e:
             return error(str(e), code='PASSWORD_POLICY_VIOLATION', status=422)
 
-        # Expire all other sessions after password change (security best practice)
+        # we will suspend all te sessons after the password chnages;
         request.env['shiv.session'].sudo().action_expire_all_user_sessions(
             user.id,
             reason='Password changed — all other sessions revoked.',
