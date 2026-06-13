@@ -1,4 +1,4 @@
-import { Navigate, Outlet } from 'react-router-dom';
+import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
 interface ProtectedRouteProps {
@@ -19,6 +19,11 @@ export function ProtectedRoute({ allowedRoles }: ProtectedRouteProps) {
   // If not logged in, force redirect to Sign In page
   if (!user) {
     return <Navigate to="/login" replace />;
+  }
+
+  const location = useLocation();
+  if (user.must_change_password && location.pathname !== '/change-password') {
+    return <Navigate to="/change-password" replace />;
   }
 
   // If roles are specified and the user's role is not among them

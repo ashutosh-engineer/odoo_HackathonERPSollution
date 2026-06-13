@@ -9,11 +9,17 @@ import { ProductMaster } from './pages/ProductMaster';
 import { SalesOrder } from './pages/SalesOrder';
 import { ManufacturingOrder } from './pages/ManufacturingOrder';
 import { PurchaseOrder } from './pages/PurchaseOrder';
+import { SalesList } from './pages/SalesList';
+import { PurchaseList } from './pages/PurchaseList';
+import { ManufacturingList } from './pages/ManufacturingList';
 import { Inventory } from './pages/Inventory';
 import { Settings } from './pages/Settings';
 import { UserManagement } from './pages/UserManagement';
+import { ChangePassword } from './pages/ChangePassword';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { FloorConsole } from './pages/FloorConsole';
+import { AuditLog } from './pages/AuditLog';
 
 const AppLayout = ({ children }: { children: React.ReactNode }) => {
   const location = useLocation();
@@ -26,10 +32,14 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
 
   const roles = {
     admin: ['admin'],
-    sales: ['admin', 'sales_manager', 'sales_user', 'viewer', 'auditor'],
-    purchase: ['admin', 'purchase_manager', 'purchase_user', 'viewer', 'auditor'],
-    mfg: ['admin', 'production_manager', 'production_user', 'viewer', 'auditor'],
-    inv: ['admin', 'warehouse_manager', 'warehouse_user', 'viewer', 'auditor'],
+    dashboard: ['admin', 'sales_manager', 'sales_user', 'warehouse_manager', 'warehouse_user', 'purchase_manager', 'purchase_user', 'production_manager', 'production_user', 'accountant', 'auditor', 'viewer'],
+    products: ['admin', 'sales_manager', 'sales_user', 'warehouse_manager', 'warehouse_user', 'purchase_manager', 'purchase_user', 'production_manager', 'production_user', 'accountant', 'auditor', 'viewer'],
+    sales: ['admin', 'sales_manager', 'sales_user', 'accountant', 'auditor'],
+    purchase: ['admin', 'purchase_manager', 'purchase_user', 'accountant', 'auditor'],
+    mfg: ['admin', 'production_manager', 'production_user', 'auditor'],
+    inv: ['admin', 'warehouse_manager', 'warehouse_user', 'accountant', 'auditor'],
+    floor_console: ['admin', 'production_manager', 'production_user'],
+    audit: ['admin', 'auditor'],
   };
 
   return (
@@ -95,21 +105,21 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
           </Link>
           
           {hasAccess(roles.sales) && (
-            <Link to="/sales/1" className={`flex items-center gap-3 px-4 py-3 cursor-pointer rounded-xl transition-all ${isActive('/sales') ? 'nav-active font-semibold' : 'text-white/70 hover:bg-white/10 hover:text-white'}`}>
+            <Link to="/sales" className={`flex items-center gap-3 px-4 py-3 cursor-pointer rounded-xl transition-all ${isActive('/sales') ? 'nav-active font-semibold' : 'text-white/70 hover:bg-white/10 hover:text-white'}`}>
               <span className="material-symbols-outlined">receipt_long</span>
               <span className="font-label-md">Sales</span>
             </Link>
           )}
           
           {hasAccess(roles.purchase) && (
-            <Link to="/purchase/1" className={`flex items-center gap-3 px-4 py-3 cursor-pointer rounded-xl transition-all ${isActive('/purchase') ? 'nav-active font-semibold' : 'text-white/70 hover:bg-white/10 hover:text-white'}`}>
+            <Link to="/purchase" className={`flex items-center gap-3 px-4 py-3 cursor-pointer rounded-xl transition-all ${isActive('/purchase') ? 'nav-active font-semibold' : 'text-white/70 hover:bg-white/10 hover:text-white'}`}>
               <span className="material-symbols-outlined">shopping_cart</span>
               <span className="font-label-md">Purchase</span>
             </Link>
           )}
           
           {hasAccess(roles.mfg) && (
-            <Link to="/manufacturing/1" className={`flex items-center gap-3 px-4 py-3 cursor-pointer rounded-xl transition-all ${isActive('/manufacturing') ? 'nav-active font-semibold' : 'text-white/70 hover:bg-white/10 hover:text-white'}`}>
+            <Link to="/manufacturing" className={`flex items-center gap-3 px-4 py-3 cursor-pointer rounded-xl transition-all ${isActive('/manufacturing') ? 'nav-active font-semibold' : 'text-white/70 hover:bg-white/10 hover:text-white'}`}>
               <span className="material-symbols-outlined">precision_manufacturing</span>
               <span className="font-label-md">Manufacturing</span>
             </Link>
@@ -119,6 +129,20 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
             <Link to="/inventory" className={`flex items-center gap-3 px-4 py-3 cursor-pointer rounded-xl transition-all ${isActive('/inventory') ? 'nav-active font-semibold' : 'text-white/70 hover:bg-white/10 hover:text-white'}`}>
               <span className="material-symbols-outlined">warehouse</span>
               <span className="font-label-md">Inventory</span>
+            </Link>
+          )}
+          
+          {hasAccess(roles.floor_console) && (
+            <Link to="/floor-console" className={`flex items-center gap-3 px-4 py-3 cursor-pointer rounded-xl transition-all ${isActive('/floor-console') ? 'nav-active font-semibold' : 'text-white/70 hover:bg-white/10 hover:text-white'}`}>
+              <span className="material-symbols-outlined">dashboard_customize</span>
+              <span className="font-label-md">Floor Console</span>
+            </Link>
+          )}
+
+          {hasAccess(roles.audit) && (
+            <Link to="/audit-log" className={`flex items-center gap-3 px-4 py-3 cursor-pointer rounded-xl transition-all ${isActive('/audit-log') ? 'nav-active font-semibold' : 'text-white/70 hover:bg-white/10 hover:text-white'}`}>
+              <span className="material-symbols-outlined">history</span>
+              <span className="font-label-md">Audit Log</span>
             </Link>
           )}
           
@@ -172,24 +196,36 @@ function App() {
 
           {/* Internal Application Routes (Secured) */}
           <Route element={<ProtectedRoute />}>
+            <Route path="/change-password" element={<ChangePassword />} />
             <Route path="/dashboard" element={<AppLayout><OperationalDashboard /></AppLayout>} />
             <Route path="/products" element={<AppLayout><ProductMaster /></AppLayout>} />
           </Route>
           
-          <Route element={<ProtectedRoute allowedRoles={['admin', 'sales_manager', 'sales_user', 'viewer', 'auditor']} />}>
+          <Route element={<ProtectedRoute allowedRoles={['admin', 'sales_manager', 'sales_user', 'accountant', 'auditor']} />}>
+            <Route path="/sales" element={<AppLayout><SalesList /></AppLayout>} />
             <Route path="/sales/:id" element={<AppLayout><SalesOrder /></AppLayout>} />
           </Route>
 
-          <Route element={<ProtectedRoute allowedRoles={['admin', 'purchase_manager', 'purchase_user', 'viewer', 'auditor']} />}>
+          <Route element={<ProtectedRoute allowedRoles={['admin', 'purchase_manager', 'purchase_user', 'accountant', 'auditor']} />}>
+            <Route path="/purchase" element={<AppLayout><PurchaseList /></AppLayout>} />
             <Route path="/purchase/:id" element={<AppLayout><PurchaseOrder /></AppLayout>} />
           </Route>
 
-          <Route element={<ProtectedRoute allowedRoles={['admin', 'production_manager', 'production_user', 'viewer', 'auditor']} />}>
+          <Route element={<ProtectedRoute allowedRoles={['admin', 'production_manager', 'production_user', 'auditor']} />}>
+            <Route path="/manufacturing" element={<AppLayout><ManufacturingList /></AppLayout>} />
             <Route path="/manufacturing/:id" element={<AppLayout><ManufacturingOrder /></AppLayout>} />
           </Route>
 
-          <Route element={<ProtectedRoute allowedRoles={['admin', 'warehouse_manager', 'warehouse_user', 'viewer', 'auditor']} />}>
+          <Route element={<ProtectedRoute allowedRoles={['admin', 'production_manager', 'production_user']} />}>
+            <Route path="/floor-console" element={<AppLayout><FloorConsole /></AppLayout>} />
+          </Route>
+
+          <Route element={<ProtectedRoute allowedRoles={['admin', 'warehouse_manager', 'warehouse_user', 'accountant', 'auditor']} />}>
             <Route path="/inventory" element={<AppLayout><Inventory /></AppLayout>} />
+          </Route>
+
+          <Route element={<ProtectedRoute allowedRoles={['admin', 'auditor']} />}>
+            <Route path="/audit-log" element={<AppLayout><AuditLog /></AppLayout>} />
           </Route>
 
           <Route element={<ProtectedRoute allowedRoles={['admin']} />}>

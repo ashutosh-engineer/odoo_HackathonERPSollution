@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { odooSearchRead } from '../utils/api';
+import { odooSearchRead, odooCall } from '../utils/api';
 import { RoleGuard } from '../components/RoleGuard';
 
 interface StockSummary {
@@ -28,25 +28,68 @@ export const Inventory = () => {
   const [ledger, setLedger] = useState<StockLedger[]>([]);
   const [loading, setLoading] = useState(true);
 
+  // Modal State
+  const [isAdjModalOpen, setIsAdjModalOpen] = useState(false);
+  const [adjType, setAdjType] = useState('correction');
+  const [adjProductId, setAdjProductId] = useState('');
+  const [adjQtyPhysical, setAdjQtyPhysical] = useState('');
+  const [adjNotes, setAdjNotes] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [actionError, setActionError] = useState<string | null>(null);
+
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      const [summaryData, ledgerData] = await Promise.all([
+        odooSearchRead('shiv.stock.summary', [], ['product_id', 'qty_on_hand', 'qty_available', 'qty_incoming']),
+        odooSearchRead('shiv.stock.ledger', [], ['timestamp', 'source_ref', 'product_id', 'location_from', 'location_to', 'qty_change', 'movement_type'])
+      ]);
+      
+      setSummaries(summaryData as StockSummary[]);
+      setLedger(ledgerData as StockLedger[]);
+    } catch (err) {
+      console.error("Failed to load inventory data", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true);
-        const [summaryData, ledgerData] = await Promise.all([
-          odooSearchRead('shiv.stock.summary', [], ['product_id', 'qty_on_hand', 'qty_available', 'qty_incoming']),
-          odooSearchRead('shiv.stock.ledger', [], ['timestamp', 'source_ref', 'product_id', 'location_from', 'location_to', 'qty_change', 'movement_type'])
-        ]);
-        
-        setSummaries(summaryData as StockSummary[]);
-        setLedger(ledgerData as StockLedger[]);
-      } catch (err) {
-        console.error("Failed to load inventory data", err);
-      } finally {
-        setLoading(false);
-      }
-    };
     fetchData();
   }, []);
+
+  const handleStockAdjustment = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!adjProductId || !adjQtyPhysical) return;
+
+    try {
+      setIsSubmitting(true);
+      setActionError(null);
+      // Create draft adjustment
+      const adjId = await odooCall('shiv.stock.adjustment', 'create', [{
+        adjustment_type: adjType,
+        notes: adjNotes,
+        line_ids: [
+          [0, 0, {
+            product_id: parseInt(adjProductId, 10),
+            qty_physical: parseFloat(adjQtyPhysical)
+          }]
+        ]
+      }]);
+      // Validate it immediately
+      await odooCall('shiv.stock.adjustment', 'action_validate', [[adjId]]);
+      
+      setIsAdjModalOpen(false);
+      setAdjProductId('');
+      setAdjQtyPhysical('');
+      setAdjNotes('');
+      await fetchData();
+    } catch (err: any) {
+      setActionError(`Failed to adjust stock: ${err.message || err}`);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   const totalOnHand = summaries.reduce((acc, s) => acc + s.qty_on_hand, 0);
   const totalIncoming = summaries.reduce((acc, s) => acc + s.qty_incoming, 0);
@@ -77,13 +120,64 @@ export const Inventory = () => {
                 <span className="material-symbols-outlined text-[18px]">download</span>
                 Export Ledger
               </button>
-              <button className="px-md py-sm bg-primary text-on-primary font-label-md rounded-lg hover:bg-primary-container transition-all flex items-center gap-sm shadow-sm">
+              <button onClick={() => setIsAdjModalOpen(true)} className="px-md py-sm bg-primary text-on-primary font-label-md rounded-lg hover:bg-primary-container transition-all flex items-center gap-sm shadow-sm">
                 <span className="material-symbols-outlined text-[18px]">swap_horiz</span>
                 New Movement
               </button>
             </RoleGuard>
           </div>
         </div>
+
+        {actionError && (
+          <div className="bg-error-container text-error px-4 py-3 rounded-lg text-sm font-bold flex items-center gap-2 shadow-sm">
+            <span className="material-symbols-outlined text-[18px]">error</span>
+            {actionError}
+          </div>
+        )}
+
+        {isAdjModalOpen && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+            <div className="bg-white p-6 rounded-xl w-full max-w-md shadow-lg">
+              <h3 className="text-lg font-bold mb-4 flex items-center gap-2 text-primary">
+                <span className="material-symbols-outlined">edit_square</span> Stock Adjustment
+              </h3>
+              <form onSubmit={handleStockAdjustment} className="space-y-4">
+                <div>
+                  <label className="block text-sm font-bold mb-1">Adjustment Type</label>
+                  <select value={adjType} onChange={e => setAdjType(e.target.value)} className="w-full border rounded p-2">
+                    <option value="correction">Correction</option>
+                    <option value="stocktake">Physical Stocktake</option>
+                    <option value="writeoff">Write-off / Damage</option>
+                    <option value="opening">Opening Balance</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-bold mb-1">Product</label>
+                  <select required value={adjProductId} onChange={e => setAdjProductId(e.target.value)} className="w-full border rounded p-2">
+                    <option value="">-- Select Product --</option>
+                    {summaries.map(s => (
+                      <option key={s.product_id[0]} value={s.product_id[0]}>{s.product_id[1]}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-bold mb-1">New Physical Quantity</label>
+                  <input required type="number" step="0.01" value={adjQtyPhysical} onChange={e => setAdjQtyPhysical(e.target.value)} className="w-full border rounded p-2" placeholder="e.g. 50" />
+                </div>
+                <div>
+                  <label className="block text-sm font-bold mb-1">Notes</label>
+                  <textarea value={adjNotes} onChange={e => setAdjNotes(e.target.value)} className="w-full border rounded p-2 h-20" placeholder="Reason for adjustment..."></textarea>
+                </div>
+                <div className="flex justify-end gap-2 mt-6">
+                  <button type="button" onClick={() => setIsAdjModalOpen(false)} className="px-4 py-2 border rounded hover:bg-gray-50">Cancel</button>
+                  <button type="submit" disabled={isSubmitting} className="px-4 py-2 bg-primary text-white rounded hover:bg-primary/90 disabled:opacity-50">
+                    {isSubmitting ? 'Processing...' : 'Apply Adjustment'}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
 
         {/* Dashboard Row 1: KPI & Top Products */}
         <div className="grid grid-cols-12 gap-lg">
