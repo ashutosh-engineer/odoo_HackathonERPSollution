@@ -56,7 +56,7 @@ services:
   # 1000 client connections → 25 actual DB connections
   # ──────────────────────────────────────────────
   pgbouncer:
-    image: edoburu/pgbouncer:1.21.0
+    image: edoburu/pgbouncer:1.17.0
     container_name: shiv_pgbouncer
     restart: unless-stopped
     environment:
