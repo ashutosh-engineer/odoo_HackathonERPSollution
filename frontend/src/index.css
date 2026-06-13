@@ -1,0 +1,120 @@
+@import "tailwindcss";
+@config "../tailwind.config.js";
+
+body {
+  background-color: #F8FAFC;
+}
+
+@layer utilities {
+  .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 20;
+      vertical-align: middle;
+      font-size: 20px;
+  }
+  .zebra-stripes tr:nth-child(even) {
+      background-color: #f8fafc;
+  }
+  .custom-scrollbar::-webkit-scrollbar {
+      width: 5px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+      background: transparent;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #e2e8f0;
+      border-radius: 10px;
+  }
+  .nav-active {
+      background-color: rgba(255, 255, 255, 0.12);
+      color: white;
+      box-shadow: inset 2px 0 0 white;
+  }
+
+  .status-stepper-item::after {
+      content: "";
+      position: absolute;
+      right: -10px;
+      top: 0;
+      bottom: 0;
+      width: 20px;
+      background: inherit;
+      clip-path: polygon(0% 0%, 100% 50%, 0% 100%);
+      z-index: 10;
+  }
+  .status-stepper-item:last-child::after {
+      display: none;
+  }
+
+  .zebra-table tr:nth-child(even) { background-color: rgba(241, 244, 249, 0.5); }
+  .status-progress-clip { clip-path: polygon(95% 0%, 100% 50%, 95% 100%, 0% 100%, 5% 50%, 0% 0%); }
+  .status-progress-clip:first-child { clip-path: polygon(95% 0%, 100% 50%, 95% 100%, 0% 100%, 0% 0%); }
+  .status-progress-clip:last-child { clip-path: polygon(100% 0%, 100% 100%, 0% 100%, 5% 50%, 0% 0%); }
+
+  .step-chevron {
+      clip-path: polygon(95% 0%, 100% 50%, 95% 100%, 0% 100%, 5% 50%, 0% 0%);
+  }
+  .step-chevron-first {
+      clip-path: polygon(95% 0%, 100% 50%, 95% 100%, 0% 100%, 0% 50%, 0% 0%);
+  }
+  .step-chevron-last {
+      clip-path: polygon(100% 0%, 100% 50%, 100% 100%, 0% 100%, 5% 50%, 0% 0%);
+  }
+
+  .status-breadcrumb::after {
+      content: '';
+      position: absolute;
+      right: -10px;
+      top: 50%;
+      transform: translateY(-50%);
+      border-top: 10px solid transparent;
+      border-bottom: 10px solid transparent;
+      border-left: 10px solid currentColor;
+      z-index: 10;
+  }
+
+  .data-table-container {
+      max-height: calc(100vh - 420px);
+  }
+
+  .sidebar-transition { transition: all 0.3s ease-in-out; }
+  .toggle-switch {
+      width: 36px;
+      height: 20px;
+      position: relative;
+      display: inline-block;
+  }
+  .toggle-switch input { opacity: 0; width: 0; height: 0; }
+  .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: #D1D5DB;
+      transition: .4s;
+      border-radius: 20px;
+  }
+  .slider:before {
+      position: absolute;
+      content: "";
+      height: 14px; width: 14px;
+      left: 3px; bottom: 3px;
+      background-color: white;
+      transition: .4s;
+      border-radius: 50%;
+  }
+  input:checked + .slider { background-color: #57344f; }
+  input:checked + .slider:before { transform: translateX(16px); }
+
+  .login-card {
+      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
+  }
+  .animate-shake {
+      animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+  }
+}
+
+@keyframes shake {
+  10%, 90% { transform: translate3d(-1px, 0, 0); }
+  20%, 80% { transform: translate3d(2px, 0, 0); }
+  30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+  40%, 60% { transform: translate3d(4px, 0, 0); }
+}
