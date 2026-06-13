@@ -138,6 +138,7 @@ class ShivUser(models.Model):
     is_account_locked = fields.Boolean(
         string='Account Locked',
         compute='_compute_is_account_locked',
+        search='_search_is_account_locked',
         store=False,
         help='True if locked_until is in the future.',
     )
@@ -159,6 +160,7 @@ class ShivUser(models.Model):
     is_password_expired = fields.Boolean(
         string='Password Expired',
         compute='_compute_is_password_expired',
+        search='_search_is_password_expired',
         store=False,
     )
 
@@ -250,6 +252,16 @@ class ShivUser(models.Model):
             user.is_password_expired = bool(
                 user.password_expires_on and user.password_expires_on < now
             )
+
+    def _search_is_account_locked(self, operator, value):
+        if operator == '=' and value:
+            return [('locked_until', '>', fields.Datetime.now())]
+        return ['|', ('locked_until', '=', False), ('locked_until', '<=', fields.Datetime.now())]
+
+    def _search_is_password_expired(self, operator, value):
+        if operator == '=' and value:
+            return [('password_expires_on', '<', fields.Datetime.now()), ('password_expires_on', '!=', False)]
+        return ['|', ('password_expires_on', '>=', fields.Datetime.now()), ('password_expires_on', '=', False)]
 
     # ─────────────────────────────────────────────────────────────────────────
     # CONSTRAINTS

@@ -57,6 +57,7 @@ def require_admin(f):
     """Decorator: require shiv_auth.group_shiv_admin group."""
     @require_auth
     def wrapper(*args, **kwargs):
+        #if the request is not from the admininstrator
         if not request.env.user.has_group('shiv_auth.group_shiv_admin'):
             return error(
                 'Only System Administrators can perform this action.',

@@ -1,31 +1,24 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-# ── shiv.bom ─────────────────────────────────────────────────────────────────
 access_shiv_bom_admin,shiv.bom admin,model_shiv_bom,shiv_auth.group_shiv_admin,1,1,1,1
 access_shiv_bom_prod_manager,shiv.bom prod manager,model_shiv_bom,shiv_auth.group_shiv_production_manager,1,1,1,0
 access_shiv_bom_prod_user,shiv.bom prod user,model_shiv_bom,shiv_auth.group_shiv_production_user,1,0,0,0
 access_shiv_bom_viewer,shiv.bom viewer,model_shiv_bom,shiv_auth.group_shiv_viewer,1,0,0,0
-# ── shiv.bom.line ─────────────────────────────────────────────────────────────
 access_shiv_bom_line_admin,shiv.bom.line admin,model_shiv_bom_line,shiv_auth.group_shiv_admin,1,1,1,1
 access_shiv_bom_line_prod_manager,shiv.bom.line prod manager,model_shiv_bom_line,shiv_auth.group_shiv_production_manager,1,1,1,1
 access_shiv_bom_line_viewer,shiv.bom.line viewer,model_shiv_bom_line,shiv_auth.group_shiv_viewer,1,0,0,0
-# ── shiv.work.center ─────────────────────────────────────────────────────────
 access_shiv_work_center_admin,shiv.work.center admin,model_shiv_work_center,shiv_auth.group_shiv_admin,1,1,1,1
 access_shiv_work_center_prod_manager,shiv.work.center prod manager,model_shiv_work_center,shiv_auth.group_shiv_production_manager,1,1,1,0
 access_shiv_work_center_prod_user,shiv.work.center prod user,model_shiv_work_center,shiv_auth.group_shiv_production_user,1,1,0,0
 access_shiv_work_center_viewer,shiv.work.center viewer,model_shiv_work_center,shiv_auth.group_shiv_viewer,1,0,0,0
-# ── shiv.wc.anomaly.event ────────────────────────────────────────────────────
 access_shiv_wc_anomaly_admin,shiv.wc.anomaly.event admin,model_shiv_wc_anomaly_event,shiv_auth.group_shiv_admin,1,1,1,0
 access_shiv_wc_anomaly_prod_manager,shiv.wc.anomaly.event prod manager,model_shiv_wc_anomaly_event,shiv_auth.group_shiv_production_manager,1,1,1,0
 access_shiv_wc_anomaly_prod_user,shiv.wc.anomaly.event prod user,model_shiv_wc_anomaly_event,shiv_auth.group_shiv_production_user,1,0,1,0
 access_shiv_wc_anomaly_auditor,shiv.wc.anomaly.event auditor,model_shiv_wc_anomaly_event,shiv_auth.group_shiv_auditor,1,0,0,0
-# ── shiv.floor.console ───────────────────────────────────────────────────────
 access_shiv_floor_console_prod,shiv.floor.console prod,model_shiv_floor_console,shiv_auth.group_shiv_production_user,1,0,0,0
 access_shiv_floor_console_admin,shiv.floor.console admin,model_shiv_floor_console,shiv_auth.group_shiv_admin,1,1,1,1
-# ── shiv.manufacturing.order ─────────────────────────────────────────────────
 access_shiv_mo_admin,shiv.manufacturing.order admin,model_shiv_manufacturing_order,shiv_auth.group_shiv_admin,1,1,1,0
 access_shiv_mo_prod_manager,shiv.manufacturing.order prod manager,model_shiv_manufacturing_order,shiv_auth.group_shiv_production_manager,1,1,1,0
 access_shiv_mo_prod_user,shiv.manufacturing.order prod user,model_shiv_manufacturing_order,shiv_auth.group_shiv_production_user,1,1,0,0
 access_shiv_mo_viewer,shiv.manufacturing.order viewer,model_shiv_manufacturing_order,shiv_auth.group_shiv_viewer,1,0,0,0
-# ── shiv.mo.component.line ───────────────────────────────────────────────────
 access_shiv_mo_comp_admin,shiv.mo.component.line admin,model_shiv_mo_component_line,shiv_auth.group_shiv_admin,1,1,1,1
 access_shiv_mo_comp_prod,shiv.mo.component.line prod,model_shiv_mo_component_line,shiv_auth.group_shiv_production_user,1,1,0,0

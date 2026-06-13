@@ -8,4 +8,10 @@ export default defineConfig({
     react(),
     tailwindcss(),
   ],
+  server: {
+    proxy: {
+      '/shiv': 'http://localhost:80',
+      '/web': 'http://localhost:80'
+    }
+  }
 })

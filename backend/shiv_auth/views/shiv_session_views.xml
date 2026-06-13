@@ -5,7 +5,7 @@
             <field name="name">shiv.session.list</field>
             <field name="model">shiv.session</field>
             <field name="arch" type="xml">
-                <list string="Sessions" create="0" delete="0"
+                <tree string="Sessions" create="0" delete="0"
                       decoration-success="state == 'active'"
                       decoration-muted="state in ['logged_out','expired']"
                       decoration-danger="state == 'force_expired'">
@@ -25,7 +25,7 @@
                             attrs="{'invisible': [('state', '!=', 'active')]}"
                             groups="shiv_auth.group_shiv_admin"
                             confirm="Force-expire this session? The user will be logged out immediately."/>
-                </list>
+                </tree>
             </field>
         </record>
 

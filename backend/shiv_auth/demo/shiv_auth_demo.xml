@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-    Demo data — only loaded when Odoo is started with --load-demo
+    Demo data: only loaded when Odoo is started with load-demo
     NOT loaded in production. All passwords are temp and trigger must_change_password=True
 -->
 <odoo>

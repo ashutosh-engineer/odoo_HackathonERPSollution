@@ -1,23 +1,33 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 
 export const SignIn = () => {
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
   const [isAuthenticating, setIsAuthenticating] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  
+  const { login } = useAuth();
+  const navigate = useNavigate();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsAuthenticating(true);
+    setError('');
 
-    // Simulate API call
-    setTimeout(() => {
+    try {
+      await login(email, password);
       setIsSuccess(true);
-      
-      // Redirect simulation
       setTimeout(() => {
-        window.location.href = '/dashboard';
-      }, 1000);
-    }, 1500);
+        navigate('/dashboard');
+      }, 500);
+    } catch (err: any) {
+      setError(err.message || 'Login failed. Please check your credentials.');
+    } finally {
+      setIsAuthenticating(false);
+    }
   };
 
   return (
@@ -48,17 +58,26 @@ export const SignIn = () => {
         {/* Login Card */}
         <div className="bg-surface-container-lowest border border-outline-variant p-8 rounded-xl shadow-sm">
           <form className="space-y-6" id="loginForm" onSubmit={handleSubmit}>
-            {/* Email Field */}
+            {error && (
+              <div className="bg-error-container text-error px-4 py-3 rounded-lg text-sm font-bold flex items-center gap-2">
+                <span className="material-symbols-outlined text-[18px]">error</span>
+                {error}
+              </div>
+            )}
+
+            {/* Email/Login Field */}
             <div className="space-y-2 group">
-              <label className="font-label-md text-label-md text-on-surface-variant block uppercase" htmlFor="email">Email Address</label>
+              <label className="font-label-md text-label-md text-on-surface-variant block uppercase" htmlFor="email">Email or Username</label>
               <div className="relative group-focus-within:scale-[1.01] transition-transform">
                 <input 
                   className="w-full h-10 px-3 bg-surface-container-low border border-outline-variant rounded-lg font-body-md text-body-md form-input-focus transition-all focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" 
                   id="email" 
                   name="email" 
-                  placeholder="name@shivfurniture.com" 
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="admin or name@shivfurniture.com" 
                   required 
-                  type="email" 
+                  type="text" 
                 />
               </div>
             </div>
@@ -67,13 +86,14 @@ export const SignIn = () => {
             <div className="space-y-2 group">
               <div className="flex justify-between items-center">
                 <label className="font-label-md text-label-md text-on-surface-variant block uppercase" htmlFor="password">Password</label>
-                <Link className="font-label-md text-label-md text-primary hover:underline transition-all" to="/forgot-password">Forgot?</Link>
               </div>
               <div className="relative group-focus-within:scale-[1.01] transition-transform">
                 <input 
                   className="w-full h-10 px-3 bg-surface-container-low border border-outline-variant rounded-lg font-body-md text-body-md form-input-focus transition-all focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary" 
                   id="password" 
                   name="password" 
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••" 
                   required 
                   type="password" 

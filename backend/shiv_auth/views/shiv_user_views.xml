@@ -86,7 +86,7 @@
         <record id="view_shiv_user_list" model="ir.ui.view">
             <field name="name">res.users.shiv.list</field>
             <field name="model">res.users</field>
-            <field name="inherit_id" ref="base.view_users_list"/>
+            <field name="inherit_id" ref="base.view_users_tree"/>
             <field name="arch" type="xml">
                 <field name="name" position="after">
                     <field name="shiv_role"
@@ -116,7 +116,7 @@
                     <field name="department"/>
                     <field name="employee_id"/>
                 </field>
-                <filter name="active" position="after">
+                <xpath expr="//search" position="inside">
                     <filter string="Locked Accounts"
                             name="filter_locked"
                             domain="[('is_account_locked', '=', True)]"/>
@@ -145,7 +145,7 @@
                                 name="groupby_department"
                                 context="{'group_by': 'department'}"/>
                     </group>
-                </filter>
+                </xpath>
             </field>
         </record>
 

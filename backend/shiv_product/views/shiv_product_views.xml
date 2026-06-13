@@ -6,7 +6,7 @@
         <field name="name">shiv.product.list</field>
         <field name="model">shiv.product</field>
         <field name="arch" type="xml">
-            <list string="Products"
+            <tree string="Products"
                   decoration-muted="state == 'archived'"
                   decoration-warning="state == 'discontinued'">
                 <field name="internal_ref"/>
@@ -21,7 +21,7 @@
                 <field name="qty_available" string="Available"/>
                 <field name="sale_price"/>
                 <field name="uom_id"/>
-            </list>
+            </tree>
         </field>
     </record>
 
@@ -80,11 +80,6 @@
                         </page>
                     </notebook>
                 </sheet>
-                <div class="oe_chatter">
-                    <field name="message_follower_ids"/>
-                    <field name="message_ids"/>
-                    <field name="activity_ids"/>
-                </div>
             </form>
         </field>
     </record>
@@ -100,8 +95,6 @@
                 <field name="barcode"/>
                 <field name="category_id"/>
                 <filter string="Active" name="filter_active" domain="[('state','=','active')]"/>
-                <filter string="Low Stock" name="filter_low_stock"
-                        domain="[('qty_available','&lt;=','reorder_point')]"/>
                 <filter string="Storable" name="filter_storable"
                         domain="[('product_type','=','storable')]"/>
                 <separator/>

@@ -5,7 +5,7 @@
             <field name="name">shiv.role.list</field>
             <field name="model">shiv.role</field>
             <field name="arch" type="xml">
-                <list string="Roles" decoration-danger="code == 'admin'">
+                <tree string="Roles" decoration-danger="code == 'admin'">
                     <field name="sequence" widget="handle"/>
                     <field name="display_name"/>
                     <field name="code"/>
@@ -14,7 +14,7 @@
                     <field name="can_view_audit_log" optional="show"/>
                     <field name="can_approve_sales" optional="show"/>
                     <field name="can_approve_purchase" optional="show"/>
-                </list>
+                </tree>
             </field>
         </record>
 

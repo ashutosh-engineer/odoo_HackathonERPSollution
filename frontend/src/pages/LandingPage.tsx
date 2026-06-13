@@ -22,9 +22,8 @@ export const LandingPage = () => {
             </div>
             
             <div className="flex items-center gap-6">
-              <Link to="/login" className="hidden md:block text-on-surface hover:text-primary text-sm font-semibold transition-colors">Sign In</Link>
               <Link to="/login" className="px-5 py-2.5 bg-primary text-white text-sm rounded font-semibold hover:bg-primary/90 transition-all shadow-sm">
-                Sign Up Free
+                Sign In
               </Link>
             </div>
           </div>
@@ -43,13 +42,6 @@ export const LandingPage = () => {
               A production-ready system designed to cut ₹2Cr+ in operational waste. Unifying inventory, procurement, and manufacturing with absolute ACID compliance.
             </p>
             <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-16">
-              <Link to="/login" className="w-full sm:w-auto px-8 py-3.5 bg-primary text-white rounded font-bold hover:bg-primary/90 transition-all shadow-sm flex items-center justify-center gap-2">
-                Get Started Free
-                <ArrowRight className="w-4 h-4" />
-              </Link>
-              <a href="#features" className="w-full sm:w-auto px-8 py-3.5 bg-white text-slate-700 border border-slate-300 rounded font-bold hover:bg-slate-50 transition-all flex items-center justify-center shadow-sm">
-                View Architecture
-              </a>
             </div>
           </div>
           
@@ -281,25 +273,7 @@ export const LandingPage = () => {
         </div>
       </section>
 
-      {/* Footer - Product Approach */}
-      <footer className="bg-white py-10 border-t border-slate-200">
-        <div className="max-w-7xl mx-auto px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center gap-4">
-          <div className="flex items-center gap-2">
-            <svg viewBox="0 0 40 40" className="w-5 h-5 text-primary" fill="currentColor">
-              <path d="M10 20C10 14.4772 14.4772 10 20 10V20H10Z" opacity="0.8"/>
-              <path d="M20 10C25.5228 10 30 14.4772 30 20H20V10Z" />
-              <path d="M30 20C30 25.5228 25.5228 30 20 30V20H30Z" opacity="0.6"/>
-              <path d="M20 30C14.4772 30 10 25.5228 10 20H20V30Z" opacity="0.4"/>
-            </svg>
-            <span className="font-extrabold text-sm tracking-tight text-slate-900">SHIV<span className="text-primary font-light">ERP</span></span>
-          </div>
-          <div className="flex gap-8 text-sm font-medium text-slate-500">
-            <Link to="/dashboard" className="hover:text-primary transition-colors">Product</Link>
-            <Link to="/privacy" className="hover:text-primary transition-colors">Privacy Policy</Link>
-            <Link to="/terms" className="hover:text-primary transition-colors">Terms of Service</Link>
-          </div>
-        </div>
-      </footer>
+
     </div>
   );
 };

@@ -1,9 +1,7 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-# shiv.product.category
 access_shiv_product_category_admin,shiv.product.category admin,model_shiv_product_category,shiv_auth.group_shiv_admin,1,1,1,1
 access_shiv_product_category_manager,shiv.product.category manager,model_shiv_product_category,shiv_auth.group_shiv_warehouse_manager,1,1,1,0
 access_shiv_product_category_viewer,shiv.product.category viewer,model_shiv_product_category,shiv_auth.group_shiv_viewer,1,0,0,0
-# shiv.product
 access_shiv_product_admin,shiv.product admin,model_shiv_product,shiv_auth.group_shiv_admin,1,1,1,1
 access_shiv_product_manager,shiv.product manager,model_shiv_product,shiv_auth.group_shiv_warehouse_manager,1,1,1,0
 access_shiv_product_purchase,shiv.product purchase,model_shiv_product,shiv_auth.group_shiv_purchase_user,1,1,0,0
