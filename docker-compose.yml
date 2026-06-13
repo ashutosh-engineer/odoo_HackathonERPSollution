@@ -1,0 +1,235 @@
+version: "3.9"
+
+# ============================================================
+# Shiv Furniture Works ERP — Complete Docker Stack
+# Odoo 16 + PostgreSQL 15 + Redis 7 + Nginx + PgBouncer
+# ============================================================
+
+services:
+
+  # ──────────────────────────────────────────────
+  # PostgreSQL 15 — Primary Database
+  # ──────────────────────────────────────────────
+  db:
+    image: postgres:15-alpine
+    container_name: shiv_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: shiv_furniture_erp
+      POSTGRES_USER: shiv_odoo
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-ShivSecure@2024}
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=en_US.UTF-8"
+      # Performance tuning for production
+      POSTGRES_HOST_AUTH_METHOD: md5
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/postgres/init:/docker-entrypoint-initdb.d:ro
+      - ./docker/postgres/postgresql.conf:/etc/postgresql/postgresql.conf:ro
+    ports:
+      - "5432:5432"
+    networks:
+      - shiv_internal
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U shiv_odoo -d shiv_furniture_erp"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    command: >
+      postgres
+        -c max_connections=200
+        -c shared_buffers=256MB
+        -c effective_cache_size=768MB
+        -c maintenance_work_mem=64MB
+        -c checkpoint_completion_target=0.9
+        -c wal_buffers=16MB
+        -c default_statistics_target=100
+        -c random_page_cost=1.1
+        -c effective_io_concurrency=200
+        -c work_mem=4MB
+        -c min_wal_size=1GB
+        -c max_wal_size=4GB
+        -c log_min_duration_statement=5000
+        -c log_checkpoints=on
+        -c log_connections=on
+        -c log_disconnections=on
+        -c log_lock_waits=on
+        -c deadlock_timeout=1s
+
+  # ──────────────────────────────────────────────
+  # PgBouncer — Connection Pooler
+  # 1000 client connections → 25 actual DB connections
+  # ──────────────────────────────────────────────
+  pgbouncer:
+    image: edoburu/pgbouncer:1.21.0
+    container_name: shiv_pgbouncer
+    restart: unless-stopped
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: shiv_odoo
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-ShivSecure@2024}
+      DB_NAME: shiv_furniture_erp
+      POOL_MODE: transaction
+      MAX_CLIENT_CONN: 1000
+      DEFAULT_POOL_SIZE: 25
+      MIN_POOL_SIZE: 5
+      RESERVE_POOL_SIZE: 5
+      RESERVE_POOL_TIMEOUT: 3
+      SERVER_IDLE_TIMEOUT: 600
+      CLIENT_IDLE_TIMEOUT: 0
+      LOG_CONNECTIONS: 1
+      LOG_DISCONNECTIONS: 1
+      LOG_POOLER_ERRORS: 1
+      ADMIN_USERS: shiv_odoo
+    ports:
+      - "6432:5432"
+    networks:
+      - shiv_internal
+    depends_on:
+      db:
+        condition: service_healthy
+
+  # ──────────────────────────────────────────────
+  # Redis 7 — Sessions, Cache, Distributed Locks
+  # ──────────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: shiv_redis
+    restart: unless-stopped
+    command: >
+      redis-server
+        --requirepass ${REDIS_PASSWORD:-ShivRedis@2024}
+        --maxmemory 256mb
+        --maxmemory-policy allkeys-lru
+        --save 900 1
+        --save 300 10
+        --save 60 10000
+        --appendonly yes
+        --appendfsync everysec
+        --loglevel notice
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    networks:
+      - shiv_internal
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD:-ShivRedis@2024}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ──────────────────────────────────────────────
+  # Odoo 16 — ERP Application Server
+  # ──────────────────────────────────────────────
+  odoo:
+    build:
+      context: .
+      dockerfile: docker/odoo/Dockerfile
+    container_name: shiv_odoo
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      pgbouncer:
+        condition: service_started
+    environment:
+      HOST: pgbouncer
+      PORT: 5432
+      USER: shiv_odoo
+      PASSWORD: ${POSTGRES_PASSWORD:-ShivSecure@2024}
+      REDIS_URL: redis://:${REDIS_PASSWORD:-ShivRedis@2024}@redis:6379/0
+      ODOO_ADMIN_PASSWD: ${ODOO_MASTER_PASSWORD:-ShivMaster@2024}
+    volumes:
+      - ./backend:/mnt/extra-addons                  # All custom modules
+      - odoo_data:/var/lib/odoo                       # Filestore, sessions
+      - ./docker/odoo/odoo.conf:/etc/odoo/odoo.conf:ro
+    ports:
+      - "8069:8069"
+      - "8072:8072"                                   # Longpolling
+    networks:
+      - shiv_internal
+      - shiv_external
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8069/web/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
+  # ──────────────────────────────────────────────
+  # Nginx — Reverse Proxy, TLS, Rate Limiting
+  # ──────────────────────────────────────────────
+  nginx:
+    image: nginx:1.25-alpine
+    container_name: shiv_nginx
+    restart: unless-stopped
+    depends_on:
+      - odoo
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./docker/nginx/conf.d:/etc/nginx/conf.d:ro
+      - ./docker/nginx/ssl:/etc/nginx/ssl:ro
+      - nginx_logs:/var/log/nginx
+    networks:
+      - shiv_external
+      - shiv_internal
+    healthcheck:
+      test: ["CMD", "nginx", "-t"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+  # ──────────────────────────────────────────────
+  # Adminer — DB Admin UI (dev only, disable in prod)
+  # ──────────────────────────────────────────────
+  adminer:
+    image: adminer:4.8.1
+    container_name: shiv_adminer
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    networks:
+      - shiv_internal
+    depends_on:
+      - db
+    environment:
+      ADMINER_DEFAULT_SERVER: db
+      ADMINER_DESIGN: pepa-linha
+    profiles:
+      - dev                                           # Only starts with: docker-compose --profile dev up
+
+# ============================================================
+# Volumes — Persistent Data
+# ============================================================
+volumes:
+  postgres_data:
+    driver: local
+    name: shiv_postgres_data
+  redis_data:
+    driver: local
+    name: shiv_redis_data
+  odoo_data:
+    driver: local
+    name: shiv_odoo_data
+  nginx_logs:
+    driver: local
+    name: shiv_nginx_logs
+
+# ============================================================
+# Networks
+# ============================================================
+networks:
+  shiv_internal:
+    driver: bridge
+    name: shiv_internal
+    internal: true                                    # No direct internet access
+  shiv_external:
+    driver: bridge
+    name: shiv_external                               # Only nginx touches internet
