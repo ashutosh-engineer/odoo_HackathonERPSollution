@@ -131,7 +131,7 @@ services:
       pgbouncer:
         condition: service_started
     environment:
-      HOST: pgbouncer
+      HOST: db
       PORT: "5432"
       USER: shiv_odoo
       PASSWORD: ${POSTGRES_PASSWORD:-ShivSecure@2024}

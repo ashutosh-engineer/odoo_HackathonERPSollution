@@ -105,6 +105,23 @@ class ShivAuthController(http.Controller):
     """REST API for authentication operations."""
 
     # ──────────────────────────────────────────────────────────────────────────
+    # GET /status
+    # ──────────────────────────────────────────────────────────────────────────
+
+    @http.route('/status', type='http', auth='none', methods=['GET'], csrf=False)
+    def status(self, **kwargs):
+        """Health check endpoint - shows server is live."""
+        return Response(
+            json.dumps({
+                'status': 'live',
+                'message': 'Shiv Furniture Works ERP Backend is running',
+                'timestamp': str(__import__('datetime').datetime.now()),
+            }, default=str),
+            status=200,
+            mimetype='application/json',
+        )
+
+    # ──────────────────────────────────────────────────────────────────────────
     # POST /shiv/auth/login
     # ──────────────────────────────────────────────────────────────────────────
 
