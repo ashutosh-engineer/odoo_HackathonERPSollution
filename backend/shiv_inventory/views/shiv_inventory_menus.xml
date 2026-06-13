@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo><data>
+    <menuitem id="menu_shiv_inventory_root" name="Inventory"
+              parent="shiv_auth.menu_shiv_root" sequence="30"/>
+    <menuitem id="menu_shiv_inventory_overview" name="Inventory Overview"
+              parent="menu_shiv_inventory_root"
+              action="shiv_inventory.action_shiv_stock_summary" sequence="10"/>
+    <menuitem id="menu_shiv_stock_ledger" name="Stock Ledger (Audit Trail)"
+              parent="menu_shiv_inventory_root"
+              action="shiv_inventory.action_shiv_stock_ledger" sequence="20"/>
+    <menuitem id="menu_shiv_stock_adj" name="Stock Adjustments"
+              parent="menu_shiv_inventory_root"
+              action="shiv_inventory.action_shiv_stock_adj" sequence="30"
+              groups="shiv_auth.group_shiv_warehouse_user"/>
+</data></odoo>

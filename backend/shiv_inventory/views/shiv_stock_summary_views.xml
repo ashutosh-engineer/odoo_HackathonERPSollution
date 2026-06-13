@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo><data>
+    <record id="view_shiv_stock_summary_list" model="ir.ui.view">
+        <field name="name">shiv.stock.summary.list</field>
+        <field name="model">shiv.stock.summary</field>
+        <field name="arch" type="xml">
+            <list string="Inventory"
+                  decoration-danger="qty_available &lt;= 0"
+                  decoration-warning="qty_available &lt;= product_id.reorder_point">
+                <field name="product_id"/>
+                <field name="qty_on_hand" string="On Hand"/>
+                <field name="qty_reserved" string="Reserved"/>
+                <field name="qty_available" string="Available"/>
+                <field name="qty_incoming" string="Incoming"/>
+                <field name="qty_forecasted" string="Forecasted"/>
+                <field name="last_movement_at" string="Last Movement"/>
+                <field name="stock_value" string="Value (₹)"
+                       groups="shiv_auth.group_shiv_purchase_user"/>
+                <button name="action_view_ledger" string="Ledger"
+                        type="object" class="btn-sm btn-info"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_shiv_stock_summary_search" model="ir.ui.view">
+        <field name="name">shiv.stock.summary.search</field>
+        <field name="model">shiv.stock.summary</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="product_id"/>
+                <filter string="Low Stock" name="filter_low"
+                        domain="[('qty_available','&lt;=',0)]"/>
+                <filter string="Has Stock" name="filter_has_stock"
+                        domain="[('qty_on_hand','&gt;',0)]"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_shiv_stock_summary" model="ir.actions.act_window">
+        <field name="name">Inventory Overview</field>
+        <field name="res_model">shiv.stock.summary</field>
+        <field name="view_mode">list</field>
+        <field name="context">{'create': False}</field>
+    </record>
+
+    <!-- Stock Adjustment views -->
+    <record id="view_shiv_stock_adj_list" model="ir.ui.view">
+        <field name="name">shiv.stock.adjustment.list</field>
+        <field name="model">shiv.stock.adjustment</field>
+        <field name="arch" type="xml">
+            <list string="Stock Adjustments"
+                  decoration-success="state == 'done'"
+                  decoration-muted="state == 'cancelled'">
+                <field name="name"/>
+                <field name="date"/>
+                <field name="adjustment_type" widget="badge"/>
+                <field name="state" widget="badge"/>
+                <field name="validated_by"/>
+                <field name="validated_at"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_shiv_stock_adj_form" model="ir.ui.view">
+        <field name="name">shiv.stock.adjustment.form</field>
+        <field name="model">shiv.stock.adjustment</field>
+        <field name="arch" type="xml">
+            <form string="Stock Adjustment">
+                <header>
+                    <button name="action_validate" string="Validate"
+                            type="object" class="btn-primary"
+                            attrs="{'invisible': [('state','!=','draft')]}"
+                            confirm="This will update inventory. Cannot be undone. Confirm?"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,done"/>
+                </header>
+                <sheet>
+                    <group>
+                        <field name="name" readonly="1"/>
+                        <field name="date" attrs="{'readonly': [('state','!=','draft')]}"/>
+                        <field name="adjustment_type" attrs="{'readonly': [('state','!=','draft')]}"/>
+                        <field name="notes" attrs="{'readonly': [('state','!=','draft')]}"/>
+                    </group>
+                    <field name="line_ids"
+                           attrs="{'readonly': [('state','!=','draft')]}"
+                           widget="one2many">
+                        <list editable="bottom">
+                            <field name="product_id"/>
+                            <field name="qty_system" readonly="1"/>
+                            <field name="qty_physical"/>
+                            <field name="qty_adjusted" readonly="1"/>
+                            <field name="notes"/>
+                        </list>
+                    </field>
+                    <group attrs="{'invisible': [('state','=','draft')]}">
+                        <field name="validated_by" readonly="1"/>
+                        <field name="validated_at" readonly="1"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_shiv_stock_adj" model="ir.actions.act_window">
+        <field name="name">Stock Adjustments</field>
+        <field name="res_model">shiv.stock.adjustment</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</data></odoo>

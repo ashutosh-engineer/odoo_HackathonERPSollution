@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo><data>
+    <record id="view_shiv_stock_ledger_list" model="ir.ui.view">
+        <field name="name">shiv.stock.ledger.list</field>
+        <field name="model">shiv.stock.ledger</field>
+        <field name="arch" type="xml">
+            <list string="Stock Ledger" create="0" edit="0" delete="0"
+                  decoration-success="movement_type in ['in_purchase','in_production','in_return','in_opening']"
+                  decoration-danger="movement_type in ['out_sale','out_consumed','out_adjustment']"
+                  decoration-info="movement_type in ['reserve','unreserve']">
+                <field name="timestamp"/>
+                <field name="product_id"/>
+                <field name="movement_type" widget="badge"/>
+                <field name="qty_change"/>
+                <field name="qty_after"/>
+                <field name="uom_id"/>
+                <field name="source_ref"/>
+                <field name="actor_name"/>
+                <field name="location_from" optional="show"/>
+                <field name="location_to" optional="show"/>
+                <field name="notes" optional="show"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_shiv_stock_ledger_search" model="ir.ui.view">
+        <field name="name">shiv.stock.ledger.search</field>
+        <field name="model">shiv.stock.ledger</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="product_id"/>
+                <field name="source_ref"/>
+                <field name="actor_name"/>
+                <filter string="Stock In" name="filter_in"
+                        domain="[('movement_type','like','in_')]"/>
+                <filter string="Stock Out" name="filter_out"
+                        domain="[('movement_type','like','out_')]"/>
+                <filter string="Reservations" name="filter_reserve"
+                        domain="[('movement_type','in',['reserve','unreserve'])]"/>
+                <filter string="Today" name="filter_today"
+                        domain="[('timestamp','&gt;=',context_today().strftime('%Y-%m-%d'))]"/>
+                <separator/>
+                <group expand="0" string="Group By">
+                    <filter string="Product" name="groupby_product" context="{'group_by':'product_id'}"/>
+                    <filter string="Movement Type" name="groupby_type" context="{'group_by':'movement_type'}"/>
+                    <filter string="Date" name="groupby_date" context="{'group_by':'timestamp:day'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_shiv_stock_ledger" model="ir.actions.act_window">
+        <field name="name">Stock Ledger</field>
+        <field name="res_model">shiv.stock.ledger</field>
+        <field name="view_mode">list</field>
+        <field name="context">{'create': False}</field>
+    </record>
+</data></odoo>
