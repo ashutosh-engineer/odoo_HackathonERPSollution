@@ -485,66 +485,6 @@ Shard by customer ID only if Phase 3 insufficient (rare).
 
 ---
 
-## Jury Q&A (Technical Defense)
-
-### Q1: How do you prevent overselling?
-
-```
-PostgreSQL SERIALIZABLE isolation + SELECT FOR UPDATE.
-
-User A orders 10, User B orders 10 (last 10 in stock):
-- User A: BEGIN, SELECT FOR UPDATE (locks row)
-- User B: BEGIN, SELECT FOR UPDATE (WAITS)
-- User A commits (reserves 10)
-- User B: qty is now 0, can't reserve 10, ERROR
-
-Database enforces this. No code logic needed. Impossible to oversell.
-```
-
-### Q2: How do you handle concurrent reads during writes?
-
-```
-Read replicas absorb 99% of reads. Primary handles writes only.
-
-Dashboards → Replica (might be 5s old, acceptable)
-Real-time data → Redis cache (1s old max)
-Fresh writes → Primary (immediate)
-```
-
-### Q3: What if primary crashes?
-
-```
-RTO: 15 minutes. RPO: <1 minute.
-
-Promote replica to primary (automated), update DNS, workers reconnect.
-WAL archiving allows recovery of last 1 min of transactions.
-```
-
-### Q4: Can employee delete their records?
-
-```
-Four layers:
-1. Application RBAC (delete button not shown)
-2. Database RBAC (permission denied)
-3. Soft delete only (never DELETE, mark is_archived)
-4. Immutable audit log (proves what happened)
-
-Result: Cannot delete. Forensics show who tried.
-```
-
-### Q5: How do you scale to 10M records?
-
-```
-Phase 1: Single instance + indexes (handles 1M)
-Phase 2: Replicas + caching (handles 10M)
-Phase 3: Partitioning (handles 100M)
-Phase 4: Sharding (unlimited, if needed)
-
-No code changes between phases. Infrastructure change only.
-```
-
----
-
 ## Deployment
 
 ### Quick Start
@@ -602,6 +542,6 @@ Shiv Furniture Works' ERP is built to solve more than ₹2Cr per year in waste w
 
 ---
 
-**GitHub**: [ashutosh-engineer/odoo_Hackathon_Team_adip1](https://github.com/ashutosh-engineer/odoo_Hackathon_Team_adip1)
+**GitHub**: [ashutosh-engineer/odoo_HackathonERPSollution](https://github.com/ashutosh-engineer/odoo_HackathonERPSollution)
 
 **Production-grade. Jury-defensible. Enterprise-ready.**
