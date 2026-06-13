@@ -1,0 +1,237 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    shiv_auth/data/shiv_auth_data.xml
+    Seed data: roles metadata, password policy, scheduled actions.
+    noupdate="1" — never overwrite on module update.
+-->
+<odoo>
+    <data noupdate="1">
+
+        <!-- ═══════════════════════════════════════════════════════════
+             DEFAULT PASSWORD POLICY
+             ═══════════════════════════════════════════════════════════ -->
+        <record id="shiv_default_password_policy" model="shiv.password.policy">
+            <field name="policy_name">Shiv Furniture Default Password Policy</field>
+            <field name="min_length">8</field>
+            <field name="max_length">128</field>
+            <field name="require_uppercase">True</field>
+            <field name="require_lowercase">True</field>
+            <field name="require_digit">True</field>
+            <field name="require_special">True</field>
+            <field name="expiry_days">90</field>
+            <field name="history_depth">5</field>
+            <field name="max_login_attempts">5</field>
+            <field name="lockout_duration_minutes">30</field>
+            <field name="max_concurrent_sessions">3</field>
+            <field name="session_idle_timeout_hours">8</field>
+            <field name="force_change_on_first_login">True</field>
+        </record>
+
+        <!-- ═══════════════════════════════════════════════════════════
+             ROLE METADATA RECORDS
+             ═══════════════════════════════════════════════════════════ -->
+        <record id="shiv_role_admin" model="shiv.role">
+            <field name="code">admin</field>
+            <field name="display_name">System Administrator</field>
+            <field name="description">Full system access. Can manage users, roles, all data, configurations, and audit logs.</field>
+            <field name="sequence">1</field>
+            <field name="color">1</field>
+            <field name="can_view_sales">True</field>
+            <field name="can_create_sales">True</field>
+            <field name="can_approve_sales">True</field>
+            <field name="can_view_inventory">True</field>
+            <field name="can_adjust_inventory">True</field>
+            <field name="can_transfer_inventory">True</field>
+            <field name="can_view_purchase">True</field>
+            <field name="can_create_purchase">True</field>
+            <field name="can_approve_purchase">True</field>
+            <field name="can_view_manufacturing">True</field>
+            <field name="can_create_manufacturing">True</field>
+            <field name="can_execute_manufacturing">True</field>
+            <field name="can_view_audit_log">True</field>
+            <field name="can_export_audit_log">True</field>
+            <field name="can_manage_users">True</field>
+            <field name="can_manage_roles">True</field>
+            <field name="can_view_financial">True</field>
+            <field name="can_view_cost_prices">True</field>
+            <field name="can_view_dashboard">True</field>
+            <field name="can_view_reports">True</field>
+            <field name="can_export_reports">True</field>
+        </record>
+
+        <record id="shiv_role_sales_manager" model="shiv.role">
+            <field name="code">sales_manager</field>
+            <field name="display_name">Sales Manager</field>
+            <field name="description">Can approve orders, apply discounts, view full pipeline, assign territories.</field>
+            <field name="sequence">2</field>
+            <field name="color">3</field>
+            <field name="can_view_sales">True</field>
+            <field name="can_create_sales">True</field>
+            <field name="can_approve_sales">True</field>
+            <field name="can_view_inventory">True</field>
+            <field name="can_view_dashboard">True</field>
+            <field name="can_view_reports">True</field>
+            <field name="can_export_reports">True</field>
+        </record>
+
+        <record id="shiv_role_sales_user" model="shiv.role">
+            <field name="code">sales_user</field>
+            <field name="display_name">Sales Executive</field>
+            <field name="description">Can create and confirm sales orders. Cannot approve or apply discounts above threshold.</field>
+            <field name="sequence">3</field>
+            <field name="color">4</field>
+            <field name="can_view_sales">True</field>
+            <field name="can_create_sales">True</field>
+            <field name="can_view_inventory">True</field>
+            <field name="can_view_dashboard">True</field>
+        </record>
+
+        <record id="shiv_role_warehouse_manager" model="shiv.role">
+            <field name="code">warehouse_manager</field>
+            <field name="display_name">Warehouse Manager</field>
+            <field name="description">Can approve transfers, manage locations, run stock valuations.</field>
+            <field name="sequence">4</field>
+            <field name="color">5</field>
+            <field name="can_view_inventory">True</field>
+            <field name="can_adjust_inventory">True</field>
+            <field name="can_transfer_inventory">True</field>
+            <field name="can_view_dashboard">True</field>
+            <field name="can_view_reports">True</field>
+        </record>
+
+        <record id="shiv_role_warehouse_user" model="shiv.role">
+            <field name="code">warehouse_user</field>
+            <field name="display_name">Warehouse Staff</field>
+            <field name="description">Can receive stock, perform transfers, record adjustments.</field>
+            <field name="sequence">5</field>
+            <field name="color">6</field>
+            <field name="can_view_inventory">True</field>
+            <field name="can_adjust_inventory">True</field>
+            <field name="can_transfer_inventory">True</field>
+            <field name="can_view_dashboard">True</field>
+        </record>
+
+        <record id="shiv_role_purchase_manager" model="shiv.role">
+            <field name="code">purchase_manager</field>
+            <field name="display_name">Purchase Manager</field>
+            <field name="description">Can approve POs at any value, manage vendors, configure reorder rules.</field>
+            <field name="sequence">6</field>
+            <field name="color">7</field>
+            <field name="can_view_purchase">True</field>
+            <field name="can_create_purchase">True</field>
+            <field name="can_approve_purchase">True</field>
+            <field name="can_view_inventory">True</field>
+            <field name="can_view_cost_prices">True</field>
+            <field name="can_view_dashboard">True</field>
+            <field name="can_view_reports">True</field>
+        </record>
+
+        <record id="shiv_role_purchase_user" model="shiv.role">
+            <field name="code">purchase_user</field>
+            <field name="display_name">Purchase Officer</field>
+            <field name="description">Can create RFQs and purchase orders. Cannot approve above threshold.</field>
+            <field name="sequence">7</field>
+            <field name="color">8</field>
+            <field name="can_view_purchase">True</field>
+            <field name="can_create_purchase">True</field>
+            <field name="can_view_inventory">True</field>
+            <field name="can_view_dashboard">True</field>
+        </record>
+
+        <record id="shiv_role_production_manager" model="shiv.role">
+            <field name="code">production_manager</field>
+            <field name="display_name">Production Manager</field>
+            <field name="description">Can create/approve manufacturing orders, manage work centers and BOMs.</field>
+            <field name="sequence">8</field>
+            <field name="color">9</field>
+            <field name="can_view_manufacturing">True</field>
+            <field name="can_create_manufacturing">True</field>
+            <field name="can_execute_manufacturing">True</field>
+            <field name="can_view_inventory">True</field>
+            <field name="can_view_dashboard">True</field>
+            <field name="can_view_reports">True</field>
+        </record>
+
+        <record id="shiv_role_production_user" model="shiv.role">
+            <field name="code">production_user</field>
+            <field name="display_name">Production Staff</field>
+            <field name="description">Can execute work orders, record production progress, log wastage.</field>
+            <field name="sequence">9</field>
+            <field name="color">10</field>
+            <field name="can_view_manufacturing">True</field>
+            <field name="can_execute_manufacturing">True</field>
+            <field name="can_view_dashboard">True</field>
+        </record>
+
+        <record id="shiv_role_accountant" model="shiv.role">
+            <field name="code">accountant</field>
+            <field name="display_name">Accountant</field>
+            <field name="description">Can view and manage financial data, invoices, and cost reports.</field>
+            <field name="sequence">10</field>
+            <field name="color">2</field>
+            <field name="can_view_financial">True</field>
+            <field name="can_view_cost_prices">True</field>
+            <field name="can_view_dashboard">True</field>
+            <field name="can_view_reports">True</field>
+            <field name="can_export_reports">True</field>
+        </record>
+
+        <record id="shiv_role_auditor" model="shiv.role">
+            <field name="code">auditor</field>
+            <field name="display_name">Auditor</field>
+            <field name="description">Read-only access to all records including audit logs. Cannot create or modify anything.</field>
+            <field name="sequence">11</field>
+            <field name="color">11</field>
+            <field name="can_view_sales">True</field>
+            <field name="can_view_inventory">True</field>
+            <field name="can_view_purchase">True</field>
+            <field name="can_view_manufacturing">True</field>
+            <field name="can_view_audit_log">True</field>
+            <field name="can_export_audit_log">True</field>
+            <field name="can_view_financial">True</field>
+            <field name="can_view_dashboard">True</field>
+            <field name="can_view_reports">True</field>
+            <field name="can_export_reports">True</field>
+        </record>
+
+        <record id="shiv_role_viewer" model="shiv.role">
+            <field name="code">viewer</field>
+            <field name="display_name">Read-Only Viewer</field>
+            <field name="description">Can view (not edit) basic non-sensitive records. Lowest privilege level.</field>
+            <field name="sequence">12</field>
+            <field name="color">0</field>
+            <field name="can_view_dashboard">True</field>
+        </record>
+
+        <!-- ═══════════════════════════════════════════════════════════
+             SCHEDULED ACTIONS (CRON JOBS)
+             ═══════════════════════════════════════════════════════════ -->
+
+        <!-- Expire idle sessions every 15 minutes -->
+        <record id="cron_expire_idle_sessions" model="ir.cron">
+            <field name="name">Shiv Auth: Expire Idle Sessions</field>
+            <field name="model_id" ref="shiv_auth.model_shiv_session"/>
+            <field name="state">code</field>
+            <field name="code">model.cron_expire_idle_sessions()</field>
+            <field name="interval_number">15</field>
+            <field name="interval_type">minutes</field>
+            <field name="numbercall">-1</field>
+            <field name="doall">False</field>
+            <field name="active">True</field>
+        </record>
+
+        <!-- Archive old audit logs annually -->
+        <record id="cron_archive_audit_logs" model="ir.cron">
+            <field name="name">Shiv Auth: Archive Old Audit Logs (7yr retention)</field>
+            <field name="model_id" ref="shiv_auth.model_shiv_audit_log"/>
+            <field name="state">code</field>
+            <field name="code">model.cron_archive_old_logs()</field>
+            <field name="interval_number">1</field>
+            <field name="interval_type">years</field>
+            <field name="numbercall">-1</field>
+            <field name="doall">False</field>
+            <field name="active">True</field>
+        </record>
+
+    </data>
+</odoo>

@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    shiv_auth/security/shiv_auth_groups.xml
+    Defines all Shiv Furniture security groups (roles).
+    Groups follow a strict hierarchy: each includes the one below it.
+    Admin → inherits all groups
+    Managers → inherit their user-level groups
+    Users → base permissions only
+-->
+<odoo>
+    <data noupdate="1">
+
+        <!-- ═══════════════════════════════════════════════════════════
+             MODULE CATEGORY
+             ═══════════════════════════════════════════════════════════ -->
+        <record id="module_category_shiv_furniture" model="ir.module.category">
+            <field name="name">Shiv Furniture</field>
+            <field name="description">Shiv Furniture Works ERP — Role Categories</field>
+            <field name="sequence">1</field>
+        </record>
+
+        <!-- ═══════════════════════════════════════════════════════════
+             VIEWER — read-only baseline (all authenticated users)
+             ═══════════════════════════════════════════════════════════ -->
+        <record id="group_shiv_viewer" model="res.groups">
+            <field name="name">Read-Only Viewer</field>
+            <field name="category_id" ref="module_category_shiv_furniture"/>
+            <field name="comment">Can view (not edit) all non-sensitive records.</field>
+        </record>
+
+        <!-- ═══════════════════════════════════════════════════════════
+             AUDITOR — can view all records + audit logs (read-only)
+             ═══════════════════════════════════════════════════════════ -->
+        <record id="group_shiv_auditor" model="res.groups">
+            <field name="name">Auditor</field>
+            <field name="category_id" ref="module_category_shiv_furniture"/>
+            <field name="implied_ids" eval="[(4, ref('group_shiv_viewer'))]"/>
+            <field name="comment">Read-only access to all records including audit logs. Cannot create or modify.</field>
+        </record>
+
+        <!-- ═══════════════════════════════════════════════════════════
+             PRODUCTION STAFF
+             ═══════════════════════════════════════════════════════════ -->
+        <record id="group_shiv_production_user" model="res.groups">
+            <field name="name">Production Staff</field>
+            <field name="category_id" ref="module_category_shiv_furniture"/>
+            <field name="implied_ids" eval="[(4, ref('group_shiv_viewer'))]"/>
+            <field name="comment">Can execute work orders, record production progress, log wastage.</field>
+        </record>
+
+        <!-- ═══════════════════════════════════════════════════════════
+             PRODUCTION MANAGER — inherits Production Staff
+             ═══════════════════════════════════════════════════════════ -->
+        <record id="group_shiv_production_manager" model="res.groups">
+            <field name="name">Production Manager</field>
+            <field name="category_id" ref="module_category_shiv_furniture"/>
+            <field name="implied_ids" eval="[(4, ref('group_shiv_production_user'))]"/>
+            <field name="comment">Can create/approve manufacturing orders, manage work centers and BOMs.</field>
+        </record>
+
+        <!-- ═══════════════════════════════════════════════════════════
+             WAREHOUSE STAFF
+             ═══════════════════════════════════════════════════════════ -->
+        <record id="group_shiv_warehouse_user" model="res.groups">
+            <field name="name">Warehouse Staff</field>
+            <field name="category_id" ref="module_category_shiv_furniture"/>
+            <field name="implied_ids" eval="[(4, ref('group_shiv_viewer'))]"/>
+            <field name="comment">Can receive stock, perform transfers, record adjustments.</field>
+        </record>
+
+        <!-- ═══════════════════════════════════════════════════════════
+             WAREHOUSE MANAGER — inherits Warehouse Staff
+             ═══════════════════════════════════════════════════════════ -->
+        <record id="group_shiv_warehouse_manager" model="res.groups">
+            <field name="name">Warehouse Manager</field>
+            <field name="category_id" ref="module_category_shiv_furniture"/>
+            <field name="implied_ids" eval="[(4, ref('group_shiv_warehouse_user'))]"/>
+            <field name="comment">Can approve transfers, manage locations, run stock valuations.</field>
+        </record>
+
+        <!-- ═══════════════════════════════════════════════════════════
+             PURCHASE OFFICER
+             ═══════════════════════════════════════════════════════════ -->
+        <record id="group_shiv_purchase_user" model="res.groups">
+            <field name="name">Purchase Officer</field>
+            <field name="category_id" ref="module_category_shiv_furniture"/>
+            <field name="implied_ids" eval="[(4, ref('group_shiv_viewer'))]"/>
+            <field name="comment">Can create RFQs and purchase orders. Cannot approve above threshold.</field>
+        </record>
+
+        <!-- ═══════════════════════════════════════════════════════════
+             PURCHASE MANAGER — inherits Purchase Officer
+             ═══════════════════════════════════════════════════════════ -->
+        <record id="group_shiv_purchase_manager" model="res.groups">
+            <field name="name">Purchase Manager</field>
+            <field name="category_id" ref="module_category_shiv_furniture"/>
+            <field name="implied_ids" eval="[(4, ref('group_shiv_purchase_user'))]"/>
+            <field name="comment">Can approve POs at any value, manage vendors, configure reorder rules.</field>
+        </record>
+
+        <!-- ═══════════════════════════════════════════════════════════
+             SALES EXECUTIVE
+             ═══════════════════════════════════════════════════════════ -->
+        <record id="group_shiv_sales_user" model="res.groups">
+            <field name="name">Sales Executive</field>
+            <field name="category_id" ref="module_category_shiv_furniture"/>
+            <field name="implied_ids" eval="[(4, ref('group_shiv_viewer'))]"/>
+            <field name="comment">Can create and confirm sales orders. Cannot approve or apply discounts.</field>
+        </record>
+
+        <!-- ═══════════════════════════════════════════════════════════
+             SALES MANAGER — inherits Sales Executive
+             ═══════════════════════════════════════════════════════════ -->
+        <record id="group_shiv_sales_manager" model="res.groups">
+            <field name="name">Sales Manager</field>
+            <field name="category_id" ref="module_category_shiv_furniture"/>
+            <field name="implied_ids" eval="[(4, ref('group_shiv_sales_user'))]"/>
+            <field name="comment">Can approve orders, apply discounts, view full pipeline and reports.</field>
+        </record>
+
+        <!-- ═══════════════════════════════════════════════════════════
+             ACCOUNTANT
+             ═══════════════════════════════════════════════════════════ -->
+        <record id="group_shiv_accountant" model="res.groups">
+            <field name="name">Accountant</field>
+            <field name="category_id" ref="module_category_shiv_furniture"/>
+            <field name="implied_ids" eval="[(4, ref('group_shiv_viewer'))]"/>
+            <field name="comment">Can view and manage financial data, invoices, and cost reports.</field>
+        </record>
+
+        <!-- ═══════════════════════════════════════════════════════════
+             SYSTEM ADMINISTRATOR — inherits ALL groups
+             ═══════════════════════════════════════════════════════════ -->
+        <record id="group_shiv_admin" model="res.groups">
+            <field name="name">System Administrator</field>
+            <field name="category_id" ref="module_category_shiv_furniture"/>
+            <field name="implied_ids" eval="[
+                (4, ref('group_shiv_sales_manager')),
+                (4, ref('group_shiv_purchase_manager')),
+                (4, ref('group_shiv_warehouse_manager')),
+                (4, ref('group_shiv_production_manager')),
+                (4, ref('group_shiv_accountant')),
+                (4, ref('group_shiv_auditor')),
+            ]"/>
+            <field name="users" eval="[(4, ref('base.user_admin'))]"/>
+            <field name="comment">Full system access. Can manage users, roles, configurations, and all data.</field>
+        </record>
+
+    </data>
+</odoo>

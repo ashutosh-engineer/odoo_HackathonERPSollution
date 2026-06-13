@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="view_shiv_role_list" model="ir.ui.view">
+            <field name="name">shiv.role.list</field>
+            <field name="model">shiv.role</field>
+            <field name="arch" type="xml">
+                <list string="Roles" decoration-danger="code == 'admin'">
+                    <field name="sequence" widget="handle"/>
+                    <field name="display_name"/>
+                    <field name="code"/>
+                    <field name="active_user_count"/>
+                    <field name="can_manage_users" optional="show"/>
+                    <field name="can_view_audit_log" optional="show"/>
+                    <field name="can_approve_sales" optional="show"/>
+                    <field name="can_approve_purchase" optional="show"/>
+                </list>
+            </field>
+        </record>
+
+        <record id="view_shiv_role_form" model="ir.ui.view">
+            <field name="name">shiv.role.form</field>
+            <field name="model">shiv.role</field>
+            <field name="arch" type="xml">
+                <form string="Role Definition">
+                    <sheet>
+                        <group>
+                            <field name="display_name"/>
+                            <field name="code" readonly="1"/>
+                            <field name="description"/>
+                            <field name="sequence"/>
+                            <field name="active_user_count" readonly="1"/>
+                        </group>
+                        <notebook>
+                            <page string="Sales Permissions">
+                                <group>
+                                    <field name="can_view_sales"/>
+                                    <field name="can_create_sales"/>
+                                    <field name="can_approve_sales"/>
+                                </group>
+                            </page>
+                            <page string="Inventory Permissions">
+                                <group>
+                                    <field name="can_view_inventory"/>
+                                    <field name="can_adjust_inventory"/>
+                                    <field name="can_transfer_inventory"/>
+                                </group>
+                            </page>
+                            <page string="Purchase Permissions">
+                                <group>
+                                    <field name="can_view_purchase"/>
+                                    <field name="can_create_purchase"/>
+                                    <field name="can_approve_purchase"/>
+                                </group>
+                            </page>
+                            <page string="Manufacturing Permissions">
+                                <group>
+                                    <field name="can_view_manufacturing"/>
+                                    <field name="can_create_manufacturing"/>
+                                    <field name="can_execute_manufacturing"/>
+                                </group>
+                            </page>
+                            <page string="Admin &amp; Audit">
+                                <group>
+                                    <field name="can_view_audit_log"/>
+                                    <field name="can_export_audit_log"/>
+                                    <field name="can_manage_users"/>
+                                    <field name="can_manage_roles"/>
+                                    <field name="can_view_financial"/>
+                                    <field name="can_view_cost_prices"/>
+                                </group>
+                            </page>
+                            <page string="Reporting">
+                                <group>
+                                    <field name="can_view_dashboard"/>
+                                    <field name="can_view_reports"/>
+                                    <field name="can_export_reports"/>
+                                </group>
+                            </page>
+                        </notebook>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="action_shiv_roles" model="ir.actions.act_window">
+            <field name="name">Role Definitions</field>
+            <field name="res_model">shiv.role</field>
+            <field name="view_mode">list,form</field>
+        </record>
+    </data>
+</odoo>

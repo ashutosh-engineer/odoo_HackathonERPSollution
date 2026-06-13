@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="view_shiv_session_list" model="ir.ui.view">
+            <field name="name">shiv.session.list</field>
+            <field name="model">shiv.session</field>
+            <field name="arch" type="xml">
+                <list string="Sessions" create="0" delete="0"
+                      decoration-success="state == 'active'"
+                      decoration-muted="state in ['logged_out','expired']"
+                      decoration-danger="state == 'force_expired'">
+                    <field name="user_id"/>
+                    <field name="session_token_preview"/>
+                    <field name="ip_address"/>
+                    <field name="device_type" widget="badge"/>
+                    <field name="state" widget="badge"/>
+                    <field name="login_at"/>
+                    <field name="last_activity"/>
+                    <field name="expires_at" optional="show"/>
+                    <field name="logout_at" optional="show"/>
+                    <button name="action_force_logout"
+                            string="Force Logout"
+                            type="object"
+                            class="btn-sm btn-danger"
+                            attrs="{'invisible': [('state', '!=', 'active')]}"
+                            groups="shiv_auth.group_shiv_admin"
+                            confirm="Force-expire this session? The user will be logged out immediately."/>
+                </list>
+            </field>
+        </record>
+
+        <record id="view_shiv_session_search" model="ir.ui.view">
+            <field name="name">shiv.session.search</field>
+            <field name="model">shiv.session</field>
+            <field name="arch" type="xml">
+                <search string="Search Sessions">
+                    <field name="user_id"/>
+                    <field name="ip_address"/>
+                    <filter string="Active" name="filter_active" domain="[('state','=','active')]"/>
+                    <filter string="Expired" name="filter_expired" domain="[('state','in',['expired','force_expired'])]"/>
+                    <group expand="0" string="Group By">
+                        <filter string="User" name="groupby_user" context="{'group_by': 'user_id'}"/>
+                        <filter string="State" name="groupby_state" context="{'group_by': 'state'}"/>
+                        <filter string="Device" name="groupby_device" context="{'group_by': 'device_type'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <record id="action_shiv_sessions" model="ir.actions.act_window">
+            <field name="name">Active Sessions</field>
+            <field name="res_model">shiv.session</field>
+            <field name="view_mode">list</field>
+            <field name="domain">[('state','=','active')]</field>
+            <field name="context">{'search_default_filter_active': True}</field>
+        </record>
+
+        <record id="action_shiv_all_sessions" model="ir.actions.act_window">
+            <field name="name">All Sessions</field>
+            <field name="res_model">shiv.session</field>
+            <field name="view_mode">list</field>
+        </record>
+    </data>
+</odoo>

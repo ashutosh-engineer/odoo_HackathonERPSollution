@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    shiv_auth/security/record_rules.xml
+    Row-level (record-level) security rules for User & Auth module.
+    These run AFTER model-level access checks (ir.model.access).
+
+    Principle of Least Privilege:
+    - Non-admin users can only see their own user record.
+    - Admins see all records.
+    - Auditors see all records (read-only).
+    - Session records: users see only their own sessions.
+    - Audit log: only admins and auditors.
+-->
+<odoo>
+    <data noupdate="1">
+
+        <!-- ═══════════════════════════════════════════════════════════
+             res.users RECORD RULES
+             ═══════════════════════════════════════════════════════════ -->
+
+        <!-- Non-admin users can only view/edit their own profile -->
+        <record id="rule_res_users_own_record" model="ir.rule">
+            <field name="name">Users: Read Own Record Only (non-admin)</field>
+            <field name="model_id" ref="base.model_res_users"/>
+            <field name="domain_force">[('id', '=', user.id)]</field>
+            <field name="groups" eval="[(4, ref('shiv_auth.group_shiv_viewer'))]"/>
+            <field name="perm_read">1</field>
+            <field name="perm_write">1</field>
+            <field name="perm_create">0</field>
+            <field name="perm_unlink">0</field>
+        </record>
+
+        <!-- Admins see ALL users (including inactive) -->
+        <record id="rule_res_users_admin_all" model="ir.rule">
+            <field name="name">Users: Admin Sees All</field>
+            <field name="model_id" ref="base.model_res_users"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('shiv_auth.group_shiv_admin'))]"/>
+            <field name="perm_read">1</field>
+            <field name="perm_write">1</field>
+            <field name="perm_create">1</field>
+            <field name="perm_unlink">0</field>
+        </record>
+
+        <!-- Auditors see all users in read-only mode -->
+        <record id="rule_res_users_auditor_all" model="ir.rule">
+            <field name="name">Users: Auditor Reads All</field>
+            <field name="model_id" ref="base.model_res_users"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('shiv_auth.group_shiv_auditor'))]"/>
+            <field name="perm_read">1</field>
+            <field name="perm_write">0</field>
+            <field name="perm_create">0</field>
+            <field name="perm_unlink">0</field>
+        </record>
+
+        <!-- ═══════════════════════════════════════════════════════════
+             shiv.session RECORD RULES
+             ═══════════════════════════════════════════════════════════ -->
+
+        <!-- Users can only view their own sessions -->
+        <record id="rule_shiv_session_own" model="ir.rule">
+            <field name="name">Sessions: User Sees Own Sessions Only</field>
+            <field name="model_id" ref="shiv_auth.model_shiv_session"/>
+            <field name="domain_force">[('user_id', '=', user.id)]</field>
+            <field name="groups" eval="[(4, ref('shiv_auth.group_shiv_viewer'))]"/>
+            <field name="perm_read">1</field>
+            <field name="perm_write">0</field>
+            <field name="perm_create">0</field>
+            <field name="perm_unlink">0</field>
+        </record>
+
+        <!-- Admins see all sessions -->
+        <record id="rule_shiv_session_admin_all" model="ir.rule">
+            <field name="name">Sessions: Admin Sees All</field>
+            <field name="model_id" ref="shiv_auth.model_shiv_session"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('shiv_auth.group_shiv_admin'))]"/>
+            <field name="perm_read">1</field>
+            <field name="perm_write">1</field>
+            <field name="perm_create">0</field>
+            <field name="perm_unlink">0</field>
+        </record>
+
+        <!-- ═══════════════════════════════════════════════════════════
+             shiv.audit.log RECORD RULES
+             ═══════════════════════════════════════════════════════════ -->
+
+        <!-- Only admins and auditors can see audit logs -->
+        <record id="rule_shiv_audit_log_admin" model="ir.rule">
+            <field name="name">Audit Log: Admin Full Access</field>
+            <field name="model_id" ref="shiv_auth.model_shiv_audit_log"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('shiv_auth.group_shiv_admin'))]"/>
+            <field name="perm_read">1</field>
+            <field name="perm_write">0</field>
+            <field name="perm_create">1</field>
+            <field name="perm_unlink">0</field>
+        </record>
+
+        <record id="rule_shiv_audit_log_auditor" model="ir.rule">
+            <field name="name">Audit Log: Auditor Read-Only</field>
+            <field name="model_id" ref="shiv_auth.model_shiv_audit_log"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('shiv_auth.group_shiv_auditor'))]"/>
+            <field name="perm_read">1</field>
+            <field name="perm_write">0</field>
+            <field name="perm_create">0</field>
+            <field name="perm_unlink">0</field>
+        </record>
+
+        <!-- ═══════════════════════════════════════════════════════════
+             shiv.login.attempt RECORD RULES
+             ═══════════════════════════════════════════════════════════ -->
+
+        <record id="rule_shiv_login_attempt_admin" model="ir.rule">
+            <field name="name">Login Attempts: Admin Full View</field>
+            <field name="model_id" ref="shiv_auth.model_shiv_login_attempt"/>
+            <field name="domain_force">[(1, '=', 1)]</field>
+            <field name="groups" eval="[(4, ref('shiv_auth.group_shiv_admin'))]"/>
+            <field name="perm_read">1</field>
+            <field name="perm_write">0</field>
+            <field name="perm_create">1</field>
+            <field name="perm_unlink">0</field>
+        </record>
+
+    </data>
+</odoo>

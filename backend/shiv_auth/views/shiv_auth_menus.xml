@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <!-- ═══ TOP-LEVEL APP MENU ═══════════════════════════════════════════ -->
+        <menuitem id="menu_shiv_root"
+                  name="Shiv Furniture ERP"
+                  sequence="1"
+                  web_icon="shiv_auth,static/description/icon.png"/>
+
+        <!-- ═══ USER MANAGEMENT ══════════════════════════════════════════════ -->
+        <menuitem id="menu_shiv_user_management"
+                  name="User Management"
+                  parent="menu_shiv_root"
+                  sequence="10"
+                  groups="shiv_auth.group_shiv_admin"/>
+
+        <menuitem id="menu_shiv_users"
+                  name="Users"
+                  parent="menu_shiv_user_management"
+                  action="action_shiv_users"
+                  sequence="10"
+                  groups="shiv_auth.group_shiv_admin"/>
+
+        <menuitem id="menu_shiv_roles"
+                  name="Role Definitions"
+                  parent="menu_shiv_user_management"
+                  action="action_shiv_roles"
+                  sequence="20"
+                  groups="shiv_auth.group_shiv_admin"/>
+
+        <menuitem id="menu_shiv_password_policy"
+                  name="Password Policy"
+                  parent="menu_shiv_user_management"
+                  action="action_shiv_password_policy"
+                  sequence="30"
+                  groups="shiv_auth.group_shiv_admin"/>
+
+        <!-- ═══ SESSION MANAGEMENT ════════════════════════════════════════════ -->
+        <menuitem id="menu_shiv_sessions_root"
+                  name="Sessions"
+                  parent="menu_shiv_user_management"
+                  sequence="40"
+                  groups="shiv_auth.group_shiv_admin"/>
+
+        <menuitem id="menu_shiv_active_sessions"
+                  name="Active Sessions"
+                  parent="menu_shiv_sessions_root"
+                  action="action_shiv_sessions"
+                  sequence="10"
+                  groups="shiv_auth.group_shiv_admin"/>
+
+        <menuitem id="menu_shiv_all_sessions"
+                  name="Session History"
+                  parent="menu_shiv_sessions_root"
+                  action="action_shiv_all_sessions"
+                  sequence="20"
+                  groups="shiv_auth.group_shiv_admin"/>
+
+        <!-- ═══ AUDIT &amp; COMPLIANCE ════════════════════════════════════════ -->
+        <menuitem id="menu_shiv_audit_root"
+                  name="Audit &amp; Compliance"
+                  parent="menu_shiv_root"
+                  sequence="90"
+                  groups="shiv_auth.group_shiv_auditor"/>
+
+        <menuitem id="menu_shiv_audit_log"
+                  name="Audit Log"
+                  parent="menu_shiv_audit_root"
+                  action="action_shiv_audit_log"
+                  sequence="10"
+                  groups="shiv_auth.group_shiv_auditor"/>
+
+        <menuitem id="menu_shiv_security_events"
+                  name="Security Events"
+                  parent="menu_shiv_audit_root"
+                  action="action_shiv_security_events"
+                  sequence="20"
+                  groups="shiv_auth.group_shiv_auditor"/>
+
+    </data>
+</odoo>

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Demo data — only loaded when Odoo is started with --load-demo
+    NOT loaded in production. All passwords are temp and trigger must_change_password=True
+-->
+<odoo>
+    <data>
+        <!-- Demo Sales Executive -->
+        <record id="demo_user_sales_exec" model="res.users">
+            <field name="name">Rahul Sharma (Demo)</field>
+            <field name="login">rahul.demo@shivfurniture.com</field>
+            <field name="password">DemoPass@123</field>
+            <field name="email">rahul.demo@shivfurniture.com</field>
+            <field name="shiv_role">sales_user</field>
+            <field name="department">sales</field>
+            <field name="employee_id">DEMO001</field>
+            <field name="must_change_password">True</field>
+        </record>
+
+        <!-- Demo Warehouse Manager -->
+        <record id="demo_user_wh_manager" model="res.users">
+            <field name="name">Priya Patel (Demo)</field>
+            <field name="login">priya.demo@shivfurniture.com</field>
+            <field name="password">DemoPass@123</field>
+            <field name="email">priya.demo@shivfurniture.com</field>
+            <field name="shiv_role">warehouse_manager</field>
+            <field name="department">warehouse</field>
+            <field name="employee_id">DEMO002</field>
+            <field name="must_change_password">True</field>
+        </record>
+
+        <!-- Demo Auditor -->
+        <record id="demo_user_auditor" model="res.users">
+            <field name="name">Suresh Gupta (Demo Auditor)</field>
+            <field name="login">suresh.demo@shivfurniture.com</field>
+            <field name="password">DemoPass@123</field>
+            <field name="email">suresh.demo@shivfurniture.com</field>
+            <field name="shiv_role">auditor</field>
+            <field name="department">management</field>
+            <field name="employee_id">DEMO003</field>
+            <field name="must_change_password">True</field>
+        </record>
+    </data>
+</odoo>
