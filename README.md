@@ -544,4 +544,4 @@ Shiv Furniture Works' ERP is built to solve more than ₹2Cr per year in waste w
 
 **GitHub**: [ashutosh-engineer/odoo_HackathonERPSollution](https://github.com/ashutosh-engineer/odoo_HackathonERPSollution)
 
-**Production-grade. Jury-defensible. Enterprise-ready.**
+**Production-grade.Enterprise-ready.**
