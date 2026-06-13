@@ -335,6 +335,357 @@ PostgreSQL's audit log + immutable constraints = same guarantee, simpler.
 
 ---
 
+## Data Architecture & Ownership
+
+### Data Ownership Matrix
+
+Who controls each data domain in the ERP:
+
+| Data Domain | Owner | Readers | Writers | Audit Trail |
+|---|---|---|---|---|
+| **User Accounts** | shiv_auth | All (read own profile) | HR + admins | ✅ Immutable |
+| **Sales Orders** | shiv_sales | Sales + finance (read) | Sales only | ✅ Immutable |
+| **Inventory** | shiv_inventory | All (read qty) | Inventory + manufacturing | ✅ Immutable |
+| **Purchase Orders** | shiv_purchase | Procurement + finance | Procurement only | ✅ Immutable |
+| **Manufacturing Orders** | shiv_manufacturing | Production + planning | Production only | ✅ Immutable |
+| **Product Master** | shiv_product | All (read) | Product team + admins | ✅ Immutable |
+| **Audit Logs** | shiv_auth | Compliance officers | System (append-only) | ✅ Protected |
+| **KPIs / Dashboard** | shiv_dashboard | Managers only | System (computed) | ✅ N/A |
+| **Work Center Status** | shiv_manufacturing | Floor supervisors | Operators + auto-reroute | ✅ Immutable |
+| **Password Policies** | shiv_auth | HR + security | Security team | ✅ Immutable |
+| **Session Data** | shiv_auth | Per-user | Per-user | ⚠️ Temporary |
+
+### Data Flow & Module Dependencies
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                     EXTERNAL SYSTEMS                            │
+│         (Customer Portal, Supplier Portal, EDI)                 │
+└────┬───────────────────────────────────────┬──────────────────┘
+     │                                       │
+     ▼                                       ▼
+┌──────────────────┐                  ┌──────────────────┐
+│   shiv_sales     │                  │  shiv_purchase   │
+│   (Sales Orders) │                  │ (Purchase Orders)│
+└────┬─────────────┘                  └─────┬────────────┘
+     │                                      │
+     │ Creates demand for                   │ Creates supply from
+     │ inventory                            │ vendors
+     │                                      │
+     │ ┌────────────────────────────────────┴──────────────┐
+     │ │                                                    │
+     │ ▼                                                    ▼
+     │ ┌────────────────────────────────────────────────────────┐
+     │ │         shiv_inventory (Stock Master)                │
+     │ │  • On-hand qty                                       │
+     │ │  • Reserved qty (locked by sales orders)             │
+     │ │  • Incoming qty (locked by purchase orders)          │
+     │ │  • Stock ledger (append-only audit trail)            │
+     │ └────────────────────────────────────────────────────────┘
+     │ ▲                                                    ▲
+     │ │                                                    │
+     │ │ Consumes inventory                                 │ Receives inventory
+     │ │                                                    │
+     │ ▼                                                    ▼
+     │ ┌────────────────────────────────────────────────────────┐
+     │ │      shiv_manufacturing (Work Orders)                 │
+     │ │  • Manufacturing Orders (BoM expansion)              │
+     │ │  • Work Center allocation & status                   │
+     │ │  • Wastage tracking                                  │
+     │ └────────────────────────────────────────────────────────┘
+     │
+     ├─ Reads product specs from shiv_product
+     │
+     └─ Reports completion to shiv_inventory
+```
+
+### Data Sharing Patterns
+
+#### Pattern 1: Demand-Driven Replenishment (Sales → Inventory → Purchase)
+
+```
+Sales Order Created:
+  shiv_sales.SaleOrder { product_id: 10, qty: 50 }
+    ↓
+Inventory Check (SERIALIZABLE):
+  shiv_inventory.StockLevel { product_id: 10 }
+    ├─ on_hand: 30
+    ├─ reserved: 0
+    └─ free_to_use: 30 (insufficient, order PARTIAL)
+    ↓
+Auto-trigger Purchase Requisition:
+  shiv_purchase.PurchaseOrder { product_id: 10, qty: 20 (gap fill) }
+    ├─ Status: Auto-created
+    ├─ Vendor: Auto-selected (lead time + cost)
+    └─ Audit log: "Auto-created due to SO-001"
+
+**Data not shared**: 
+  - Sales order cost (shiv_sales) never exposed to manufacturing
+  - Vendor lead times (shiv_purchase) not visible to sales
+```
+
+#### Pattern 2: Manufacturing Consumes Inventory (Manufacturing → Inventory)
+
+```
+Manufacturing Order Started:
+  shiv_manufacturing.MfgOrder { id: MO-100 }
+    ├─ Bill of Materials:
+    │  ├─ Sofa Frame Wood (product_id: 5): 2 units
+    │  ├─ Seat Foam (product_id: 8): 0.5 cubic meters
+    │  └─ Fabric (product_id: 12): 3 yards
+    ↓
+Inventory Reservation (for component parts):
+  shiv_inventory.StockLevel[product_id=5].reserved += 2
+  shiv_inventory.StockLevel[product_id=8].reserved += 0.5
+  shiv_inventory.StockLevel[product_id=12].reserved += 3
+    ↓
+Manufacturing Completes MO:
+  shiv_manufacturing.MfgOrder { state: DONE, actual_wastage: 0.1 }
+    ↓
+Inventory Consumes Reserved Stock:
+  shiv_inventory.StockLevel[product_id=5].on_hand -= 2 (reserved moves to consumed)
+  shiv_inventory.StockLedger.insert { product_id: 5, qty: -2, reason: "MO-100 completed" }
+    ↓
+Inventory Produces Finished Good:
+  shiv_inventory.StockLevel[product_id=100] (finished sofa).on_hand += 1
+  shiv_inventory.StockLedger.insert { product_id: 100, qty: +1, reason: "MO-100 completed" }
+
+**Data not shared**:
+  - Manufacturing wastage (shiv_manufacturing) only used for variance reports
+  - Sales commission (if applicable) never exposed to manufacturing
+```
+
+#### Pattern 3: Authentication & Audit (shiv_auth controls all access)
+
+```
+User Login:
+  shiv_auth.User { user_id: 1, username: "john" }
+    ├─ Groups: sales_user, region_east
+    └─ Permissions: read sales orders, create sales orders
+    ↓
+Session Created (Redis):
+  redis:session:xyz123 = { user_id: 1, groups: [sales_user, region_east], expires: 8h }
+    ↓
+Every API Call:
+  1. Validate session from redis
+  2. Extract groups + permissions
+  3. Enforce RBAC before database query
+    ↓
+Record-Level Rules Applied:
+  If accessing shiv_sales.SaleOrder:
+    - SQL automatically becomes: WHERE territory_id = user.territory_id
+    - User in region_east only sees orders for region_east
+    ↓
+Audit Log (Immutable):
+  shiv_auth.AuditLog.insert {
+    user_id: 1,
+    action: "UPDATE",
+    model: "sale.order",
+    record_id: 50,
+    before_values: { state: "draft" },
+    after_values: { state: "confirmed" },
+    timestamp: now(),
+    is_locked: TRUE  (can never be deleted/modified)
+  }
+
+**Data not shared**:
+  - User passwords never logged (hashed only)
+  - Session tokens not logged (privacy)
+  - Audit logs visible only to compliance officers
+```
+
+### Data Isolation & Non-Sharing Rules
+
+**What data is intentionally NOT shared between modules:**
+
+| Isolation | Why | Consequence |
+|-----------|-----|-------------|
+| **Sales cost** (shiv_sales) not visible to manufacturing | Prevent bias in production planning | MFG makes neutral routing decisions |
+| **Vendor payment terms** (shiv_purchase) not shared with sales | Sales doesn't cherry-pick cheap-but-slow vendors | Encourages honest demand forecasting |
+| **Work center hourly rates** (shiv_manufacturing) not shared with accounting | Prevents cost manipulation in financial reports | Accounting calculates rates independently |
+| **Employee wages** (shiv_auth) not shared with anyone | Privacy & security | No module knows employee cost |
+| **Finished product cost** (computed by accounting) not shared with sales | Remove conflict of interest | Sales can't inflate cost to justify discounts |
+| **Future demand forecast** (planning) not shared with suppliers | Prevent artificial scarcity claims | Suppliers price fairly, not on rush premium |
+
+### Cross-Module Dependencies
+
+```
+Dependency Graph (Module Load Order):
+
+1. shiv_auth
+   ├─ Must load first (RBAC enforced everywhere)
+   └─ Other modules depend on shiv_auth.User
+
+2. shiv_product
+   ├─ Depends on shiv_auth
+   └─ Required by all other modules (product_id references)
+
+3. shiv_inventory
+   ├─ Depends on shiv_product (for product master)
+   └─ Required by shiv_sales, shiv_manufacturing, shiv_purchase
+
+4. shiv_sales
+   ├─ Depends on shiv_inventory (for real-time qty check)
+   └─ Triggers shiv_purchase (for auto-replenishment)
+
+5. shiv_purchase
+   ├─ Depends on shiv_inventory (to update incoming qty)
+   └─ Must complete before manufacturing starts
+
+6. shiv_manufacturing
+   ├─ Depends on shiv_inventory (for BoM expansion + qty check)
+   └─ Provides feedback to shiv_inventory (wastage, completion)
+
+7. shiv_dashboard
+   ├─ Depends on all modules (read-only access)
+   └─ Computed from other modules, no original data
+```
+
+### Real-World Example: Order-to-Delivery Data Flow
+
+```
+Scenario: Customer orders 10 sofas, manufacturing is 5 days, delivery is 2 days
+
+┌─── Sales Rep Creates Order ───┐
+│ POST /sale/order/create        │
+│ { product_id: 100, qty: 10 }   │
+└─────────────┬──────────────────┘
+              ▼
+┌─────────────────────────────────────────┐
+│ shiv_inventory.check_qty_available()    │
+│                                         │
+│ on_hand: 15, reserved: 5                │
+│ available: 10 → ORDER CAN PROCEED ✓     │
+└─────────────┬──────────────────────────┘
+              ▼
+┌─────────────────────────────────────────┐
+│ shiv_inventory.reserve_qty()            │
+│                                         │
+│ UPDATE stock_level                      │
+│ SET reserved_qty = reserved_qty + 10    │
+│ INSERT stock_ledger (reason: SO-1001)   │
+└─────────────┬──────────────────────────┘
+              ▼
+┌─────────────────────────────────────────┐
+│ shiv_auth.audit_log.insert()            │
+│                                         │
+│ action: CREATE                          │
+│ model: sale.order                       │
+│ user_id: 2 (sales rep)                  │
+│ is_locked: TRUE                         │
+└─────────────┬──────────────────────────┘
+              ▼
+┌─────────────────────────────────────────┐
+│ Order Confirmed                         │
+│ shiv_sales.SaleOrder.state = CONFIRMED  │
+│ Delivery date auto-calculated:          │
+│   manufacturing: +5 days                │
+│   + shipping: +2 days                   │
+│   = delivery: +7 days                   │
+└─────────────┬──────────────────────────┘
+              ▼
+┌─────────────────────────────────────────┐
+│ shiv_manufacturing creates MfgOrder     │
+│                                         │
+│ MfgOrder {                              │
+│   sale_order_id: 1001,                  │
+│   product_id: 100,                      │
+│   qty: 10,                              │
+│   bom_id: 5 (references 15 components)  │
+│ }                                       │
+│                                         │
+│ BoM expansion (from shiv_product):      │
+│   Sofa Frame Wood: 20 units needed      │
+│   Fabric (from shiv_product): 30 yards  │
+│   Padding: 10 units                     │
+└─────────────┬──────────────────────────┘
+              ▼
+┌─────────────────────────────────────────┐
+│ shiv_inventory reserves components      │
+│                                         │
+│ stock_level[frame_wood].reserved += 20  │
+│ stock_level[fabric].reserved += 30      │
+│ stock_level[padding].reserved += 10     │
+│ (prevents these from being sold)        │
+└─────────────┬──────────────────────────┘
+              ▼
+┌─────────────────────────────────────────┐
+│ Manufacturing Starts (5 days)           │
+│                                         │
+│ shiv_manufacturing.MfgOrder.state = WIP │
+│ Work orders assigned to work centers    │
+│ Operators report progress on floor      │
+│ (shiv_manufacturing tracks this)        │
+└─────────────┬──────────────────────────┘
+              ▼
+┌─────────────────────────────────────────┐
+│ Manufacturing Completes                 │
+│                                         │
+│ shiv_manufacturing.MfgOrder.state = DONE│
+│ Actual wastage: 5% (tracked in AUDIT)   │
+└─────────────┬──────────────────────────┘
+              ▼
+┌─────────────────────────────────────────┐
+│ shiv_inventory.update_on_completion()   │
+│                                         │
+│ 1. Consume component stock:             │
+│    stock_level[frame].on_hand -= 20     │
+│    INSERT ledger: "Consumed by MO-1"    │
+│                                         │
+│ 2. Add finished product:                │
+│    stock_level[sofa].on_hand += 10      │
+│    INSERT ledger: "Produced by MO-1"    │
+│                                         │
+│ 3. Update reserved qty:                 │
+│    stock_level[sofa].reserved -= 10     │
+│    (reserved moved to on_hand)          │
+└─────────────┬──────────────────────────┘
+              ▼
+┌─────────────────────────────────────────┐
+│ shiv_sales.order_status = READY_SHIP    │
+│ Notification sent to warehouse/shipping │
+└─────────────┬──────────────────────────┘
+              ▼
+┌─────────────────────────────────────────┐
+│ Warehouse Ships (2 days)                │
+│                                         │
+│ shiv_inventory.transfer_stock():        │
+│   from: warehouse location              │
+│   to: in-transit location               │
+│ INSERT ledger: "Shipped to customer"    │
+└─────────────┬──────────────────────────┘
+              ▼
+┌─────────────────────────────────────────┐
+│ shiv_sales.SaleOrder.state = DELIVERED  │
+│ shiv_dashboard.kpi updated:             │
+│   on_time_delivery count += 1           │
+│   revenue += 50000                      │
+└─────────────────────────────────────────┘
+
+**Audit Trail (IMMUTABLE)**: 7 steps logged
+  SO-1001 CREATED → Reserved → MO created → Consumed → Produced → Shipped → Delivered
+  Every step locked with user_id, timestamp, before/after values
+```
+
+### Security Implications
+
+**Each module controls its own security boundary:**
+
+- **shiv_auth**: Controls who can do what (RBAC enforced at DB level)
+- **shiv_sales**: Only sales users can create/edit orders (ir.model.access)
+- **shiv_inventory**: Only inventory team can adjust stock (ir.rule)
+- **shiv_manufacturing**: Only production can create/complete work orders
+- **shiv_purchase**: Only procurement can approve/create POs
+- **shiv_dashboard**: Only managers can view (read-only, no write access)
+
+**Cross-module data access is prevented at three levels:**
+
+1. **Application Level**: API endpoints check RBAC
+2. **Database Level**: ir.rule SQL filters automatically applied
+3. **Audit Level**: All access logged, tamper-proof
+
+---
+
 ## Enterprise Infrastructure
 
 ### Load Balancing & Reverse Proxy (Nginx)
