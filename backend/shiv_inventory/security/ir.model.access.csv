@@ -1,17 +1,13 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-# shiv.stock.ledger — immutable, create only
 access_shiv_stock_ledger_admin,shiv.stock.ledger admin,model_shiv_stock_ledger,shiv_auth.group_shiv_admin,1,0,1,0
 access_shiv_stock_ledger_warehouse,shiv.stock.ledger warehouse,model_shiv_stock_ledger,shiv_auth.group_shiv_warehouse_user,1,0,1,0
 access_shiv_stock_ledger_viewer,shiv.stock.ledger viewer,model_shiv_stock_ledger,shiv_auth.group_shiv_viewer,1,0,0,0
 access_shiv_stock_ledger_auditor,shiv.stock.ledger auditor,model_shiv_stock_ledger,shiv_auth.group_shiv_auditor,1,0,0,0
-# shiv.stock.summary
 access_shiv_stock_summary_admin,shiv.stock.summary admin,model_shiv_stock_summary,shiv_auth.group_shiv_admin,1,1,1,0
 access_shiv_stock_summary_warehouse,shiv.stock.summary warehouse,model_shiv_stock_summary,shiv_auth.group_shiv_warehouse_user,1,1,1,0
 access_shiv_stock_summary_viewer,shiv.stock.summary viewer,model_shiv_stock_summary,shiv_auth.group_shiv_viewer,1,0,0,0
-# shiv.stock.adjustment
 access_shiv_stock_adj_admin,shiv.stock.adjustment admin,model_shiv_stock_adjustment,shiv_auth.group_shiv_admin,1,1,1,0
 access_shiv_stock_adj_wh_manager,shiv.stock.adjustment wh manager,model_shiv_stock_adjustment,shiv_auth.group_shiv_warehouse_manager,1,1,1,0
 access_shiv_stock_adj_wh_user,shiv.stock.adjustment wh user,model_shiv_stock_adjustment,shiv_auth.group_shiv_warehouse_user,1,1,1,0
-# shiv.stock.adjustment.line
 access_shiv_stock_adj_line_admin,shiv.stock.adjustment.line admin,model_shiv_stock_adjustment_line,shiv_auth.group_shiv_admin,1,1,1,1
 access_shiv_stock_adj_line_wh,shiv.stock.adjustment.line wh,model_shiv_stock_adjustment_line,shiv_auth.group_shiv_warehouse_user,1,1,1,1

@@ -1,4 +1,35 @@
+import { useState, useEffect } from 'react';
+import { apiFetch } from '../utils/api';
+
+interface DashboardKPIs {
+  total_sales_month: number;
+  sales_growth_pct: number;
+  pending_deliveries: number;
+  urgent_deliveries: number;
+  active_mos: number;
+  capacity_pct: number;
+  material_shortages: number;
+  blocked_mos: number;
+}
+
 export const OperationalDashboard = () => {
+  const [kpis, setKpis] = useState<DashboardKPIs | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchKPIs = async () => {
+      try {
+        const response = await apiFetch('/shiv/dashboard/kpis');
+        setKpis(response.data);
+      } catch (err) {
+        console.error("Failed to load KPIs", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchKPIs();
+  }, []);
+
   return (
     <div className="p-xl">
       {/* Header */}
@@ -25,11 +56,13 @@ export const OperationalDashboard = () => {
           <div className="absolute -right-4 -top-4 p-8 opacity-5 group-hover:opacity-10 transition-opacity rotate-12">
             <span className="material-symbols-outlined !text-[80px] text-primary">payments</span>
           </div>
-          <p className="font-label-md text-on-surface-variant uppercase tracking-wider mb-2">Total Sales Orders</p>
+          <p className="font-label-md text-on-surface-variant uppercase tracking-wider mb-2">Total Sales</p>
           <div className="flex items-baseline gap-2">
-            <h2 className="font-headline-lg text-headline-lg text-primary tracking-tight">₹14.2M</h2>
+            <h2 className="font-headline-lg text-headline-lg text-primary tracking-tight">
+              {loading ? '...' : `₹${(kpis?.total_sales_month || 0).toLocaleString()}`}
+            </h2>
             <span className="text-success-forest font-bold text-body-sm flex items-center gap-0.5 bg-success-forest/10 px-2 py-0.5 rounded-full">
-              <span className="material-symbols-outlined !text-[16px]">trending_up</span> 12%
+              <span className="material-symbols-outlined !text-[16px]">trending_up</span> {kpis?.sales_growth_pct || 0}%
             </span>
           </div>
           <p className="text-label-sm text-on-surface-variant mt-3 font-medium opacity-70">Vs. previous month</p>
@@ -38,28 +71,36 @@ export const OperationalDashboard = () => {
         <div className="bg-white border-l-4 border-l-warning-amber border border-outline-variant p-6 rounded-xl shadow-soft hover:shadow-soft-lg transition-all relative">
           <p className="font-label-md text-on-surface-variant uppercase tracking-wider mb-2">Pending Deliveries</p>
           <div className="flex items-baseline gap-3">
-            <h2 className="font-headline-lg text-headline-lg text-on-surface tracking-tight">24</h2>
-            <span className="bg-error-container text-error px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider animate-pulse">Urgent</span>
+            <h2 className="font-headline-lg text-headline-lg text-on-surface tracking-tight">
+              {loading ? '...' : kpis?.pending_deliveries || 0}
+            </h2>
+            {(kpis?.urgent_deliveries || 0) > 0 && (
+              <span className="bg-error-container text-error px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider animate-pulse">Urgent</span>
+            )}
           </div>
-          <p className="text-label-sm text-on-surface-variant mt-3 font-medium opacity-70"><span className="text-error font-bold">8</span> past due date</p>
+          <p className="text-label-sm text-on-surface-variant mt-3 font-medium opacity-70"><span className="text-error font-bold">{kpis?.urgent_deliveries || 0}</span> past due date</p>
         </div>
 
         <div className="bg-white border border-outline-variant p-6 rounded-xl shadow-soft hover:shadow-soft-lg transition-all relative group">
           <p className="font-label-md text-on-surface-variant uppercase tracking-wider mb-2">Manufacturing Orders</p>
           <div className="flex items-baseline gap-3">
-            <h2 className="font-headline-lg text-headline-lg text-odoo-teal tracking-tight">156</h2>
+            <h2 className="font-headline-lg text-headline-lg text-odoo-teal tracking-tight">
+              {loading ? '...' : kpis?.active_mos || 0}
+            </h2>
             <span className="text-on-surface-variant text-body-sm font-semibold px-2 py-1 bg-surface-variant rounded-lg">In Progress</span>
           </div>
-          <p className="text-label-sm text-on-surface-variant mt-3 font-medium opacity-70">Capacity at <span className="text-odoo-teal font-bold">84%</span></p>
+          <p className="text-label-sm text-on-surface-variant mt-3 font-medium opacity-70">Capacity at <span className="text-odoo-teal font-bold">{kpis?.capacity_pct || 0}%</span></p>
         </div>
 
         <div className="bg-white border-l-4 border-l-error border border-outline-variant p-6 rounded-xl shadow-soft hover:shadow-soft-lg transition-all relative">
           <p className="font-label-md text-on-surface-variant uppercase tracking-wider mb-2">Material Shortages</p>
           <div className="flex items-baseline gap-3">
-            <h2 className="font-headline-lg text-headline-lg text-error tracking-tight">12</h2>
+            <h2 className="font-headline-lg text-headline-lg text-error tracking-tight">
+              {loading ? '...' : kpis?.material_shortages || 0}
+            </h2>
             <span className="material-symbols-outlined text-error !text-[24px]">report_problem</span>
           </div>
-          <p className="text-label-sm text-on-surface-variant mt-3 font-medium opacity-70">Blocking <span className="text-error font-bold">4</span> work orders</p>
+          <p className="text-label-sm text-on-surface-variant mt-3 font-medium opacity-70">Blocking <span className="text-error font-bold">{kpis?.blocked_mos || 0}</span> work orders</p>
         </div>
       </div>
 

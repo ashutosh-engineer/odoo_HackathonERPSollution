@@ -4,7 +4,7 @@
         <field name="name">shiv.vendor.list</field>
         <field name="model">shiv.vendor</field>
         <field name="arch" type="xml">
-            <list string="Vendors" decoration-muted="not is_active">
+            <tree string="Vendors" decoration-muted="not is_active">
                 <field name="code"/>
                 <field name="name"/>
                 <field name="email"/>
@@ -13,7 +13,7 @@
                 <field name="on_time_delivery_pct"/>
                 <field name="total_orders"/>
                 <field name="is_active" optional="show"/>
-            </list>
+            </tree>
         </field>
     </record>
     <record id="view_shiv_vendor_form" model="ir.ui.view">
@@ -43,14 +43,14 @@
                     <notebook>
                         <page string="Products &amp; Pricing">
                             <field name="product_line_ids" widget="one2many">
-                                <list editable="bottom">
+                                <tree editable="bottom">
                                     <field name="product_id"/>
                                     <field name="vendor_product_code"/>
                                     <field name="unit_price"/>
                                     <field name="min_order_qty"/>
                                     <field name="lead_time_days"/>
                                     <field name="is_preferred"/>
-                                </list>
+                                </tree>
                             </field>
                         </page>
                     </notebook>

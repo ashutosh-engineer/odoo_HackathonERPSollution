@@ -61,7 +61,7 @@
                 </group>
             </xpath>
 
-            <xpath expr="//notebook" position="before">
+            <xpath expr="//sheet" position="inside">
                 <!-- Floor Console Actions -->
                 <div class="o_statusbar_buttons" style="margin-bottom:16px">
                     <button name="action_set_running" string="▶ Start"
@@ -82,27 +82,26 @@
                             groups="shiv_auth.group_shiv_production_manager"
                             confirm="Schedule maintenance? Active MOs will be put on hold."/>
                 </div>
-            </xpath>
+                <notebook>
+                    <!-- Alternatives -->
+                    <page string="Alternative Work Centers">
+                        <field name="alternative_workcenter_ids" widget="many2many_tags"/>
+                        <p class="text-muted">
+                            When this work center has a breakdown, active Manufacturing Orders
+                            will be auto-rerouted to these alternatives (in priority order by
+                            status: idle first, then running, then by utilization ascending).
+                        </p>
+                    </page>
 
-            <xpath expr="//notebook" position="inside">
-                <!-- Alternatives -->
-                <page string="Alternative Work Centers">
-                    <field name="alternative_workcenter_ids" widget="many2many_tags"/>
-                    <p class="text-muted">
-                        When this work center has a breakdown, active Manufacturing Orders
-                        will be auto-rerouted to these alternatives (in priority order by
-                        status: idle first, then running, then by utilization ascending).
-                    </p>
-                </page>
-
-                <!-- Anomaly History -->
-                <page string="Anomaly History" groups="shiv_auth.group_shiv_production_manager">
-                    <field name="anomaly_reported_by" readonly="1" invisible="1"/>
-                    <p class="text-muted">
-                        View full anomaly history via API:
-                        GET /shiv/floor/work-centers/[id]/anomaly-history
-                    </p>
-                </page>
+                    <!-- Anomaly History -->
+                    <page string="Anomaly History" groups="shiv_auth.group_shiv_production_manager">
+                        <field name="anomaly_reported_by" readonly="1" invisible="1"/>
+                        <p class="text-muted">
+                            View full anomaly history via API:
+                            GET /shiv/floor/work-centers/[id]/anomaly-history
+                        </p>
+                    </page>
+                </notebook>
             </xpath>
         </field>
     </record>
@@ -137,7 +136,7 @@
         <field name="name">shiv.wc.anomaly.event.list</field>
         <field name="model">shiv.wc.anomaly.event</field>
         <field name="arch" type="xml">
-            <list string="Anomaly Events" create="0" edit="0" delete="0"
+            <tree string="Anomaly Events" create="0" edit="0" delete="0"
                   decoration-danger="state == 'active'"
                   decoration-success="state == 'resolved'">
                 <field name="reported_at"/>
@@ -152,7 +151,7 @@
                 <field name="reported_by"/>
                 <field name="resolved_at" optional="show"/>
                 <field name="resolved_by" optional="show"/>
-            </list>
+            </tree>
         </field>
     </record>
 
@@ -261,7 +260,7 @@
                     </span>
                 </div>
             </xpath>
-            <xpath expr="//group[@string='Scheduling']" position="inside">
+            <xpath expr="//group[@name='scheduling']" position="inside">
                 <field name="hold_reason" readonly="1"
                        attrs="{'invisible': [('hold_reason','=',False)]}"/>
                 <field name="held_at" readonly="1"

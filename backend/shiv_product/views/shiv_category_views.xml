@@ -4,11 +4,11 @@
         <field name="name">shiv.product.category.list</field>
         <field name="model">shiv.product.category</field>
         <field name="arch" type="xml">
-            <list string="Categories">
+            <tree string="Categories">
                 <field name="complete_name"/>
                 <field name="parent_id"/>
                 <field name="product_count"/>
-            </list>
+            </tree>
         </field>
     </record>
     <record id="view_shiv_category_form" model="ir.ui.view">

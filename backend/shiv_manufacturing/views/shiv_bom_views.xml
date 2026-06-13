@@ -6,14 +6,14 @@
         <field name="name">shiv.bom.list</field>
         <field name="model">shiv.bom</field>
         <field name="arch" type="xml">
-            <list string="Bills of Materials"
+            <tree string="Bills of Materials"
                   decoration-muted="not is_active">
                 <field name="product_id"/>
                 <field name="qty_produced"/>
                 <field name="version"/>
                 <field name="is_active" widget="boolean"/>
                 <field name="notes" optional="show"/>
-            </list>
+            </tree>
         </field>
     </record>
 
@@ -35,12 +35,12 @@
                     <notebook>
                         <page string="Components">
                             <field name="component_ids" widget="one2many">
-                                <list editable="bottom">
+                                <tree editable="bottom">
                                     <field name="product_id" string="Component"/>
                                     <field name="qty_required"/>
                                     <field name="uom_id"/>
                                     <field name="notes"/>
-                                </list>
+                                </tree>
                             </field>
                         </page>
                         <page string="Notes">

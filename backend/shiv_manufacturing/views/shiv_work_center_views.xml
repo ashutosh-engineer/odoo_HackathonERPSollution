@@ -5,14 +5,14 @@
         <field name="name">shiv.work.center.list</field>
         <field name="model">shiv.work.center</field>
         <field name="arch" type="xml">
-            <list string="Work Centers" decoration-muted="not is_active">
+            <tree string="Work Centers" decoration-muted="not is_active">
                 <field name="code"/>
                 <field name="name"/>
                 <field name="capacity" string="Capacity (units/day)"/>
                 <field name="utilization_pct" widget="progressbar"
                        options="{'max_value': 100}" string="Utilization %"/>
                 <field name="is_active" widget="boolean"/>
-            </list>
+            </tree>
         </field>
     </record>
 

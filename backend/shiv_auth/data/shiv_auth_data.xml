@@ -226,8 +226,8 @@
             <field name="model_id" ref="shiv_auth.model_shiv_audit_log"/>
             <field name="state">code</field>
             <field name="code">model.cron_archive_old_logs()</field>
-            <field name="interval_number">1</field>
-            <field name="interval_type">years</field>
+            <field name="interval_number">12</field>
+            <field name="interval_type">months</field>
             <field name="numbercall">-1</field>
             <field name="doall">False</field>
             <field name="active">True</field>

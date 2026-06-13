@@ -1,23 +1,15 @@
 id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
-# ─── shiv.role ────────────────────────────────────────────────────────────────
 access_shiv_role_admin,shiv.role admin,model_shiv_role,shiv_auth.group_shiv_admin,1,1,1,1
 access_shiv_role_auditor,shiv.role auditor,model_shiv_role,shiv_auth.group_shiv_auditor,1,0,0,0
 access_shiv_role_viewer,shiv.role viewer,model_shiv_role,shiv_auth.group_shiv_viewer,1,0,0,0
-# ─── shiv.password.policy ────────────────────────────────────────────────────
 access_shiv_password_policy_admin,shiv.password.policy admin,model_shiv_password_policy,shiv_auth.group_shiv_admin,1,1,1,0
 access_shiv_password_policy_viewer,shiv.password.policy viewer,model_shiv_password_policy,shiv_auth.group_shiv_viewer,1,0,0,0
-# ─── shiv.password.history ───────────────────────────────────────────────────
 access_shiv_password_history_admin,shiv.password.history admin,model_shiv_password_history,shiv_auth.group_shiv_admin,1,0,1,0
-# ─── shiv.session ────────────────────────────────────────────────────────────
 access_shiv_session_admin,shiv.session admin,model_shiv_session,shiv_auth.group_shiv_admin,1,1,1,0
 access_shiv_session_auditor,shiv.session auditor,model_shiv_session,shiv_auth.group_shiv_auditor,1,0,0,0
-# ─── shiv.audit.log ──────────────────────────────────────────────────────────
 access_shiv_audit_log_admin,shiv.audit.log admin,model_shiv_audit_log,shiv_auth.group_shiv_admin,1,0,1,0
 access_shiv_audit_log_auditor,shiv.audit.log auditor,model_shiv_audit_log,shiv_auth.group_shiv_auditor,1,0,0,0
-# ─── shiv.login.attempt ──────────────────────────────────────────────────────
 access_shiv_login_attempt_admin,shiv.login.attempt admin,model_shiv_login_attempt,shiv_auth.group_shiv_admin,1,0,1,0
 access_shiv_login_attempt_auditor,shiv.login.attempt auditor,model_shiv_login_attempt,shiv_auth.group_shiv_auditor,1,0,0,0
-# ─── res.users (extended) ────────────────────────────────────────────────────
-# Odoo base already defines these; we add Shiv-specific access tiers
 access_res_users_shiv_admin,res.users shiv admin,base.model_res_users,shiv_auth.group_shiv_admin,1,1,1,0
 access_res_users_shiv_manager,res.users shiv self-view,base.model_res_users,shiv_auth.group_shiv_viewer,1,0,0,0
