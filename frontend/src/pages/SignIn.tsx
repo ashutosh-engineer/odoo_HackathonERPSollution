@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 
 export const SignIn = () => {
   const [isAuthenticating, setIsAuthenticating] = useState(false);
@@ -32,10 +33,15 @@ export const SignIn = () => {
       <div className="w-full max-w-[400px] z-10">
         {/* Brand Identity */}
         <div className="flex flex-col items-center mb-10 text-center">
-          <div className="w-16 h-16 mb-4 bg-primary rounded-xl flex items-center justify-center shadow-sm">
-            <span className="material-symbols-outlined text-on-primary text-4xl">chair</span>
+          <div className="w-16 h-16 mb-4 text-primary flex items-center justify-center">
+            <svg viewBox="0 0 40 40" className="w-full h-full" fill="currentColor">
+              <path d="M10 20C10 14.4772 14.4772 10 20 10V20H10Z" opacity="0.8"/>
+              <path d="M20 10C25.5228 10 30 14.4772 30 20H20V10Z" />
+              <path d="M30 20C30 25.5228 25.5228 30 20 30V20H30Z" opacity="0.6"/>
+              <path d="M20 30C14.4772 30 10 25.5228 10 20H20V30Z" opacity="0.4"/>
+            </svg>
           </div>
-          <h1 className="font-headline-md text-headline-md text-on-surface tracking-tight">Shiv Furniture Works</h1>
+          <h1 className="font-headline-md text-headline-md font-extrabold text-slate-900 tracking-tight">SHIV<span className="text-primary font-light">ERP</span></h1>
           <p className="font-body-sm text-body-sm text-on-surface-variant mt-1">Workshop Management Portal</p>
         </div>
         
@@ -61,7 +67,7 @@ export const SignIn = () => {
             <div className="space-y-2 group">
               <div className="flex justify-between items-center">
                 <label className="font-label-md text-label-md text-on-surface-variant block uppercase" htmlFor="password">Password</label>
-                <a className="font-label-md text-label-md text-primary hover:underline transition-all" href="#">Forgot?</a>
+                <Link className="font-label-md text-label-md text-primary hover:underline transition-all" to="/forgot-password">Forgot?</Link>
               </div>
               <div className="relative group-focus-within:scale-[1.01] transition-transform">
                 <input 
@@ -114,16 +120,18 @@ export const SignIn = () => {
         
         {/* Footer / Secondary Actions */}
         <div className="mt-8 text-center space-y-4">
-          <p className="font-body-sm text-body-sm text-on-surface-variant">
-            Don't have an account? <a className="text-primary font-semibold hover:underline" href="#">Contact Administrator</a>
-          </p>
-          <div className="pt-8 flex justify-center gap-6">
-            <a className="font-label-md text-label-md text-outline hover:text-on-surface transition-colors" href="#">Privacy Policy</a>
-            <a className="font-label-md text-label-md text-outline hover:text-on-surface transition-colors" href="#">Terms of Service</a>
+          <div className="pt-4 flex justify-center gap-6">
+            <Link className="font-label-md text-label-md text-outline hover:text-on-surface transition-colors" to="/privacy">Privacy Policy</Link>
+            <Link className="font-label-md text-label-md text-outline hover:text-on-surface transition-colors" to="/terms">Terms of Service</Link>
           </div>
           <div className="flex items-center justify-center gap-2 text-outline">
-            <span className="material-symbols-outlined text-sm">copyright</span>
-            <span className="font-label-md text-label-md">Shiv Furniture</span>
+            <svg viewBox="0 0 40 40" className="w-4 h-4 text-outline" fill="currentColor">
+              <path d="M10 20C10 14.4772 14.4772 10 20 10V20H10Z" opacity="0.8"/>
+              <path d="M20 10C25.5228 10 30 14.4772 30 20H20V10Z" />
+              <path d="M30 20C30 25.5228 25.5228 30 20 30V20H30Z" opacity="0.6"/>
+              <path d="M20 30C14.4772 30 10 25.5228 10 20H20V30Z" opacity="0.4"/>
+            </svg>
+            <span className="font-label-md text-label-md">SHIV ERP</span>
           </div>
         </div>
       </div>

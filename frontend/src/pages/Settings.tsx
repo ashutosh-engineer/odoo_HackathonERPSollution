@@ -9,7 +9,7 @@ export const Settings = () => {
       <div className="p-lg flex-grow max-w-[1200px] mx-auto w-full">
         <div className="mb-lg">
           <h2 className="font-headline-md text-headline-md text-primary">System Settings</h2>
-          <p className="font-body-md text-body-md text-on-surface-variant">Configure your Shiv Furniture ERP environment and manage access control.</p>
+          <p className="font-body-md text-body-md text-on-surface-variant">Configure your SHIV ERP environment and manage access control.</p>
         </div>
 
         {/* Settings Layout: Vertical Tabs */}
@@ -83,7 +83,7 @@ export const Settings = () => {
                   <div className="space-y-md">
                     <div>
                       <label className="block font-label-md text-label-md mb-xs">Company Name</label>
-                      <input className="w-full px-md py-sm border border-outline-variant rounded focus:ring-primary focus:border-primary" type="text" defaultValue="Shiv Furniture Works"/>
+                      <input className="w-full px-md py-sm border border-outline-variant rounded focus:ring-primary focus:border-primary" type="text" defaultValue="SHIV ERP"/>
                     </div>
                     <div>
                       <label className="block font-label-md text-label-md mb-xs">Official Currency</label>

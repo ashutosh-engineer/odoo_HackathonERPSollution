@@ -23,10 +23,15 @@ export const AdminLogin = () => {
       <main className="w-full max-w-[440px]">
         {/* Branding Area */}
         <div className="text-center mb-xl">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-xl bg-primary-container mb-md">
-            <span className="material-symbols-outlined text-white text-[32px]" style={{ fontVariationSettings: "'FILL' 1" }}>factory</span>
+          <div className="w-16 h-16 mb-4 text-primary flex items-center justify-center">
+            <svg viewBox="0 0 40 40" className="w-full h-full" fill="currentColor">
+              <path d="M10 20C10 14.4772 14.4772 10 20 10V20H10Z" opacity="0.8"/>
+              <path d="M20 10C25.5228 10 30 14.4772 30 20H20V10Z" />
+              <path d="M30 20C30 25.5228 25.5228 30 20 30V20H30Z" opacity="0.6"/>
+              <path d="M20 30C14.4772 30 10 25.5228 10 20H20V30Z" opacity="0.4"/>
+            </svg>
           </div>
-          <h1 className="font-headline-sm text-headline-sm text-primary tracking-tight">Shiv Furniture ERP</h1>
+          <h1 className="font-headline-sm text-headline-sm font-extrabold text-primary tracking-tight">SHIV<span className="font-light">ERP</span></h1>
         </div>
 
         {/* Login Card */}

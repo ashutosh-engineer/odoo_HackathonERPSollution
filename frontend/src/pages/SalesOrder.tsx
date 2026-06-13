@@ -204,7 +204,7 @@ export const SalesOrder = () => {
           <div className="rounded-lg overflow-hidden h-48 relative border border-outline-variant group shadow-sm">
             <img alt="Furniture workshop" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBtNfVywVoR0x2JqNwsB-pYTUmCM9cpqazVBxfFqUTFMi9xtGHDS6whRCUoDsgEelTy5yssi570BucK2J-AKcMOCts16vuchXYL7NNzOHYkLCB5fFz4fDhvFaQEjaVGTeJNcDQ7NsDALHhGIKPGH2jiwx1dWwrnb4NeqdP9EKb3q-nVMApfF1EggxCdlxGU-lEYM6hHuWILO3fR0lQur3yIzBlh_7S31OCUHu-eDKTDBgWbEOzbzcW37L-nXPWAujP5IyjaA8xduvf0"/>
             <div className="absolute inset-0 bg-gradient-to-t from-primary/80 to-transparent flex items-end p-lg">
-              <p className="text-white font-bold text-label-md">Shiv Furniture Workshop: Delhi Cluster A</p>
+              <p className="text-white font-bold text-label-md">SHIV ERP Workshop: Delhi Cluster A</p>
             </div>
           </div>
         </div>

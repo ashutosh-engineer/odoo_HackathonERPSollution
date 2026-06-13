@@ -2,6 +2,9 @@ import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react
 import { LandingPage } from './pages/LandingPage';
 import { SignIn } from './pages/SignIn';
 import { AdminLogin } from './pages/AdminLogin';
+import { ForgotPassword } from './pages/ForgotPassword';
+import { TermsOfService } from './pages/TermsOfService';
+import { PrivacyPolicy } from './pages/PrivacyPolicy';
 import { OperationalDashboard } from './pages/OperationalDashboard';
 import { ProductMaster } from './pages/ProductMaster';
 import { SalesOrder } from './pages/SalesOrder';
@@ -20,7 +23,15 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
       {/* TopNavBar */}
       <nav className="flex justify-between items-center w-full px-gutter h-16 sticky top-0 z-50 bg-white border-b border-outline-variant shadow-sm">
         <div className="flex items-center gap-8">
-          <span className="font-headline-sm text-headline-sm font-extrabold text-primary tracking-tight">Shiv Furniture Works</span>
+          <div className="flex items-center gap-2">
+            <svg viewBox="0 0 40 40" className="w-7 h-7 text-primary" fill="currentColor">
+              <path d="M10 20C10 14.4772 14.4772 10 20 10V20H10Z" opacity="0.8"/>
+              <path d="M20 10C25.5228 10 30 14.4772 30 20H20V10Z" />
+              <path d="M30 20C30 25.5228 25.5228 30 20 30V20H30Z" opacity="0.6"/>
+              <path d="M20 30C14.4772 30 10 25.5228 10 20H20V30Z" opacity="0.4"/>
+            </svg>
+            <span className="font-headline-sm text-headline-sm font-extrabold tracking-tight text-slate-900">SHIV<span className="text-primary font-light">ERP</span></span>
+          </div>
           <div className="hidden md:flex items-center bg-surface-variant rounded-lg px-4 py-2 gap-3 border border-outline-variant transition-all focus-within:border-primary/50 focus-within:bg-white focus-within:shadow-sm">
             <span className="material-symbols-outlined text-on-surface-variant">search</span>
             <input className="bg-transparent border-none focus:ring-0 text-body-sm w-72 p-0 placeholder-on-surface-variant/60 outline-none" placeholder="Search for orders, products or customers..." type="text"/>
@@ -46,11 +57,16 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
       {/* SideNavBar */}
       <aside className="fixed left-0 top-0 h-full w-[260px] flex flex-col pt-lg pb-md px-sm z-40 bg-primary shadow-xl">
         <div className="flex items-center gap-3 mb-10 px-4 mt-16">
-          <div className="w-10 h-10 bg-white/10 backdrop-blur-md rounded-xl flex items-center justify-center text-white border border-white/20">
-            <span className="material-symbols-outlined !text-[24px]">factory</span>
+          <div className="w-10 h-10 flex items-center justify-center text-white">
+            <svg viewBox="0 0 40 40" className="w-full h-full text-white" fill="currentColor">
+              <path d="M10 20C10 14.4772 14.4772 10 20 10V20H10Z" opacity="0.8"/>
+              <path d="M20 10C25.5228 10 30 14.4772 30 20H20V10Z" />
+              <path d="M30 20C30 25.5228 25.5228 30 20 30V20H30Z" opacity="0.6"/>
+              <path d="M20 30C14.4772 30 10 25.5228 10 20H20V30Z" opacity="0.4"/>
+            </svg>
           </div>
           <div>
-            <p className="font-headline-sm text-[18px] text-white font-bold leading-tight">Shiv Furniture</p>
+            <p className="font-headline-sm text-[18px] text-white font-extrabold tracking-tight leading-tight">SHIV<span className="font-light opacity-80">ERP</span></p>
             <p className="text-[10px] text-white/60 uppercase tracking-[0.1em] font-black">Enterprise ERP</p>
           </div>
         </div>
@@ -117,6 +133,9 @@ function App() {
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<SignIn />} />
         <Route path="/admin-login" element={<AdminLogin />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/terms" element={<TermsOfService />} />
+        <Route path="/privacy" element={<PrivacyPolicy />} />
 
         {/* Internal Application Routes (wrapped in layout) */}
         <Route path="/dashboard" element={<AppLayout><OperationalDashboard /></AppLayout>} />

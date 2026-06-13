@@ -286,7 +286,7 @@ export const UserManagement = () => {
       {/* Footer */}
       <footer className="mt-auto px-lg py-md border-t border-outline-variant bg-surface-container-low flex justify-between items-center">
         <div className="flex items-center gap-md">
-          <span className="font-label-md text-label-md text-on-surface-variant">© 2024 Shiv Furniture ERP</span>
+          <span className="font-label-md text-label-md text-on-surface-variant">© 2026 SHIV ERP</span>
           <span className="w-1 h-1 rounded-full bg-outline"></span>
           <a className="font-label-md text-label-md text-on-surface-variant hover:text-primary" href="#">Privacy Policy</a>
           <a className="font-label-md text-label-md text-on-surface-variant hover:text-primary" href="#">System Health</a>
