@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { odooSearchRead, odooCall } from '../utils/api';
+import { odooSearchRead, odooCall, apiFetch } from '../utils/api';
 
 interface UserData {
   id: number;
@@ -17,6 +17,14 @@ export const UserManagement = () => {
   const [loading, setLoading] = useState(true);
 
   const [actionError, setActionError] = useState<string | null>(null);
+
+  // Modal State
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [newUserName, setNewUserName] = useState('');
+  const [newUserLogin, setNewUserLogin] = useState('');
+  const [newUserPassword, setNewUserPassword] = useState('');
+  const [newUserRole, setNewUserRole] = useState('viewer');
+  const [isAdding, setIsAdding] = useState(false);
 
   const fetchUsers = async () => {
     try {
@@ -43,6 +51,34 @@ export const UserManagement = () => {
       await fetchUsers();
     } catch (err: any) {
       setActionError(`Action failed: ${err.message || err}`);
+    }
+  };
+
+  const handleAddUser = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      setIsAdding(true);
+      setActionError(null);
+      await apiFetch('/shiv/users', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: newUserName,
+          login: newUserLogin,
+          password: newUserPassword,
+          shiv_role: newUserRole
+        })
+      });
+      setIsAddModalOpen(false);
+      setNewUserName('');
+      setNewUserLogin('');
+      setNewUserPassword('');
+      setNewUserRole('viewer');
+      await fetchUsers();
+    } catch (err: any) {
+      setActionError(`Failed to create user: ${err.message || err}`);
+    } finally {
+      setIsAdding(false);
     }
   };
 
@@ -76,12 +112,58 @@ export const UserManagement = () => {
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
-          <button className="bg-primary text-white px-md py-sm rounded-lg font-label-md text-label-md flex items-center gap-sm hover:opacity-90 active:opacity-80 transition-all">
+          <button 
+            onClick={() => setIsAddModalOpen(true)}
+            className="bg-primary text-white px-md py-sm rounded-lg font-label-md text-label-md flex items-center gap-sm hover:opacity-90 active:opacity-80 transition-all">
             <span className="material-symbols-outlined" style={{ fontSize: '18px' }}>person_add</span>
             Add New User
           </button>
         </div>
       </div>
+
+      {isAddModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="bg-white p-6 rounded-xl w-full max-w-md shadow-lg">
+            <h3 className="text-lg font-bold mb-4">Add New User</h3>
+            <form onSubmit={handleAddUser} className="space-y-4">
+              <div>
+                <label className="block text-sm font-bold mb-1">Name</label>
+                <input required type="text" value={newUserName} onChange={e => setNewUserName(e.target.value)} className="w-full border rounded p-2" />
+              </div>
+              <div>
+                <label className="block text-sm font-bold mb-1">Login / Email</label>
+                <input required type="text" value={newUserLogin} onChange={e => setNewUserLogin(e.target.value)} className="w-full border rounded p-2" />
+              </div>
+              <div>
+                <label className="block text-sm font-bold mb-1">Password</label>
+                <input required type="password" value={newUserPassword} onChange={e => setNewUserPassword(e.target.value)} className="w-full border rounded p-2" />
+              </div>
+              <div>
+                <label className="block text-sm font-bold mb-1">Role</label>
+                <select value={newUserRole} onChange={e => setNewUserRole(e.target.value)} className="w-full border rounded p-2">
+                  <option value="viewer">Viewer</option>
+                  <option value="admin">Admin</option>
+                  <option value="sales_manager">Sales Manager</option>
+                  <option value="sales_user">Sales User</option>
+                  <option value="purchase_manager">Purchase Manager</option>
+                  <option value="purchase_user">Purchase User</option>
+                  <option value="production_manager">Production Manager</option>
+                  <option value="production_user">Production User</option>
+                  <option value="warehouse_manager">Warehouse Manager</option>
+                  <option value="warehouse_user">Warehouse User</option>
+                  <option value="auditor">Auditor</option>
+                </select>
+              </div>
+              <div className="flex justify-end gap-2 mt-6">
+                <button type="button" onClick={() => setIsAddModalOpen(false)} className="px-4 py-2 border rounded hover:bg-gray-50">Cancel</button>
+                <button type="submit" disabled={isAdding} className="px-4 py-2 bg-primary text-white rounded hover:bg-primary/90 disabled:opacity-50">
+                  {isAdding ? 'Adding...' : 'Create User'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Page Content */}
       <div className="p-lg flex-grow flex flex-col gap-lg bg-surface">

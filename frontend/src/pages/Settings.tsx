@@ -95,8 +95,7 @@ export const Settings = () => {
                     </div>
                   </div>
                   <div className="pt-lg border-t border-outline-variant flex justify-end gap-md">
-                    <button className="px-lg py-sm border border-outline-variant rounded font-label-md text-label-md text-on-surface-variant hover:bg-surface-container-high transition-colors">Cancel</button>
-                    <button className="px-lg py-sm bg-primary text-white rounded font-label-md text-label-md hover:bg-primary/90 transition-colors">Save Changes</button>
+                    {/* Settings apply automatically or are disabled in this demo */}
                   </div>
                 </div>
               </div>

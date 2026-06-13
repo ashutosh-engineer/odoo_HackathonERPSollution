@@ -128,12 +128,6 @@ export const SignIn = () => {
                   </>
                 )}
               </button>
-              
-              <div className="flex items-center justify-center">
-                <span className="h-[1px] w-full bg-outline-variant"></span>
-                <span className="px-4 font-label-md text-label-md text-outline">OR</span>
-                <span className="h-[1px] w-full bg-outline-variant"></span>
-              </div>
             </div>
           </form>
         </div>

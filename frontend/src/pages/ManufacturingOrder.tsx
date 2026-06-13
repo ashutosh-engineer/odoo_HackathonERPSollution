@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { odooSearchRead, odooCall } from '../utils/api';
+import { odooSearchRead, odooCall, apiFetch } from '../utils/api';
 import { RoleGuard } from '../components/RoleGuard';
 
 interface MOData {
@@ -32,6 +32,12 @@ export const ManufacturingOrder = () => {
   const [components, setComponents] = useState<MOComponentData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [actionError, setActionError] = useState<string | null>(null);
+
+  const [isAnomalyModalOpen, setIsAnomalyModalOpen] = useState(false);
+  const [anomalyType, setAnomalyType] = useState('machine_breakdown');
+  const [anomalyDesc, setAnomalyDesc] = useState('');
+  const [isReporting, setIsReporting] = useState(false);
 
   const moId = parseInt(id || '0', 10);
 
@@ -87,6 +93,29 @@ export const ManufacturingOrder = () => {
     }
   };
 
+  const handleReportAnomaly = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!order?.work_center_id) return;
+    try {
+      setIsReporting(true);
+      setActionError(null);
+      await apiFetch(`/shiv/floor/work-centers/${order.work_center_id[0]}/report-anomaly`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          anomaly_type: anomalyType,
+          description: anomalyDesc
+        })
+      });
+      setIsAnomalyModalOpen(false);
+      window.location.reload();
+    } catch (err: any) {
+      setActionError(`Failed to report anomaly: ${err.message || err}`);
+    } finally {
+      setIsReporting(false);
+    }
+  };
+
   if (loading) return <div className="p-8 text-center text-on-surface-variant animate-pulse font-bold">Loading MO Details...</div>;
   if (error) return <div className="p-8 text-center text-error font-bold">{error}</div>;
   if (!order) return null;
@@ -117,18 +146,60 @@ export const ManufacturingOrder = () => {
               </button>
             )}
             {order.state === 'in_progress' && (
-              <button onClick={() => handleAction('action_mark_done')} className="bg-primary text-white px-6 py-2.5 rounded-lg font-label-md flex items-center gap-2 hover:brightness-110 transition-all shadow-sm active:scale-95">
-                <span className="material-symbols-outlined">check_circle</span> MARK AS DONE
-              </button>
+              <>
+                <button onClick={() => setIsAnomalyModalOpen(true)} className="bg-error text-white px-6 py-2.5 rounded-lg font-label-md flex items-center gap-2 hover:brightness-110 transition-all shadow-sm active:scale-95">
+                  <span className="material-symbols-outlined">report_problem</span> REPORT ANOMALY
+                </button>
+                <button onClick={() => handleAction('action_mark_done')} className="bg-primary text-white px-6 py-2.5 rounded-lg font-label-md flex items-center gap-2 hover:brightness-110 transition-all shadow-sm active:scale-95">
+                  <span className="material-symbols-outlined">check_circle</span> MARK AS DONE
+                </button>
+              </>
             )}
             {order.state === 'on_hold' && (
-              <button onClick={() => handleAction('action_resume_from_hold')} className="bg-warning-amber text-white px-6 py-2.5 rounded-lg font-label-md flex items-center gap-2 hover:brightness-110 transition-all shadow-sm active:scale-95">
-                <span className="material-symbols-outlined">play_circle</span> RESUME
-              </button>
+              <RoleGuard allowedRoles={['admin', 'production_manager']}>
+                <button onClick={() => handleAction('action_resume_from_hold')} className="bg-warning-amber text-white px-6 py-2.5 rounded-lg font-label-md flex items-center gap-2 hover:brightness-110 transition-all shadow-sm active:scale-95">
+                  <span className="material-symbols-outlined">play_circle</span> RESUME
+                </button>
+              </RoleGuard>
             )}
           </RoleGuard>
         </div>
       </div>
+
+      {isAnomalyModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="bg-white p-6 rounded-xl w-full max-w-md shadow-lg">
+            <h3 className="text-lg font-bold mb-4 text-error flex items-center gap-2">
+              <span className="material-symbols-outlined">report_problem</span> Report Anomaly
+            </h3>
+            <form onSubmit={handleReportAnomaly} className="space-y-4">
+              <div>
+                <label className="block text-sm font-bold mb-1">Anomaly Type</label>
+                <select value={anomalyType} onChange={e => setAnomalyType(e.target.value)} className="w-full border rounded p-2">
+                  <option value="machine_breakdown">Machine Breakdown</option>
+                  <option value="power_failure">Power Failure</option>
+                  <option value="material_shortage">Material Shortage</option>
+                  <option value="operator_absent">Operator Absent</option>
+                  <option value="quality_issue">Quality Issue</option>
+                  <option value="safety_hazard">Safety Hazard</option>
+                  <option value="tool_failure">Tool Failure</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-bold mb-1">Description (Optional)</label>
+                <textarea value={anomalyDesc} onChange={e => setAnomalyDesc(e.target.value)} className="w-full border rounded p-2 h-24" placeholder="Describe the issue..."></textarea>
+              </div>
+              <div className="flex justify-end gap-2 mt-6">
+                <button type="button" onClick={() => setIsAnomalyModalOpen(false)} className="px-4 py-2 border rounded hover:bg-gray-50">Cancel</button>
+                <button type="submit" disabled={isReporting} className="px-4 py-2 bg-error text-white rounded hover:bg-error/90 disabled:opacity-50">
+                  {isReporting ? 'Reporting...' : 'Submit Report'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Status Tracker (Stepper) */}
       <div className="flex w-full mb-8 rounded-lg overflow-hidden border border-outline-variant h-10 bg-surface-container-lowest">

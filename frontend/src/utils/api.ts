@@ -3,17 +3,12 @@
  * Handles both standard REST (for our custom controllers) and native JSON-RPC
  */
 
-const getCookie = (name: string) => {
-  const value = `; ${document.cookie}`;
-  const parts = value.split(`; ${name}=`);
-  if (parts.length === 2) return parts.pop()?.split(';').shift();
-  return null;
-};
-
 // Generic REST fetch wrapper
 export async function apiFetch(url: string, options: RequestInit = {}) {
   const headers = new Headers(options.headers || {});
-  headers.set('Content-Type', 'application/json');
+  if (!headers.has('Content-Type')) {
+    headers.set('Content-Type', 'application/json');
+  }
 
   const res = await fetch(url, {
     ...options,
@@ -22,7 +17,7 @@ export async function apiFetch(url: string, options: RequestInit = {}) {
 
   const data = await res.json();
   if (!res.ok || data.success === false) {
-    throw new Error(data.error?.message || 'API Error');
+    throw new Error(data.error?.message || data.message || 'API Error');
   }
   return data;
 }
@@ -55,7 +50,24 @@ export async function odooCall(model: string, method: string, args: any[] = [], 
 }
 
 // Helper for search_read (fetching list of records)
-export async function odooSearchRead(model: string, domain: any[] = [], fields: string[] = [], limit = 80, offset = 0) {
+export async function odooSearchRead(
+  model: string,
+  domain: any[] = [],
+  fields: string[] = [],
+  limitOrOptions: number | { limit?: number; order?: string; offset?: number } = 80,
+  offset = 0
+) {
+  let limit = 80;
+  let sort = '';
+
+  if (typeof limitOrOptions === 'object') {
+    limit = limitOrOptions.limit ?? 80;
+    offset = limitOrOptions.offset ?? 0;
+    sort = limitOrOptions.order ?? '';
+  } else {
+    limit = limitOrOptions;
+  }
+
   const payload = {
     jsonrpc: '2.0',
     method: 'call',
@@ -65,7 +77,7 @@ export async function odooSearchRead(model: string, domain: any[] = [], fields: 
       fields,
       limit,
       offset,
-      sort: ''
+      sort,
     },
     id: Math.floor(Math.random() * 1000000000),
   };
@@ -80,5 +92,5 @@ export async function odooSearchRead(model: string, domain: any[] = [], fields: 
   if (data.error) {
     throw new Error(data.error.data?.message || data.error.message || 'Odoo SearchRead Error');
   }
-  return data.result.records;
+  return data.result?.records ?? data.result ?? [];
 }

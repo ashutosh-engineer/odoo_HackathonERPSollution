@@ -76,7 +76,6 @@ export const AdminLogin = () => {
             <div className="space-y-xs">
               <div className="flex justify-between items-center">
                 <label className="font-label-md text-label-md text-on-surface-variant" htmlFor="password">Password</label>
-                <button className="text-primary font-label-md hover:underline" type="button">Forgot password?</button>
               </div>
               <div className="relative">
                 <span className={`material-symbols-outlined absolute left-md top-1/2 -translate-y-1/2 transition-colors ${isFocused === 'password' ? 'text-primary' : 'text-outline'}`}>lock</span>

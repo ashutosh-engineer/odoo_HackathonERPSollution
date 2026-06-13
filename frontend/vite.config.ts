@@ -9,9 +9,23 @@ export default defineConfig({
     tailwindcss(),
   ],
   server: {
+    port: 5173,
     proxy: {
-      '/shiv': 'http://localhost:80',
-      '/web': 'http://localhost:80'
+      '/shiv': {
+        target: 'http://localhost:8069',
+        changeOrigin: true,
+        secure: false,
+      },
+      '/web': {
+        target: 'http://localhost:8069',
+        changeOrigin: true,
+        secure: false,
+      },
+      '/web/static': {
+        target: 'http://localhost:8069',
+        changeOrigin: true,
+        secure: false,
+      }
     }
   }
 })

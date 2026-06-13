@@ -45,11 +45,13 @@
                            statusbar_visible="draft,confirmed,delivered,done"/>
                 </header>
                 <sheet>
-                    <div class="alert alert-warning"
+                    <field name="is_fully_reserved" invisible="1"/>
+                    <field name="procurement_triggered" invisible="1"/>
+                    <div class="alert alert-warning" role="alert"
                          attrs="{'invisible': ['|',('state','!=','confirmed'),('is_fully_reserved','=',True)]}">
                         <i class="fa fa-exclamation-triangle"/> Some items could not be reserved. Procurement has been triggered automatically.
                     </div>
-                    <div class="alert alert-info"
+                    <div class="alert alert-info" role="alert"
                          attrs="{'invisible': [('procurement_triggered','=',False)]}">
                         <i class="fa fa-cog fa-spin"/> Auto-procurement triggered for shortfall items. Check Procurement module.
                     </div>
