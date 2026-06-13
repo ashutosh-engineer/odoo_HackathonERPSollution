@@ -1,8 +1,7 @@
-version: "3.9"
-
 # ============================================================
 # Shiv Furniture Works ERP — Complete Docker Stack
 # Odoo 16 + PostgreSQL 15 + Redis 7 + Nginx + PgBouncer
+# Local mode: HTTP only (no SSL certificate required)
 # ============================================================
 
 services:
@@ -18,17 +17,14 @@ services:
       POSTGRES_DB: shiv_furniture_erp
       POSTGRES_USER: shiv_odoo
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-ShivSecure@2024}
-      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=en_US.UTF-8"
-      # Performance tuning for production
-      POSTGRES_HOST_AUTH_METHOD: md5
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8"
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./docker/postgres/init:/docker-entrypoint-initdb.d:ro
-      - ./docker/postgres/postgresql.conf:/etc/postgresql/postgresql.conf:ro
     ports:
       - "5432:5432"
     networks:
-      - shiv_internal
+      - shiv_net
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U shiv_odoo -d shiv_furniture_erp"]
       interval: 10s
@@ -45,7 +41,6 @@ services:
         -c wal_buffers=16MB
         -c default_statistics_target=100
         -c random_page_cost=1.1
-        -c effective_io_concurrency=200
         -c work_mem=4MB
         -c min_wal_size=1GB
         -c max_wal_size=4GB
@@ -85,7 +80,7 @@ services:
     ports:
       - "6432:5432"
     networks:
-      - shiv_internal
+      - shiv_net
     depends_on:
       db:
         condition: service_healthy
@@ -104,16 +99,14 @@ services:
         --maxmemory-policy allkeys-lru
         --save 900 1
         --save 300 10
-        --save 60 10000
         --appendonly yes
         --appendfsync everysec
-        --loglevel notice
     volumes:
       - redis_data:/data
     ports:
       - "6379:6379"
     networks:
-      - shiv_internal
+      - shiv_net
     healthcheck:
       test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD:-ShivRedis@2024}", "ping"]
       interval: 10s
@@ -122,6 +115,7 @@ services:
 
   # ──────────────────────────────────────────────
   # Odoo 16 — ERP Application Server
+  # Connects to DB via PgBouncer (port 5432 on pgbouncer container)
   # ──────────────────────────────────────────────
   odoo:
     build:
@@ -138,30 +132,30 @@ services:
         condition: service_started
     environment:
       HOST: pgbouncer
-      PORT: 5432
+      PORT: "5432"
       USER: shiv_odoo
       PASSWORD: ${POSTGRES_PASSWORD:-ShivSecure@2024}
       REDIS_URL: redis://:${REDIS_PASSWORD:-ShivRedis@2024}@redis:6379/0
       ODOO_ADMIN_PASSWD: ${ODOO_MASTER_PASSWORD:-ShivMaster@2024}
     volumes:
-      - ./backend:/mnt/extra-addons                  # All custom modules
-      - odoo_data:/var/lib/odoo                       # Filestore, sessions
+      - ./backend:/mnt/extra-addons
+      - odoo_data:/var/lib/odoo
       - ./docker/odoo/odoo.conf:/etc/odoo/odoo.conf:ro
     ports:
       - "8069:8069"
-      - "8072:8072"                                   # Longpolling
+      - "8072:8072"
     networks:
-      - shiv_internal
-      - shiv_external
+      - shiv_net
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8069/web/health"]
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 60s
+      start_period: 90s
 
   # ──────────────────────────────────────────────
-  # Nginx — Reverse Proxy, TLS, Rate Limiting
+  # Nginx — Reverse Proxy (HTTP only, no SSL locally)
+  # SSL can be enabled when certificate is available
   # ──────────────────────────────────────────────
   nginx:
     image: nginx:1.25-alpine
@@ -171,23 +165,16 @@ services:
       - odoo
     ports:
       - "80:80"
-      - "443:443"
     volumes:
       - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./docker/nginx/conf.d:/etc/nginx/conf.d:ro
-      - ./docker/nginx/ssl:/etc/nginx/ssl:ro
       - nginx_logs:/var/log/nginx
     networks:
-      - shiv_external
-      - shiv_internal
-    healthcheck:
-      test: ["CMD", "nginx", "-t"]
-      interval: 30s
-      timeout: 5s
-      retries: 3
+      - shiv_net
 
   # ──────────────────────────────────────────────
-  # Adminer — DB Admin UI (dev only, disable in prod)
+  # Adminer — DB Admin UI (dev profile only)
+  # Start with: docker-compose --profile dev up
   # ──────────────────────────────────────────────
   adminer:
     image: adminer:4.8.1
@@ -196,17 +183,17 @@ services:
     ports:
       - "8080:8080"
     networks:
-      - shiv_internal
+      - shiv_net
     depends_on:
       - db
     environment:
       ADMINER_DEFAULT_SERVER: db
       ADMINER_DESIGN: pepa-linha
     profiles:
-      - dev                                           # Only starts with: docker-compose --profile dev up
+      - dev
 
 # ============================================================
-# Volumes — Persistent Data
+# Volumes
 # ============================================================
 volumes:
   postgres_data:
@@ -223,13 +210,10 @@ volumes:
     name: shiv_nginx_logs
 
 # ============================================================
-# Networks
+# Networks — single flat network for local dev
+# (split internal/external with firewall rules in production)
 # ============================================================
 networks:
-  shiv_internal:
+  shiv_net:
     driver: bridge
-    name: shiv_internal
-    internal: true                                    # No direct internet access
-  shiv_external:
-    driver: bridge
-    name: shiv_external                               # Only nginx touches internet
+    name: shiv_net
