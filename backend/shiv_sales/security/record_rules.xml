@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo><data noupdate="1">
+    <!-- Sales user sees only their own orders -->
+    <record id="rule_so_user_own" model="ir.rule">
+        <field name="name">SO: Sales User Sees Own Orders</field>
+        <field name="model_id" ref="shiv_sales.model_shiv_sale_order"/>
+        <field name="domain_force">[('create_uid','=',user.id)]</field>
+        <field name="groups" eval="[(4, ref('shiv_auth.group_shiv_sales_user'))]"/>
+        <field name="perm_read">1</field><field name="perm_write">1</field>
+        <field name="perm_create">1</field><field name="perm_unlink">0</field>
+    </record>
+    <!-- Sales manager sees all orders -->
+    <record id="rule_so_manager_all" model="ir.rule">
+        <field name="name">SO: Sales Manager Sees All</field>
+        <field name="model_id" ref="shiv_sales.model_shiv_sale_order"/>
+        <field name="domain_force">[(1,'=',1)]</field>
+        <field name="groups" eval="[(4, ref('shiv_auth.group_shiv_sales_manager'))]"/>
+        <field name="perm_read">1</field><field name="perm_write">1</field>
+        <field name="perm_create">1</field><field name="perm_unlink">0</field>
+    </record>
+    <!-- Warehouse sees all for picking -->
+    <record id="rule_so_warehouse_read" model="ir.rule">
+        <field name="name">SO: Warehouse Reads All</field>
+        <field name="model_id" ref="shiv_sales.model_shiv_sale_order"/>
+        <field name="domain_force">[(1,'=',1)]</field>
+        <field name="groups" eval="[(4, ref('shiv_auth.group_shiv_warehouse_user'))]"/>
+        <field name="perm_read">1</field><field name="perm_write">1</field>
+        <field name="perm_create">0</field><field name="perm_unlink">0</field>
+    </record>
+</data></odoo>

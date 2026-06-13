@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo><data>
+    <menuitem id="menu_shiv_sales_root" name="Sales"
+              parent="shiv_auth.menu_shiv_root" sequence="50"/>
+    <menuitem id="menu_shiv_sales_orders" name="Sales Orders"
+              parent="menu_shiv_sales_root"
+              action="shiv_sales.action_shiv_sale_orders" sequence="10"/>
+    <menuitem id="menu_shiv_customers" name="Customers"
+              parent="menu_shiv_sales_root"
+              action="shiv_sales.action_shiv_customers" sequence="20"/>
+</data></odoo>

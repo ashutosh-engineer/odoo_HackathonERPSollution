@@ -1,0 +1,11 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_shiv_customer_admin,shiv.customer admin,model_shiv_customer,shiv_auth.group_shiv_admin,1,1,1,1
+access_shiv_customer_sales,shiv.customer sales,model_shiv_customer,shiv_auth.group_shiv_sales_user,1,1,1,0
+access_shiv_customer_viewer,shiv.customer viewer,model_shiv_customer,shiv_auth.group_shiv_viewer,1,0,0,0
+access_shiv_so_admin,shiv.sale.order admin,model_shiv_sale_order,shiv_auth.group_shiv_admin,1,1,1,0
+access_shiv_so_manager,shiv.sale.order manager,model_shiv_sale_order,shiv_auth.group_shiv_sales_manager,1,1,1,0
+access_shiv_so_user,shiv.sale.order user,model_shiv_sale_order,shiv_auth.group_shiv_sales_user,1,1,1,0
+access_shiv_so_viewer,shiv.sale.order viewer,model_shiv_sale_order,shiv_auth.group_shiv_viewer,1,0,0,0
+access_shiv_so_wh,shiv.sale.order wh,model_shiv_sale_order,shiv_auth.group_shiv_warehouse_user,1,1,0,0
+access_shiv_so_line_admin,shiv.sale.order.line admin,model_shiv_sale_order_line,shiv_auth.group_shiv_admin,1,1,1,1
+access_shiv_so_line_sales,shiv.sale.order.line sales,model_shiv_sale_order_line,shiv_auth.group_shiv_sales_user,1,1,1,1

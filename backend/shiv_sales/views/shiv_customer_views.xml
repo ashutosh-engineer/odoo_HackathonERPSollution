@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo><data>
+    <record id="action_shiv_customers" model="ir.actions.act_window">
+        <field name="name">Customers</field>
+        <field name="res_model">shiv.customer</field>
+        <field name="view_mode">list,form</field>
+    </record>
+</data></odoo>
