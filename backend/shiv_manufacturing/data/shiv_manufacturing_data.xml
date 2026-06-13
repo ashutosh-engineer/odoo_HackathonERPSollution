@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo><data noupdate="1">
 
-    <!-- MO sequence -->
+    <!-- ── MO sequence ───────────────────────────────────────────────────── -->
     <record id="seq_shiv_mo" model="ir.sequence">
         <field name="name">Shiv Manufacturing Order</field>
         <field name="code">shiv.manufacturing.order</field>
@@ -10,31 +10,86 @@
         <field name="number_next">1</field>
     </record>
 
-    <!-- Default Work Centers -->
+    <!-- ── Work Centers ──────────────────────────────────────────────────── -->
     <record id="wc_carpentry" model="shiv.work.center">
         <field name="name">Carpentry</field>
         <field name="code">WC-CARP</field>
+        <field name="workcenter_type">carpentry</field>
         <field name="capacity">20</field>
+        <field name="operator_count">4</field>
+        <field name="sequence">10</field>
+        <field name="color">3</field>
     </record>
+
+    <record id="wc_carpentry_b" model="shiv.work.center">
+        <field name="name">Carpentry B (Backup)</field>
+        <field name="code">WC-CARP-B</field>
+        <field name="workcenter_type">carpentry</field>
+        <field name="capacity">10</field>
+        <field name="operator_count">2</field>
+        <field name="sequence">11</field>
+        <field name="color">4</field>
+    </record>
+
     <record id="wc_upholstery" model="shiv.work.center">
         <field name="name">Upholstery</field>
         <field name="code">WC-UPHO</field>
+        <field name="workcenter_type">upholstery</field>
         <field name="capacity">15</field>
+        <field name="operator_count">3</field>
+        <field name="sequence">20</field>
+        <field name="color">5</field>
     </record>
+
     <record id="wc_finishing" model="shiv.work.center">
         <field name="name">Finishing &amp; Polish</field>
         <field name="code">WC-FINI</field>
+        <field name="workcenter_type">finishing</field>
         <field name="capacity">30</field>
+        <field name="operator_count">3</field>
+        <field name="sequence">30</field>
+        <field name="color">6</field>
     </record>
+
     <record id="wc_assembly" model="shiv.work.center">
         <field name="name">Final Assembly</field>
         <field name="code">WC-ASSY</field>
+        <field name="workcenter_type">assembly</field>
         <field name="capacity">25</field>
+        <field name="operator_count">5</field>
+        <field name="sequence">40</field>
+        <field name="color">7</field>
     </record>
+
     <record id="wc_qc" model="shiv.work.center">
         <field name="name">Quality Control</field>
         <field name="code">WC-QC</field>
+        <field name="workcenter_type">qc</field>
         <field name="capacity">50</field>
+        <field name="operator_count">2</field>
+        <field name="sequence">50</field>
+        <field name="color">2</field>
+    </record>
+
+    <!-- ── Alternative WC relationships ──────────────────────────────────── -->
+    <!-- Carpentry → Carpentry B is its backup -->
+    <record id="wc_carpentry_alt" model="shiv.work.center">
+        <field name="name">Carpentry</field>
+        <field name="id" ref="wc_carpentry"/>
+        <field name="alternative_workcenter_ids" eval="[(4, ref('wc_carpentry_b'))]"/>
+    </record>
+
+    <!-- ── Cron: recompute utilization every 15 min ───────────────────────── -->
+    <record id="cron_recompute_wc_utilization" model="ir.cron">
+        <field name="name">Shiv Manufacturing: Recompute Work Center Utilization</field>
+        <field name="model_id" ref="shiv_manufacturing.model_shiv_work_center"/>
+        <field name="state">code</field>
+        <field name="code">model.cron_recompute_utilization()</field>
+        <field name="interval_number">15</field>
+        <field name="interval_type">minutes</field>
+        <field name="numbercall">-1</field>
+        <field name="doall">False</field>
+        <field name="active">True</field>
     </record>
 
 </data></odoo>

@@ -1,0 +1,289 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo><data>
+
+    <!-- ════════════════════════════════════════════════════════════════════
+         WORK CENTER — Enhanced form with floor console fields
+         ════════════════════════════════════════════════════════════════════ -->
+    <record id="view_shiv_wc_form_console" model="ir.ui.view">
+        <field name="name">shiv.work.center.form.console</field>
+        <field name="model">shiv.work.center</field>
+        <field name="inherit_id" ref="shiv_manufacturing.view_shiv_wc_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//sheet/group" position="before">
+                <!-- Live Status Bar -->
+                <div class="alert alert-danger"
+                     attrs="{'invisible': [('status','!=','breakdown')]}">
+                    <strong>⚠ BREAKDOWN ACTIVE</strong>
+                    — <field name="anomaly_type" readonly="1"/> :
+                    <field name="anomaly_description" readonly="1"/>
+                    <br/>
+                    Reported by <field name="anomaly_reported_by" readonly="1"/>
+                    at <field name="anomaly_reported_at" readonly="1"/>
+                </div>
+                <div class="alert alert-warning"
+                     attrs="{'invisible': [('status','!=','maintenance')]}">
+                    <strong>🔧 SCHEDULED MAINTENANCE</strong> — Work center offline.
+                </div>
+            </xpath>
+
+            <xpath expr="//sheet/group" position="replace">
+                <group>
+                    <group string="Identity">
+                        <field name="name"/>
+                        <field name="code"/>
+                        <field name="workcenter_type"/>
+                        <field name="sequence"/>
+                        <field name="is_active"/>
+                    </group>
+                    <group string="Live Status">
+                        <field name="status" widget="badge"
+                               decoration-success="status == 'running'"
+                               decoration-warning="status in ['paused','maintenance']"
+                               decoration-danger="status == 'breakdown'"
+                               decoration-info="status == 'idle'"/>
+                        <field name="status_since" readonly="1"/>
+                        <field name="status_duration_minutes" readonly="1" string="Duration (min)"/>
+                        <field name="utilization_pct" widget="progressbar"
+                               options="{'max_value': 100}"/>
+                    </group>
+                </group>
+                <group>
+                    <group string="Capacity">
+                        <field name="capacity"/>
+                        <field name="operator_count"/>
+                        <field name="active_mo_count" readonly="1"/>
+                        <field name="on_hold_mo_count" readonly="1"/>
+                    </group>
+                    <group string="Today's Performance">
+                        <field name="today_completed_count" readonly="1" string="Completed Today"/>
+                        <field name="today_units_produced" readonly="1" string="Units Produced"/>
+                    </group>
+                </group>
+            </xpath>
+
+            <xpath expr="//notebook" position="before">
+                <!-- Floor Console Actions -->
+                <div class="o_statusbar_buttons" style="margin-bottom:16px">
+                    <button name="action_set_running" string="▶ Start"
+                            type="object" class="btn-success"
+                            attrs="{'invisible': [('status','in',['running','breakdown'])]}"
+                            groups="shiv_auth.group_shiv_production_user"/>
+                    <button name="action_set_paused" string="⏸ Pause"
+                            type="object" class="btn-warning"
+                            attrs="{'invisible': [('status','!=','running')]}"
+                            groups="shiv_auth.group_shiv_production_user"/>
+                    <button name="action_set_idle" string="⬛ Set Idle"
+                            type="object" class="btn-secondary"
+                            attrs="{'invisible': [('status','not in',['running','paused'])]}"
+                            groups="shiv_auth.group_shiv_production_user"/>
+                    <button name="action_set_maintenance" string="🔧 Schedule Maintenance"
+                            type="object" class="btn-warning"
+                            attrs="{'invisible': [('status','in',['breakdown','maintenance'])]}"
+                            groups="shiv_auth.group_shiv_production_manager"
+                            confirm="Schedule maintenance? Active MOs will be put on hold."/>
+                </div>
+            </xpath>
+
+            <xpath expr="//notebook" position="inside">
+                <!-- Alternatives -->
+                <page string="Alternative Work Centers">
+                    <field name="alternative_workcenter_ids" widget="many2many_tags"/>
+                    <p class="text-muted">
+                        When this work center has a breakdown, active Manufacturing Orders
+                        will be auto-rerouted to these alternatives (in priority order by
+                        status: idle first, then running, then by utilization ascending).
+                    </p>
+                </page>
+
+                <!-- Anomaly History -->
+                <page string="Anomaly History" groups="shiv_auth.group_shiv_production_manager">
+                    <field name="anomaly_reported_by" readonly="1" invisible="1"/>
+                    <p class="text-muted">
+                        View full anomaly history via API:
+                        GET /shiv/floor/work-centers/[id]/anomaly-history
+                    </p>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- ════════════════════════════════════════════════════════════════════
+         WORK CENTER LIST — with status column
+         ════════════════════════════════════════════════════════════════════ -->
+    <record id="view_shiv_wc_list_console" model="ir.ui.view">
+        <field name="name">shiv.work.center.list.console</field>
+        <field name="model">shiv.work.center</field>
+        <field name="inherit_id" ref="shiv_manufacturing.view_shiv_wc_list"/>
+        <field name="arch" type="xml">
+            <field name="name" position="after">
+                <field name="status" widget="badge"
+                       decoration-success="status == 'running'"
+                       decoration-warning="status == 'paused'"
+                       decoration-danger="status == 'breakdown'"
+                       decoration-info="status == 'idle'"
+                       decoration-muted="status in ['maintenance','offline']"/>
+                <field name="status_duration_minutes" string="Since (min)" optional="show"/>
+                <field name="active_mo_count" string="Active MOs"/>
+                <field name="on_hold_mo_count" string="On Hold" optional="show"/>
+                <field name="today_units_produced" string="Units Today" optional="show"/>
+            </field>
+        </field>
+    </record>
+
+    <!-- ════════════════════════════════════════════════════════════════════
+         ANOMALY EVENT — List + Form
+         ════════════════════════════════════════════════════════════════════ -->
+    <record id="view_shiv_anomaly_event_list" model="ir.ui.view">
+        <field name="name">shiv.wc.anomaly.event.list</field>
+        <field name="model">shiv.wc.anomaly.event</field>
+        <field name="arch" type="xml">
+            <list string="Anomaly Events" create="0" edit="0" delete="0"
+                  decoration-danger="state == 'active'"
+                  decoration-success="state == 'resolved'">
+                <field name="reported_at"/>
+                <field name="work_center_id"/>
+                <field name="anomaly_type" widget="badge"/>
+                <field name="state" widget="badge"
+                       decoration-danger="state == 'active'"
+                       decoration-success="state == 'resolved'"/>
+                <field name="downtime_minutes" string="Downtime (min)"/>
+                <field name="held_mo_count" string="MOs Held"/>
+                <field name="rerouted_mo_count" string="MOs Rerouted"/>
+                <field name="reported_by"/>
+                <field name="resolved_at" optional="show"/>
+                <field name="resolved_by" optional="show"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_shiv_anomaly_event_form" model="ir.ui.view">
+        <field name="name">shiv.wc.anomaly.event.form</field>
+        <field name="model">shiv.wc.anomaly.event</field>
+        <field name="arch" type="xml">
+            <form string="Anomaly Event" create="0" edit="0" delete="0">
+                <sheet>
+                    <div class="alert alert-danger"
+                         attrs="{'invisible': [('state','!=','active')]}">
+                        <strong>⚠ ACTIVE BREAKDOWN</strong> — This anomaly is not yet resolved.
+                    </div>
+                    <group>
+                        <group string="Anomaly">
+                            <field name="work_center_id" readonly="1"/>
+                            <field name="anomaly_type" readonly="1"/>
+                            <field name="state" readonly="1" widget="badge"/>
+                            <field name="description" readonly="1"/>
+                        </group>
+                        <group string="Impact">
+                            <field name="held_mo_count" readonly="1" string="MOs Put on Hold"/>
+                            <field name="rerouted_mo_count" readonly="1" string="MOs Auto-Rerouted"/>
+                            <field name="downtime_minutes" readonly="1" string="Total Downtime (min)"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group string="Reported">
+                            <field name="reported_by" readonly="1"/>
+                            <field name="reported_at" readonly="1"/>
+                        </group>
+                        <group string="Resolved" attrs="{'invisible': [('state','!=','resolved')]}">
+                            <field name="resolved_by" readonly="1"/>
+                            <field name="resolved_at" readonly="1"/>
+                            <field name="resolution_notes" readonly="1"/>
+                        </group>
+                    </group>
+                    <group string="Rerouting Details" attrs="{'invisible': [('rerouting_details','=',False)]}">
+                        <field name="rerouting_details" readonly="1" widget="code"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_shiv_anomaly_event_search" model="ir.ui.view">
+        <field name="name">shiv.wc.anomaly.event.search</field>
+        <field name="model">shiv.wc.anomaly.event</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="work_center_id"/>
+                <field name="anomaly_type"/>
+                <filter string="Active" name="filter_active" domain="[('state','=','active')]"/>
+                <filter string="Resolved" name="filter_resolved" domain="[('state','=','resolved')]"/>
+                <filter string="Today" name="filter_today"
+                        domain="[('reported_at','&gt;=',context_today().strftime('%Y-%m-%d'))]"/>
+                <separator/>
+                <group expand="0" string="Group By">
+                    <filter string="Work Center" name="groupby_wc"
+                            context="{'group_by':'work_center_id'}"/>
+                    <filter string="Anomaly Type" name="groupby_type"
+                            context="{'group_by':'anomaly_type'}"/>
+                    <filter string="State" name="groupby_state"
+                            context="{'group_by':'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- Actions -->
+    <record id="action_shiv_anomaly_events" model="ir.actions.act_window">
+        <field name="name">Anomaly Events</field>
+        <field name="res_model">shiv.wc.anomaly.event</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{'create': False}</field>
+    </record>
+
+    <record id="action_shiv_active_anomalies" model="ir.actions.act_window">
+        <field name="name">Active Breakdowns</field>
+        <field name="res_model">shiv.wc.anomaly.event</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('state','=','active')]</field>
+        <field name="context">{'create': False, 'search_default_filter_active': True}</field>
+    </record>
+
+    <!-- MO form update — show hold/reroute info -->
+    <record id="view_shiv_mo_form_console" model="ir.ui.view">
+        <field name="name">shiv.manufacturing.order.form.console</field>
+        <field name="model">shiv.manufacturing.order</field>
+        <field name="inherit_id" ref="shiv_manufacturing.view_shiv_mo_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//sheet/div[hasclass('alert')]" position="after">
+                <div class="alert alert-danger"
+                     attrs="{'invisible': [('state','!=','on_hold')]}">
+                    <strong>⏸ ON HOLD</strong>
+                    <span attrs="{'invisible': [('hold_reason','=',False)]}">
+                        — Reason: <field name="hold_reason" readonly="1"/>
+                    </span>
+                    <br/>
+                    <span attrs="{'invisible': [('held_at','=',False)]}">
+                        Held since: <field name="held_at" readonly="1"/>
+                    </span>
+                    <span attrs="{'invisible': [('rerouted_from_wc_id','=',False)]}">
+                        | Rerouted from: <field name="rerouted_from_wc_id" readonly="1"/>
+                        at <field name="rerouted_at" readonly="1"/>
+                    </span>
+                </div>
+            </xpath>
+            <xpath expr="//group[@string='Scheduling']" position="inside">
+                <field name="hold_reason" readonly="1"
+                       attrs="{'invisible': [('hold_reason','=',False)]}"/>
+                <field name="held_at" readonly="1"
+                       attrs="{'invisible': [('held_at','=',False)]}"/>
+                <field name="rerouted_from_wc_id" readonly="1"
+                       attrs="{'invisible': [('rerouted_from_wc_id','=',False)]}"/>
+                <field name="rerouted_at" readonly="1"
+                       attrs="{'invisible': [('rerouted_at','=',False)]}"/>
+                <field name="reroute_reason" readonly="1"
+                       attrs="{'invisible': [('reroute_reason','=',False)]}"/>
+            </xpath>
+            <!-- Resume button for on-hold MOs -->
+            <xpath expr="//header/button[@name='action_start']" position="before">
+                <button name="action_resume_from_hold"
+                        string="▶ Resume MO"
+                        type="object"
+                        class="btn-success"
+                        attrs="{'invisible': [('state','!=','on_hold')]}"
+                        groups="shiv_auth.group_shiv_production_manager"
+                        confirm="Resume this Manufacturing Order?"/>
+            </xpath>
+        </field>
+    </record>
+
+</data></odoo>

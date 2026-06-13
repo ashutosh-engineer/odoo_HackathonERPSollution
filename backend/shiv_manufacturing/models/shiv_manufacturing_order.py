@@ -39,10 +39,31 @@ class ShivManufacturingOrder(models.Model):
         ('draft',       'Draft'),
         ('confirmed',   'Confirmed'),
         ('in_progress', 'In Progress'),
+        ('on_hold',     'On Hold ⚠'),
         ('done',        'Done'),
         ('cancelled',   'Cancelled'),
     ], string='Status', default='draft', required=True,
        index=True, readonly=True, tracking=True)
+
+    # ── On Hold / Rerouting fields (Work Center Console) ─────────────────────
+    hold_reason = fields.Text(
+        string='Hold Reason', readonly=True,
+        help='Populated when MO is put on hold due to work center breakdown.')
+
+    held_at = fields.Datetime(
+        string='Held At', readonly=True,
+        help='Timestamp when MO was put on hold.')
+
+    rerouted_from_wc_id = fields.Many2one(
+        'shiv.work.center', string='Rerouted From',
+        readonly=True, ondelete='set null',
+        help='Original work center before auto-rerouting.')
+
+    rerouted_at = fields.Datetime(
+        string='Rerouted At', readonly=True)
+
+    reroute_reason = fields.Char(
+        string='Reroute Reason', readonly=True, size=256)
 
     work_center_id = fields.Many2one('shiv.work.center', string='Work Center')
 
@@ -133,6 +154,34 @@ class ShivManufacturingOrder(models.Model):
         )
         self.write({'state': 'done', 'qty_produced': self.qty_to_produce})
         self.product_id.write({'has_bom': True})
+
+    def action_resume_from_hold(self):
+        """Manager manually resumes a single on-hold MO from the UI form."""
+        self.ensure_one()
+        if self.state != 'on_hold':
+            raise UserError(_('Only on-hold Manufacturing Orders can be resumed.'))
+        self.sudo().write({'state': 'in_progress', 'hold_reason': False, 'held_at': False})
+        self.env['shiv.audit.log'].sudo()._log(
+            model='shiv.manufacturing.order',
+            record_id=self.id,
+            record_name=self.name,
+            action='write',
+            changed_fields=['state'],
+            values_before={'state': 'on_hold'},
+            values_after={'state': 'in_progress'},
+            actor_id=self.env.uid,
+            notes='Manually resumed by production manager from UI.',
+        )
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': _('MO Resumed'),
+                'message': _('%s is back in progress.') % self.name,
+                'type': 'success',
+                'sticky': False,
+            },
+        }
 
     @api.model
     def auto_create_from_demand(self, product_id, qty_needed, trigger_source=''):

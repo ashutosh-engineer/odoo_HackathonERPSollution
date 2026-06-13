@@ -17,7 +17,7 @@
         - Field-level security on sensitive user data
     """,
     'author': 'Shiv Furniture Works ERP Team',
-    'website': 'https://github.com/ashutosh-engineer/odoo_Hackathon_Team_adip1',
+    'website': 'https://github.com/ashutosh-engineer/odoo_HackathonERPSollution',
     'license': 'LGPL-3',
     'depends': [
         'base',          # res.users, res.groups, ir.rule, ir.model.access

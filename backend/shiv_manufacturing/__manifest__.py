@@ -1,9 +1,13 @@
 # -*- coding: utf-8 -*-
 {
-    'name': 'Shiv Furniture - Manufacturing Execution',
-    'version': '16.0.1.0.0',
+    'name': 'Shiv Furniture - Manufacturing Execution & Floor Console',
+    'version': '16.0.2.0.0',
     'category': 'Shiv Furniture/Manufacturing',
-    'summary': 'Bill of Materials, work centers, manufacturing orders, work order execution.',
+    'summary': (
+        'Bill of Materials, work centers, manufacturing orders, work order execution. '
+        'SPECIAL: Live Factory Floor Work Center Status Console with anomaly reporting '
+        'and auto-rerouting of manufacturing orders.'
+    ),
     'author': 'Shiv Furniture Works ERP Team',
     'depends': ['shiv_auth', 'shiv_product', 'shiv_inventory', 'shiv_purchase'],
     'data': [
@@ -13,6 +17,7 @@
         'views/shiv_bom_views.xml',
         'views/shiv_work_center_views.xml',
         'views/shiv_manufacturing_order_views.xml',
+        'views/shiv_floor_console_views.xml',
         'views/shiv_manufacturing_menus.xml',
     ],
     'installable': True,

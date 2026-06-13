@@ -165,6 +165,97 @@ Client: Create Sales Order for 10 units
 
 ---
 
+## ⭐ Special Feature: Live Factory Floor Work Center Status Console
+
+> **Most ERPs are built for office workers. This feature bridges the gap between office planning and factory-floor reality.**
+
+### What It Is
+
+A high-density, touch-friendly operational panel designed for rugged tablets on the shop floor. Supervisors and operators get a live, real-time view of every work center — and can respond to breakdowns in seconds.
+
+### How It Works
+
+**Supervisors** see all work centers (Carpentry, Upholstery, QC, Assembly, Finishing) as live status columns:
+- 🟢 **Running** — actively processing Manufacturing Orders
+- 🟡 **Paused** — temporary halt (break, shift change)
+- ⚫ **Idle** — no active orders
+- 🔴 **Breakdown** — machine anomaly reported
+- 🔧 **Maintenance** — scheduled offline
+
+**Operators** use large touch targets to:
+- Start / Pause / Idle their work center
+- See active MOs with live progress %
+- One-tap **"Report Machine Anomaly"** button
+
+### The Anomaly Flow (What Makes This Special)
+
+When an operator hits **"Report Machine Anomaly"** — everything happens automatically in one atomic call:
+
+```
+Operator presses button on tablet
+          ↓
+POST /shiv/floor/work-centers/<id>/report-anomaly
+     { "anomaly_type": "machine_breakdown", "description": "Saw blade snapped" }
+          ↓
+1. Work center → status = BREAKDOWN (turns RED on all consoles instantly)
+2. All in-progress MOs on this WC → state = ON HOLD
+3. Auto-rerouting engine fires:
+   - Finds alternative work centers (configured per WC)
+   - Filters out alternatives that are also in breakdown/maintenance
+   - Sorts by: idle first → running → by utilization ascending
+   - Assigns each MO to the least-loaded available WC
+4. Audit log: who reported, when, which MOs held, where rerouted
+5. Anomaly event record created (immutable, with downtime tracking)
+6. Redis console cache invalidated → all tablets refresh in <15 seconds
+          ↓
+Response: { held_mos: 3, rerouted_count: 3, rerouting_details: [...] }
+```
+
+### When the Supervisor Resolves It
+
+```
+POST /shiv/floor/work-centers/<id>/resolve-anomaly
+     { "resolution_notes": "Saw blade replaced. Machine tested OK." }
+          ↓
+1. Work center → status = IDLE
+2. Anomaly event closed, downtime_minutes calculated
+3. On-hold MOs still on this WC → automatically resumed
+4. Full audit trail preserved forever
+```
+
+### API Endpoints
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| GET | `/shiv/floor/console` | Full console payload (Redis-cached 15s) |
+| GET | `/shiv/floor/work-centers` | All WCs with live status |
+| GET | `/shiv/floor/work-centers/<id>` | Single WC with active + on-hold MOs |
+| POST | `/shiv/floor/work-centers/<id>/start` | Operator starts WC |
+| POST | `/shiv/floor/work-centers/<id>/pause` | Operator pauses WC |
+| **POST** | **`/shiv/floor/work-centers/<id>/report-anomaly`** | **⭐ Report breakdown** |
+| **POST** | **`/shiv/floor/work-centers/<id>/resolve-anomaly`** | **Resolve breakdown** |
+| GET | `/shiv/floor/work-centers/<id>/anomaly-history` | Past events |
+| GET | `/shiv/floor/manufacturing-orders` | Live MO list |
+| POST | `/shiv/floor/manufacturing-orders/<id>/start` | Start MO |
+| POST | `/shiv/floor/manufacturing-orders/<id>/done` | Complete MO |
+| POST | `/shiv/floor/manufacturing-orders/<id>/resume` | Resume held MO |
+| GET | `/shiv/floor/alerts` | Active alerts (breakdown, paused, overloaded) |
+| GET | `/shiv/floor/anomaly-events` | All anomaly history with stats |
+
+### Technical Design
+
+- **Redis cache**: Console payload cached for 15 seconds → tablet polling at 10s intervals costs zero DB queries on cache hits
+- **Auto-reroute algorithm**: `preferred → idle → running → lowest utilization` — round-robin across alternatives for load balancing
+- **Immutable anomaly events**: Every breakdown is a permanent record with `reported_at`, `resolved_at`, `downtime_minutes`, `held_mo_count`, `rerouted_mo_count`
+- **4-layer audit**: WC status change + each held MO + each rerouted MO + anomaly event = full forensic trail
+- **Graceful degradation**: If Redis is down, data comes fresh from PostgreSQL — slower but never fails
+
+### Anomaly Types Supported
+
+`machine_breakdown` | `power_failure` | `material_shortage` | `operator_absent` | `quality_issue` | `safety_hazard` | `tool_failure` | `other`
+
+---
+
 ## Architecture Decisions (With Trade-offs)
 
 ### Decision 1: Why Odoo 16?

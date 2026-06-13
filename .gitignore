@@ -1,0 +1,60 @@
+# ============================================================
+# Shiv Furniture Works ERP — .gitignore
+# ============================================================
+
+# Environment secrets — NEVER commit these
+.env
+.env.*
+*.env
+
+# Jury prep — private notes
+.jury-prep-PRIVATE.md
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+.pytest_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# Odoo runtime
+*.log
+*.pid
+/filestore/
+/sessions/
+/.odoo_server_pid
+
+# Docker volumes (never tracked)
+postgres_data/
+redis_data/
+odoo_data/
+nginx_logs/
+
+# SSL certs (generated locally)
+docker/nginx/ssl/*.pem
+docker/nginx/ssl/*.crt
+docker/nginx/ssl/*.key
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Node (if frontend added later)
+node_modules/
+npm-debug.log*
+
+# Backup files
+*.bak
+*.orig
