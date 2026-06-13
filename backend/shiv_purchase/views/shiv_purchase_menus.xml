@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo><data>
+    <menuitem id="menu_shiv_purchase_root" name="Procurement"
+              parent="shiv_auth.menu_shiv_root" sequence="40"/>
+    <menuitem id="menu_shiv_purchase_orders" name="Purchase Orders"
+              parent="menu_shiv_purchase_root"
+              action="shiv_purchase.action_shiv_purchase_orders" sequence="10"/>
+    <menuitem id="menu_shiv_vendors" name="Vendors"
+              parent="menu_shiv_purchase_root"
+              action="shiv_purchase.action_shiv_vendors" sequence="20"
+              groups="shiv_auth.group_shiv_purchase_user"/>
+</data></odoo>

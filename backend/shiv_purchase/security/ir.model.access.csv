@@ -1,0 +1,14 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_shiv_vendor_admin,shiv.vendor admin,model_shiv_vendor,shiv_auth.group_shiv_admin,1,1,1,1
+access_shiv_vendor_purchase_manager,shiv.vendor purchase manager,model_shiv_vendor,shiv_auth.group_shiv_purchase_manager,1,1,1,0
+access_shiv_vendor_purchase_user,shiv.vendor purchase user,model_shiv_vendor,shiv_auth.group_shiv_purchase_user,1,1,0,0
+access_shiv_vendor_viewer,shiv.vendor viewer,model_shiv_vendor,shiv_auth.group_shiv_viewer,1,0,0,0
+access_shiv_vendor_product_admin,shiv.vendor.product admin,model_shiv_vendor_product,shiv_auth.group_shiv_admin,1,1,1,1
+access_shiv_vendor_product_purchase,shiv.vendor.product purchase,model_shiv_vendor_product,shiv_auth.group_shiv_purchase_user,1,1,1,0
+access_shiv_vendor_product_viewer,shiv.vendor.product viewer,model_shiv_vendor_product,shiv_auth.group_shiv_viewer,1,0,0,0
+access_shiv_po_admin,shiv.purchase.order admin,model_shiv_purchase_order,shiv_auth.group_shiv_admin,1,1,1,0
+access_shiv_po_purchase_manager,shiv.purchase.order manager,model_shiv_purchase_order,shiv_auth.group_shiv_purchase_manager,1,1,1,0
+access_shiv_po_purchase_user,shiv.purchase.order user,model_shiv_purchase_order,shiv_auth.group_shiv_purchase_user,1,1,1,0
+access_shiv_po_viewer,shiv.purchase.order viewer,model_shiv_purchase_order,shiv_auth.group_shiv_viewer,1,0,0,0
+access_shiv_po_line_admin,shiv.purchase.order.line admin,model_shiv_purchase_order_line,shiv_auth.group_shiv_admin,1,1,1,1
+access_shiv_po_line_purchase,shiv.purchase.order.line purchase,model_shiv_purchase_order_line,shiv_auth.group_shiv_purchase_user,1,1,1,1
