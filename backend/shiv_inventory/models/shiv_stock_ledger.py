@@ -10,8 +10,8 @@ This is the single source of truth for inventory accuracy.
 
 DB-level immutability enforced by PostgreSQL trigger (01_extensions.sql).
 """
-from odoo import api, fields, models, _
-from odoo.exceptions import UserError, ValidationError
+from odoo import api, fields, models, _  # type: ignore
+from odoo.exceptions import UserError, ValidationError  # type: ignore
 
 MOVEMENT_TYPES = [
     ('in_purchase',     'Stock In — Purchase Receipt'),
@@ -105,7 +105,7 @@ class ShivStockLedger(models.Model):
     display_ref = fields.Char(
         string='Reference', compute='_compute_display_ref', store=True)
 
-    @api.depends('product_id', 'movement_type', 'timestamp')
+    @api.depends('product_id.internal_ref', 'product_id.name', 'movement_type', 'timestamp')
     def _compute_display_ref(self):
         for rec in self:
             rec.display_ref = (
@@ -142,17 +142,27 @@ class ShivStockLedger(models.Model):
         if movement_type == 'reserve':
             # CRITICAL PATH: reservation must be atomic
             # Uses row-level lock via FOR UPDATE
+            self.env.flush_all()
             self.env.cr.execute(
                 'SELECT qty_available FROM shiv_stock_summary WHERE product_id = %s FOR UPDATE',
                 (product_id,)
             )
             row = self.env.cr.fetchone()
-            available = row[0] if row else 0.0
+            available = row[0] if (row and row[0] is not None) else 0.0
             if available < abs(qty_change):
                 raise ValidationError(
                     _('Insufficient stock for "%s". '
                       'Available: %.3f, Requested: %.3f.')
                     % (product.name, available, abs(qty_change))
+                )
+
+        if qty_change < 0 and movement_type != 'reserve':
+            # Physical stock-out check
+            if summary.qty_on_hand + qty_change < 0:
+                raise ValidationError(
+                    _('Insufficient physical stock for "%s". '
+                      'On Hand: %.3f, Requested: %.3f.')
+                    % (product.name, summary.qty_on_hand, abs(qty_change))
                 )
 
         actor = self.env['res.users'].sudo().browse(actor_id or self.env.uid)

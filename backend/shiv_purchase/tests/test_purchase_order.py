@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """shiv_purchase/tests/test_purchase_order.py — PO lifecycle + auto-procurement tests."""
-from odoo.exceptions import UserError
-from odoo.tests import TransactionCase, tagged
+from odoo.exceptions import UserError  # type: ignore
+from odoo.tests import TransactionCase, tagged  # type: ignore
 from datetime import date, timedelta
 
 
@@ -31,7 +31,7 @@ class TestPurchaseOrder(TransactionCase):
         })
 
     def _make_po(self, qty=10):
-        return self.env['shiv.purchase.order'].sudo().create({
+        return self.env['shiv.purchase.order'].with_user(self.admin).create({
             'vendor_id': self.vendor.id,
             'date_expected': date.today() + timedelta(days=3),
             'line_ids': [(0, 0, {

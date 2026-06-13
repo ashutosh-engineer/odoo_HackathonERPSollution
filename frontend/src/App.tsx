@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
 import { LandingPage } from './pages/LandingPage';
 import { SignIn } from './pages/SignIn';
@@ -24,6 +25,9 @@ import { AuditLog } from './pages/AuditLog';
 const AppLayout = ({ children }: { children: React.ReactNode }) => {
   const location = useLocation();
   const { logout, user } = useAuth();
+  const [showNewEntryMenu, setShowNewEntryMenu] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [showHelp, setShowHelp] = useState(false);
   const isActive = (path: string) => location.pathname === path || location.pathname.startsWith(path + '/');
   
   const role = user?.shiv_role || '';
@@ -62,24 +66,56 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
           </div>
         </div>
         <div className="flex items-center gap-3">
-          <button className="p-2.5 hover:bg-surface-variant transition-colors rounded-lg relative group">
-            <span className="material-symbols-outlined text-on-surface-variant group-hover:text-primary">notifications</span>
-            <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-error rounded-full border-2 border-white"></span>
-          </button>
-          <button className="p-2.5 hover:bg-surface-variant transition-colors rounded-lg group">
+          <div className="relative">
+            <button onClick={() => { setShowNotifications(!showNotifications); setShowHelp(false); }} className="p-2.5 hover:bg-surface-variant transition-colors rounded-lg relative group">
+              <span className="material-symbols-outlined text-on-surface-variant group-hover:text-primary">notifications</span>
+              <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-error rounded-full border-2 border-white"></span>
+            </button>
+            {showNotifications && (
+              <div className="absolute right-0 mt-2 w-72 bg-white border border-outline-variant rounded-xl shadow-xl z-50 p-4">
+                <h3 className="font-bold text-on-surface border-b border-outline-variant pb-2 mb-2">Notifications</h3>
+                <div className="space-y-3">
+                  <div className="flex gap-2 p-2 hover:bg-surface-variant rounded-lg transition-colors cursor-pointer">
+                    <span className="material-symbols-outlined text-primary text-[20px]">info</span>
+                    <div>
+                      <p className="text-sm font-bold text-on-surface">System Update</p>
+                      <p className="text-xs text-on-surface-variant">ERP stabilization patch deployed successfully.</p>
+                    </div>
+                  </div>
+                  <div className="flex gap-2 p-2 hover:bg-surface-variant rounded-lg transition-colors cursor-pointer">
+                    <span className="material-symbols-outlined text-warning-amber text-[20px]">warning</span>
+                    <div>
+                      <p className="text-sm font-bold text-on-surface">Low Stock Alert</p>
+                      <p className="text-xs text-on-surface-variant">Office Desk is below reorder point.</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
+          <button onClick={() => window.location.href='/settings'} className="p-2.5 hover:bg-surface-variant transition-colors rounded-lg group">
             <span className="material-symbols-outlined text-on-surface-variant group-hover:text-primary">settings</span>
           </button>
-          <button className="p-2.5 hover:bg-surface-variant transition-colors rounded-lg group">
-            <span className="material-symbols-outlined text-on-surface-variant group-hover:text-primary">help_outline</span>
-          </button>
-          <div className="ml-2 w-9 h-9 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center text-primary font-bold overflow-hidden cursor-pointer hover:ring-2 hover:ring-primary/20 transition-all">
+          <div className="relative">
+            <button onClick={() => { setShowHelp(!showHelp); setShowNotifications(false); }} className="p-2.5 hover:bg-surface-variant transition-colors rounded-lg group">
+              <span className="material-symbols-outlined text-on-surface-variant group-hover:text-primary">help_outline</span>
+            </button>
+            {showHelp && (
+              <div className="absolute right-0 mt-2 w-48 bg-white border border-outline-variant rounded-xl shadow-xl z-50 p-2 flex flex-col gap-1">
+                <button onClick={() => setShowHelp(false)} className="w-full text-left px-4 py-2 hover:bg-surface-container-low font-medium rounded-lg text-sm text-on-surface">Documentation</button>
+                <button onClick={() => setShowHelp(false)} className="w-full text-left px-4 py-2 hover:bg-surface-container-low font-medium rounded-lg text-sm text-on-surface">Contact Support</button>
+                <button onClick={() => setShowHelp(false)} className="w-full text-left px-4 py-2 hover:bg-surface-container-low font-medium rounded-lg text-sm text-on-surface">Keyboard Shortcuts</button>
+              </div>
+            )}
+          </div>
+          <div onClick={() => window.location.href='/user-management'} className="ml-2 w-9 h-9 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center text-primary font-bold overflow-hidden cursor-pointer hover:ring-2 hover:ring-primary/20 transition-all">
             <img alt="User profile" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD9nPQnPwiyFACYIPnvMJjPGpK9C_afxFIxEIdwTSghixSRtkn2ZQT-Da0TaPd0cKhwTB5chX3IJzrQrj_T5NM90mas94xO9ZxY02cbP35cTEMP8iC7gCQon0CMzExNndE_iq-B3hFj3bpdf-8nYbddYY-T8hTK6O1IRg9MZd1yGH4RHBKpAJ_cUemlSttRhfh2fIDlUcTZSTSRM4BM3DMuSL4pknCZT4Hf3x9oEGizfg8mdqvbVaVzV5diKd6S8hE8-pMLaBrEyibG"/>
           </div>
         </div>
       </nav>
 
       {/* SideNavBar */}
-      <aside className="fixed left-0 top-0 h-full w-[260px] flex flex-col pt-lg pb-md px-sm z-40 bg-primary shadow-xl">
+      <aside className="fixed left-0 top-0 h-full w-[260px] flex flex-col pt-lg pb-md px-sm z-40 bg-primary">
         <div className="flex items-center gap-3 mb-10 px-4 mt-16">
           <div className="w-10 h-10 flex items-center justify-center text-white">
             <svg viewBox="0 0 40 40" className="w-full h-full text-white" fill="currentColor">
@@ -89,65 +125,64 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
               <path d="M20 30C14.4772 30 10 25.5228 10 20H20V30Z" opacity="0.4"/>
             </svg>
           </div>
-          <div>
+          <div className="flex flex-col">
             <p className="font-headline-sm text-[18px] text-white font-extrabold tracking-tight leading-tight">SHIV<span className="font-light opacity-80">ERP</span></p>
-            <p className="text-[10px] text-white/60 uppercase tracking-[0.1em] font-black">Enterprise ERP</p>
           </div>
         </div>
         <nav className="flex-1 space-y-1 overflow-y-auto custom-scrollbar px-2">
-          <Link to="/dashboard" className={`flex items-center gap-3 px-4 py-3 cursor-pointer rounded-xl transition-all ${isActive('/dashboard') ? 'nav-active font-semibold' : 'text-white/70 hover:bg-white/10 hover:text-white'}`}>
+          <Link to="/dashboard" className={`flex items-center gap-3 px-4 py-3 cursor-pointer rounded-lg transition-all ${isActive('/dashboard') ? 'nav-active font-semibold' : 'text-white/70 hover:bg-white/10 hover:text-white'}`}>
             <span className="material-symbols-outlined">grid_view</span>
             <span className="font-label-md">Dashboard</span>
           </Link>
-          <Link to="/products" className={`flex items-center gap-3 px-4 py-3 cursor-pointer rounded-xl transition-all ${isActive('/products') ? 'nav-active font-semibold' : 'text-white/70 hover:bg-white/10 hover:text-white'}`}>
+          <Link to="/products" className={`flex items-center gap-3 px-4 py-3 cursor-pointer rounded-lg transition-all ${isActive('/products') ? 'nav-active font-semibold' : 'text-white/70 hover:bg-white/10 hover:text-white'}`}>
             <span className="material-symbols-outlined">inventory</span>
             <span className="font-label-md">Products</span>
           </Link>
           
           {hasAccess(roles.sales) && (
-            <Link to="/sales" className={`flex items-center gap-3 px-4 py-3 cursor-pointer rounded-xl transition-all ${isActive('/sales') ? 'nav-active font-semibold' : 'text-white/70 hover:bg-white/10 hover:text-white'}`}>
+            <Link to="/sales" className={`flex items-center gap-3 px-4 py-3 cursor-pointer rounded-lg transition-all ${isActive('/sales') ? 'nav-active font-semibold' : 'text-white/70 hover:bg-white/10 hover:text-white'}`}>
               <span className="material-symbols-outlined">receipt_long</span>
               <span className="font-label-md">Sales</span>
             </Link>
           )}
           
           {hasAccess(roles.purchase) && (
-            <Link to="/purchase" className={`flex items-center gap-3 px-4 py-3 cursor-pointer rounded-xl transition-all ${isActive('/purchase') ? 'nav-active font-semibold' : 'text-white/70 hover:bg-white/10 hover:text-white'}`}>
+            <Link to="/purchase" className={`flex items-center gap-3 px-4 py-3 cursor-pointer rounded-lg transition-all ${isActive('/purchase') ? 'nav-active font-semibold' : 'text-white/70 hover:bg-white/10 hover:text-white'}`}>
               <span className="material-symbols-outlined">shopping_cart</span>
               <span className="font-label-md">Purchase</span>
             </Link>
           )}
           
           {hasAccess(roles.mfg) && (
-            <Link to="/manufacturing" className={`flex items-center gap-3 px-4 py-3 cursor-pointer rounded-xl transition-all ${isActive('/manufacturing') ? 'nav-active font-semibold' : 'text-white/70 hover:bg-white/10 hover:text-white'}`}>
+            <Link to="/manufacturing" className={`flex items-center gap-3 px-4 py-3 cursor-pointer rounded-lg transition-all ${isActive('/manufacturing') ? 'nav-active font-semibold' : 'text-white/70 hover:bg-white/10 hover:text-white'}`}>
               <span className="material-symbols-outlined">precision_manufacturing</span>
               <span className="font-label-md">Manufacturing</span>
             </Link>
           )}
           
           {hasAccess(roles.inv) && (
-            <Link to="/inventory" className={`flex items-center gap-3 px-4 py-3 cursor-pointer rounded-xl transition-all ${isActive('/inventory') ? 'nav-active font-semibold' : 'text-white/70 hover:bg-white/10 hover:text-white'}`}>
+            <Link to="/inventory" className={`flex items-center gap-3 px-4 py-3 cursor-pointer rounded-lg transition-all ${isActive('/inventory') ? 'nav-active font-semibold' : 'text-white/70 hover:bg-white/10 hover:text-white'}`}>
               <span className="material-symbols-outlined">warehouse</span>
               <span className="font-label-md">Inventory</span>
             </Link>
           )}
           
           {hasAccess(roles.floor_console) && (
-            <Link to="/floor-console" className={`flex items-center gap-3 px-4 py-3 cursor-pointer rounded-xl transition-all ${isActive('/floor-console') ? 'nav-active font-semibold' : 'text-white/70 hover:bg-white/10 hover:text-white'}`}>
+            <Link to="/floor-console" className={`flex items-center gap-3 px-4 py-3 cursor-pointer rounded-lg transition-all ${isActive('/floor-console') ? 'nav-active font-semibold' : 'text-white/70 hover:bg-white/10 hover:text-white'}`}>
               <span className="material-symbols-outlined">dashboard_customize</span>
               <span className="font-label-md">Floor Console</span>
             </Link>
           )}
-
+  
           {hasAccess(roles.audit) && (
-            <Link to="/audit-log" className={`flex items-center gap-3 px-4 py-3 cursor-pointer rounded-xl transition-all ${isActive('/audit-log') ? 'nav-active font-semibold' : 'text-white/70 hover:bg-white/10 hover:text-white'}`}>
+            <Link to="/audit-log" className={`flex items-center gap-3 px-4 py-3 cursor-pointer rounded-lg transition-all ${isActive('/audit-log') ? 'nav-active font-semibold' : 'text-white/70 hover:bg-white/10 hover:text-white'}`}>
               <span className="material-symbols-outlined">history</span>
               <span className="font-label-md">Audit Log</span>
             </Link>
           )}
           
           {hasAccess(roles.admin) && (
-            <Link to="/user-management" className={`flex items-center gap-3 px-4 py-3 cursor-pointer rounded-xl transition-all ${isActive('/user-management') ? 'nav-active font-semibold' : 'text-white/70 hover:bg-white/10 hover:text-white'}`}>
+            <Link to="/user-management" className={`flex items-center gap-3 px-4 py-3 cursor-pointer rounded-lg transition-all ${isActive('/user-management') ? 'nav-active font-semibold' : 'text-white/70 hover:bg-white/10 hover:text-white'}`}>
               <span className="material-symbols-outlined">group</span>
               <span className="font-label-md">Users</span>
             </Link>
@@ -167,12 +202,64 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
             <span className="font-label-md">Logout</span>
           </button>
         </div>
-        <div className="px-4 mt-6">
-          <button className="w-full flex items-center justify-center gap-2 bg-white text-primary py-3.5 rounded-xl font-bold hover:bg-primary-fixed-dim transition-all shadow-lg active:scale-[0.98]">
+        <div className="px-4 mt-6 relative">
+          {showNewEntryMenu && (
+            <>
+              <div className="fixed inset-0 z-40 bg-transparent" onClick={() => setShowNewEntryMenu(false)} />
+              <div className="absolute bottom-16 left-4 right-4 bg-white rounded-lg shadow-xl border border-outline-variant p-2 z-50 animate-in fade-in slide-in-from-bottom-2 duration-200 text-on-surface">
+                <p className="text-[10px] font-bold text-on-surface-variant/60 uppercase tracking-widest px-3 py-1 mb-1 border-b border-outline-variant/30">Create New Record</p>
+                {hasAccess(roles.sales) && (
+                  <Link
+                    to="/sales/new"
+                    onClick={() => setShowNewEntryMenu(false)}
+                    className="flex items-center gap-2 px-3 py-2 rounded-lg text-body-sm text-on-surface hover:bg-primary/10 hover:text-primary transition-all font-semibold"
+                  >
+                    <span className="material-symbols-outlined text-[18px]">receipt_long</span>
+                    <span>New Sales Order</span>
+                  </Link>
+                )}
+                {hasAccess(roles.purchase) && (
+                  <Link
+                    to="/purchase/new"
+                    onClick={() => setShowNewEntryMenu(false)}
+                    className="flex items-center gap-2 px-3 py-2 rounded-lg text-body-sm text-on-surface hover:bg-primary/10 hover:text-primary transition-all font-semibold"
+                  >
+                    <span className="material-symbols-outlined text-[18px]">shopping_cart</span>
+                    <span>New Purchase Order</span>
+                  </Link>
+                )}
+                {hasAccess(roles.mfg) && (
+                  <Link
+                    to="/manufacturing/new"
+                    onClick={() => setShowNewEntryMenu(false)}
+                    className="flex items-center gap-2 px-3 py-2 rounded-lg text-body-sm text-on-surface hover:bg-primary/10 hover:text-primary transition-all font-semibold"
+                  >
+                    <span className="material-symbols-outlined text-[18px]">precision_manufacturing</span>
+                    <span>New Mfg Order</span>
+                  </Link>
+                )}
+                {hasAccess(roles.inv) && (
+                  <Link
+                    to="/inventory"
+                    onClick={() => setShowNewEntryMenu(false)}
+                    className="flex items-center gap-2 px-3 py-2 rounded-lg text-body-sm text-on-surface hover:bg-primary/10 hover:text-primary transition-all font-semibold"
+                  >
+                    <span className="material-symbols-outlined text-[18px]">warehouse</span>
+                    <span>New Stock Movement</span>
+                  </Link>
+                )}
+              </div>
+            </>
+          )}
+          <button
+            onClick={() => setShowNewEntryMenu(!showNewEntryMenu)}
+            className="w-full flex items-center justify-center gap-2 bg-white text-primary py-3.5 rounded-lg font-bold hover:bg-primary-fixed-dim transition-all shadow-sm active:scale-[0.98]"
+          >
             <span className="material-symbols-outlined">add_circle</span>
             <span>New Entry</span>
           </button>
         </div>
+
       </aside>
 
       <main className="ml-[260px] min-h-[calc(100vh-64px)] bg-surface">

@@ -8,8 +8,8 @@ Full PO lifecycle: Draft → Confirmed → Received → Done
 Auto-procurement: triggered by low stock or sales order demand.
 3-5 day manual cycle → 5 minute automated cycle.
 """
-from odoo import api, fields, models, _
-from odoo.exceptions import ValidationError, UserError
+from odoo import api, fields, models, _  # type: ignore
+from odoo.exceptions import ValidationError, UserError  # type: ignore
 
 
 class ShivPurchaseOrder(models.Model):
@@ -152,14 +152,22 @@ class ShivPurchaseOrder(models.Model):
             product_id, qty_needed)
 
         if not vendor_line:
-            # No vendor — create draft for manual assignment
-            vendor_line = False
+            fallback_vendor = self.env['shiv.vendor'].sudo().search([], limit=1)
+            if fallback_vendor:
+                vendor_id = fallback_vendor.id
+            else:
+                import logging
+                logger = logging.getLogger(__name__)
+                logger.warning('No vendor configured for product ID %d and no fallback vendor exists. Skipping PO.', product_id)
+                return False
+        else:
+            vendor_id = vendor_line.vendor_id.id
 
         product = self.env['shiv.product'].browse(product_id)
         lead_days = vendor_line.lead_time_days if vendor_line else (product.lead_time_days or 7)
 
         order = self.sudo().create({
-            'vendor_id': vendor_line.vendor_id.id if vendor_line else False,
+            'vendor_id': vendor_id,
             'date_order': fields.Datetime.now(),
             'date_expected': date.today() + timedelta(days=lead_days),
             'is_auto_generated': True,

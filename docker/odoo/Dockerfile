@@ -1,11 +1,12 @@
-# ============================================================
-# Shiv Furniture Works ERP — Odoo 16 Docker Image
-# Custom modules are volume-mounted at /mnt/extra-addons
-# so code changes reflect without rebuild
-# ============================================================
 FROM odoo:16.0
 
 USER root
+
+# Install compiler dependencies for python packages
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gcc \
+    python3-dev \
+    && rm -rf /var/lib/apt/lists/*
 
 # Install extra Python dependencies needed by our modules
 RUN pip3 install --no-cache-dir \

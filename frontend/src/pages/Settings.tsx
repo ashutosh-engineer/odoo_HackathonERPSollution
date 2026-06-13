@@ -2,6 +2,36 @@ import { useState } from 'react';
 
 export const Settings = () => {
   const [activeTab, setActiveTab] = useState<'general' | 'users' | 'warehouse' | 'procurement'>('general');
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [logoPreview, setLogoPreview] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+
+  const handleActionClick = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 3000);
+  };
+
+  const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setLogoPreview(reader.result as string);
+        setToastMessage('Logo selected for upload');
+        setTimeout(() => setToastMessage(null), 3000);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleSave = () => {
+    setIsSaving(true);
+    setTimeout(() => {
+      setIsSaving(false);
+      setToastMessage('Settings updated successfully');
+      setTimeout(() => setToastMessage(null), 3000);
+    }, 800);
+  };
 
   return (
     <div className="flex flex-col min-h-screen bg-surface-base text-on-surface">
@@ -58,11 +88,18 @@ export const Settings = () => {
                     <div>
                       <label className="block font-label-md text-label-md mb-xs">Company Logo</label>
                       <div className="flex items-center gap-md border-2 border-dashed border-outline-variant rounded-lg p-md">
-                        <div className="w-16 h-16 bg-surface-container-high rounded flex items-center justify-center">
-                          <span className="material-symbols-outlined text-outline">image</span>
+                        <div className="w-16 h-16 bg-surface-container-high rounded flex items-center justify-center overflow-hidden">
+                          {logoPreview ? (
+                            <img src={logoPreview} alt="Logo Preview" className="w-full h-full object-cover" />
+                          ) : (
+                            <span className="material-symbols-outlined text-outline">image</span>
+                          )}
                         </div>
                         <div>
-                          <button className="font-label-md text-label-md text-primary hover:underline">Upload new logo</button>
+                          <label className="font-label-md text-label-md text-primary hover:underline cursor-pointer">
+                            Upload new logo
+                            <input type="file" accept="image/png, image/jpeg, image/svg+xml" className="hidden" onChange={handleLogoUpload} />
+                          </label>
                           <p className="text-body-sm text-on-surface-variant">PNG or SVG, max 2MB</p>
                         </div>
                       </div>
@@ -74,7 +111,7 @@ export const Settings = () => {
                         <div className="w-8 h-8 rounded-full bg-[#00696e] cursor-pointer"></div>
                         <div className="w-8 h-8 rounded-full bg-[#34451e] cursor-pointer"></div>
                         <div className="w-8 h-8 rounded-full bg-[#212529] cursor-pointer"></div>
-                        <button className="w-8 h-8 rounded-full border border-outline flex items-center justify-center">
+                        <button onClick={() => handleActionClick('Add custom theme clicked')} className="w-8 h-8 rounded-full border border-outline flex items-center justify-center">
                           <span className="material-symbols-outlined text-body-sm">add</span>
                         </button>
                       </div>
@@ -95,7 +132,9 @@ export const Settings = () => {
                     </div>
                   </div>
                   <div className="pt-lg border-t border-outline-variant flex justify-end gap-md">
-                    {/* Settings apply automatically or are disabled in this demo */}
+                    <button onClick={handleSave} disabled={isSaving} className="bg-primary text-white px-md py-sm rounded-lg font-label-md text-label-md flex items-center gap-sm hover:bg-primary/90 transition-colors disabled:opacity-50">
+                      {isSaving ? 'Saving...' : 'Save Settings'}
+                    </button>
                   </div>
                 </div>
               </div>
@@ -106,7 +145,7 @@ export const Settings = () => {
               <div>
                 <div className="flex justify-between items-center mb-md">
                   <h3 className="font-headline-sm text-headline-sm">Users &amp; Access Management</h3>
-                  <button className="bg-primary text-white px-md py-sm rounded-lg font-label-md text-label-md flex items-center gap-sm hover:bg-primary/90 transition-colors">
+                  <button onClick={() => handleActionClick('Settings updated successfully')} className="bg-primary text-white px-md py-sm rounded-lg font-label-md text-label-md flex items-center gap-sm hover:bg-primary/90 transition-colors">
                     <span className="material-symbols-outlined">person_add</span>
                     Add User
                   </button>
@@ -143,7 +182,7 @@ export const Settings = () => {
                           </span>
                         </td>
                         <td className="py-md text-right">
-                          <button className="material-symbols-outlined text-on-surface-variant hover:text-primary">more_vert</button>
+                          <button onClick={() => handleActionClick('Settings updated successfully')} className="material-symbols-outlined text-on-surface-variant hover:text-primary">more_vert</button>
                         </td>
                       </tr>
                       <tr className="border-b border-outline-variant hover:bg-surface-container-low transition-colors">
@@ -166,7 +205,7 @@ export const Settings = () => {
                           </span>
                         </td>
                         <td className="py-md text-right">
-                          <button className="material-symbols-outlined text-on-surface-variant hover:text-primary">more_vert</button>
+                          <button onClick={() => handleActionClick('Settings updated successfully')} className="material-symbols-outlined text-on-surface-variant hover:text-primary">more_vert</button>
                         </td>
                       </tr>
                       <tr className="border-b border-outline-variant hover:bg-surface-container-low transition-colors">
@@ -189,7 +228,7 @@ export const Settings = () => {
                           </span>
                         </td>
                         <td className="py-md text-right">
-                          <button className="material-symbols-outlined text-on-surface-variant hover:text-primary">more_vert</button>
+                          <button onClick={() => handleActionClick('Settings updated successfully')} className="material-symbols-outlined text-on-surface-variant hover:text-primary">more_vert</button>
                         </td>
                       </tr>
                     </tbody>
@@ -213,7 +252,7 @@ export const Settings = () => {
                       </div>
                     </div>
                   </div>
-                  <button className="border-2 border-dashed border-outline-variant rounded-lg p-md flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-container transition-colors min-h-[140px]">
+                  <button onClick={() => handleActionClick('Settings updated successfully')} className="border-2 border-dashed border-outline-variant rounded-lg p-md flex flex-col items-center justify-center text-on-surface-variant hover:bg-surface-container transition-colors min-h-[140px]">
                     <span className="material-symbols-outlined text-headline-md mb-xs">add_business</span>
                     <span className="font-label-md text-label-md">Add Storage Location</span>
                   </button>
@@ -279,6 +318,11 @@ export const Settings = () => {
             
           </div>
         </div>
+      </div>
+      {/* Toast Notification */}
+      <div className={`fixed bottom-8 right-8 bg-inverse-surface text-inverse-on-surface px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3 transition-transform duration-300 z-50 ${toastMessage ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0 pointer-events-none'}`}>
+        <span className="material-symbols-outlined text-primary-container">info</span>
+        <p className="font-label-md">{toastMessage}</p>
       </div>
     </div>
   );

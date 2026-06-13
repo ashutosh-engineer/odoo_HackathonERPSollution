@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """shiv_sales/tests/test_sale_order.py — Sales order lifecycle tests."""
-from odoo.exceptions import UserError
-from odoo.tests import TransactionCase, tagged
+from odoo.exceptions import UserError  # type: ignore
+from odoo.tests import TransactionCase, tagged  # type: ignore
 from datetime import date, timedelta
 
 
@@ -25,7 +25,7 @@ class TestSaleOrderLifecycle(TransactionCase):
             qty_change=20, source_ref='INIT', actor_id=self.admin.id)
 
     def _make_so(self, qty=5):
-        return self.env['shiv.sale.order'].sudo().create({
+        return self.env['shiv.sale.order'].with_user(self.admin).create({
             'customer_id': self.customer.id,
             'delivery_date': date.today() + timedelta(days=5),
             'line_ids': [(0, 0, {

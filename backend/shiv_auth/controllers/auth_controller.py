@@ -328,7 +328,7 @@ class ShivAuthController(http.Controller):
     # GET /shiv/auth/me
     # ──────────────────────────────────────────────────────────────────────────
 
-    @http.route('/shiv/auth/me', type='http', auth='user', methods=['GET'], csrf=False)
+    @http.route('/shiv/auth/me', type='http', auth='public', methods=['GET'], csrf=False)
     @require_auth
     def me(self, **kwargs):
         """Return current authenticated user's profile."""

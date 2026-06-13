@@ -39,9 +39,46 @@ export const ManufacturingOrder = () => {
   const [anomalyDesc, setAnomalyDesc] = useState('');
   const [isReporting, setIsReporting] = useState(false);
 
+  const isNew = id === 'new';
   const moId = parseInt(id || '0', 10);
 
+  // New MO creation states
+  const [productList, setProductList] = useState<{ id: number; name: string }[]>([]);
+  const [bomList, setBomList] = useState<{ id: number; product_id: [number, string]; display_name_computed: string }[]>([]);
+  const [wcList, setWcList] = useState<{ id: number; name: string }[]>([]);
+  const [selectedProductId, setSelectedProductId] = useState<number | ''>('');
+  const [selectedBomId, setSelectedBomId] = useState<number | ''>('');
+  const [selectedWcId, setSelectedWcId] = useState<number | ''>('');
+  const [qtyToProduce, setQtyToProduce] = useState(1);
+  const [scheduledDate, setScheduledDate] = useState('');
+
+  // Fetch data for new MO creation
   useEffect(() => {
+    if (isNew) {
+      const fetchNewFormData = async () => {
+        try {
+          setLoading(true);
+          const [productsData, bomsData, wcsData] = await Promise.all([
+            odooSearchRead('shiv.product', [['state', '=', 'active']], ['name']),
+            odooSearchRead('shiv.bom', [['is_active', '=', true]], ['product_id', 'display_name_computed']),
+            odooSearchRead('shiv.work.center', [['is_active', '=', true]], ['name'])
+          ]);
+          setProductList(productsData as any);
+          setBomList(bomsData as any);
+          setWcList(wcsData as any);
+        } catch (err: any) {
+          setError(err.message || 'Failed to load form data');
+        } finally {
+          setLoading(false);
+        }
+      };
+      fetchNewFormData();
+    }
+  }, [isNew]);
+
+  // Fetch existing MO details
+  useEffect(() => {
+    if (isNew) return;
     if (!moId) {
       setError('Invalid MO ID');
       setLoading(false);
@@ -79,9 +116,10 @@ export const ManufacturingOrder = () => {
     };
 
     fetchOrder();
-  }, [moId]);
+  }, [moId, isNew]);
 
   const handleAction = async (actionMethod: string) => {
+    if (isNew) return;
     try {
       setActionError(null);
       setLoading(true);
@@ -93,9 +131,59 @@ export const ManufacturingOrder = () => {
     }
   };
 
+  const handleProductChange = (productId: number) => {
+    setSelectedProductId(productId);
+    // Find matching BoM
+    const matchingBom = bomList.find(b => b.product_id && b.product_id[0] === productId);
+    if (matchingBom) {
+      setSelectedBomId(matchingBom.id);
+    } else {
+      setSelectedBomId('');
+    }
+  };
+
+  const handleCreateMO = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedProductId) {
+      setActionError('Please select a product');
+      return;
+    }
+    if (!selectedBomId) {
+      setActionError('Please select a Bill of Materials');
+      return;
+    }
+    if (!scheduledDate) {
+      setActionError('Please select a scheduled date');
+      return;
+    }
+    try {
+      setActionError(null);
+      setLoading(true);
+
+      const formattedDate = scheduledDate.replace('T', ' ') + ':00';
+
+      const createParams: any = {
+        product_id: selectedProductId,
+        bom_id: selectedBomId,
+        qty_to_produce: qtyToProduce,
+        scheduled_date: formattedDate,
+      };
+
+      if (selectedWcId) {
+        createParams.work_center_id = selectedWcId;
+      }
+
+      const newMoId = await odooCall('shiv.manufacturing.order', 'create', [createParams]);
+      navigate(`/manufacturing/${newMoId}`);
+    } catch (err: any) {
+      setActionError(`Failed to create Manufacturing Order: ${err.message || err}`);
+      setLoading(false);
+    }
+  };
+
   const handleReportAnomaly = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!order?.work_center_id) return;
+    if (isNew || !order?.work_center_id) return;
     try {
       setIsReporting(true);
       setActionError(null);
@@ -118,6 +206,127 @@ export const ManufacturingOrder = () => {
 
   if (loading) return <div className="p-8 text-center text-on-surface-variant animate-pulse font-bold">Loading MO Details...</div>;
   if (error) return <div className="p-8 text-center text-error font-bold">{error}</div>;
+
+  if (isNew) {
+    return (
+      <div className="p-container-padding w-full max-w-[800px] mx-auto">
+        {actionError && (
+          <div className="bg-error-container text-error px-4 py-3 rounded-lg text-sm font-bold mb-4 flex items-center gap-2 shadow-sm">
+            <span className="material-symbols-outlined text-[18px]">error</span>
+            {actionError}
+          </div>
+        )}
+
+        {/* Header & Breadcrumbs */}
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-6">
+          <div>
+            <nav className="flex items-center gap-2 text-on-surface-variant font-label-md mb-2">
+              <button onClick={() => navigate('/manufacturing')} className="hover:text-primary cursor-pointer">Manufacturing</button>
+              <span className="material-symbols-outlined text-[16px]">chevron_right</span>
+              <span className="text-primary font-bold">New MO</span>
+            </nav>
+            <h1 className="font-headline-md text-headline-md text-primary">Create New Manufacturing Order</h1>
+          </div>
+        </div>
+
+        <form onSubmit={handleCreateMO} className="bg-white border border-outline-variant rounded-xl p-lg shadow-sm space-y-md">
+          <h3 className="font-headline-sm text-headline-sm text-primary mb-md flex items-center gap-2">
+            <span className="material-symbols-outlined">precision_manufacturing</span>
+            Manufacturing Order Details
+          </h3>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-md">
+            <div>
+              <label className="block font-label-md text-label-md text-on-surface-variant mb-2 uppercase tracking-wider">Product to Manufacture *</label>
+              <select
+                required
+                value={selectedProductId}
+                onChange={e => handleProductChange(Number(e.target.value))}
+                className="w-full border border-outline-variant rounded-lg px-3 py-2 bg-white focus:ring-1 focus:ring-primary outline-none"
+              >
+                <option value="">-- Select Product --</option>
+                {productList.map(p => (
+                  <option key={p.id} value={p.id}>{p.name}</option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block font-label-md text-label-md text-on-surface-variant mb-2 uppercase tracking-wider">Bill of Materials *</label>
+              <select
+                required
+                value={selectedBomId}
+                onChange={e => setSelectedBomId(Number(e.target.value))}
+                className="w-full border border-outline-variant rounded-lg px-3 py-2 bg-white focus:ring-1 focus:ring-primary outline-none"
+              >
+                <option value="">-- Select BoM --</option>
+                {bomList.filter(b => !selectedProductId || (b.product_id && b.product_id[0] === selectedProductId)).map(b => (
+                  <option key={b.id} value={b.id}>{b.display_name_computed}</option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block font-label-md text-label-md text-on-surface-variant mb-2 uppercase tracking-wider">Target Quantity *</label>
+              <input
+                required
+                type="number"
+                min="0.001"
+                step="0.001"
+                value={qtyToProduce}
+                onChange={e => setQtyToProduce(Math.max(0.001, parseFloat(e.target.value) || 1))}
+                className="w-full border border-outline-variant rounded-lg px-3 py-2 bg-white focus:ring-1 focus:ring-primary outline-none font-mono"
+              />
+            </div>
+
+            <div>
+              <label className="block font-label-md text-label-md text-on-surface-variant mb-2 uppercase tracking-wider">Scheduled Date *</label>
+              <input
+                required
+                type="datetime-local"
+                value={scheduledDate}
+                onChange={e => setScheduledDate(e.target.value)}
+                className="w-full border border-outline-variant rounded-lg px-3 py-2 bg-white focus:ring-1 focus:ring-primary outline-none"
+              />
+            </div>
+
+            <div className="md:col-span-2">
+              <label className="block font-label-md text-label-md text-on-surface-variant mb-2 uppercase tracking-wider">Work Center (Optional)</label>
+              <select
+                value={selectedWcId}
+                onChange={e => setSelectedWcId(e.target.value ? Number(e.target.value) : '')}
+                className="w-full border border-outline-variant rounded-lg px-3 py-2 bg-white focus:ring-1 focus:ring-primary outline-none"
+              >
+                <option value="">-- Select Work Center --</option>
+                {wcList.map(wc => (
+                  <option key={wc.id} value={wc.id}>{wc.name}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <div className="flex justify-end gap-3 pt-6 border-t border-outline-variant">
+            <button
+              type="button"
+              onClick={() => navigate('/manufacturing')}
+              className="px-6 py-2.5 border border-outline rounded-lg text-on-surface font-semibold hover:bg-surface-container transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={loading}
+              className="px-6 py-2.5 bg-primary text-white font-semibold rounded-lg hover:opacity-90 transition-all shadow-md active:scale-95 disabled:opacity-50 flex items-center gap-2"
+            >
+              <span className="material-symbols-outlined">save</span>
+              Save Manufacturing Order
+            </button>
+          </div>
+        </form>
+      </div>
+    );
+  }
+
   if (!order) return null;
 
   return (
@@ -167,15 +376,15 @@ export const ManufacturingOrder = () => {
       </div>
 
       {isAnomalyModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="bg-white p-6 rounded-xl w-full max-w-md shadow-lg">
-            <h3 className="text-lg font-bold mb-4 text-error flex items-center gap-2">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(15,23,42,0.5)]">
+          <div className="bg-white p-6 rounded-lg w-full max-w-[450px] shadow-soft border border-outline-variant">
+            <h3 className="text-lg font-bold mb-4 text-error flex items-center gap-2 border-b border-outline-variant pb-2">
               <span className="material-symbols-outlined">report_problem</span> Report Anomaly
             </h3>
             <form onSubmit={handleReportAnomaly} className="space-y-4">
               <div>
-                <label className="block text-sm font-bold mb-1">Anomaly Type</label>
-                <select value={anomalyType} onChange={e => setAnomalyType(e.target.value)} className="w-full border rounded p-2">
+                <label className="block text-sm font-bold text-on-surface-variant mb-1 uppercase tracking-wider">Anomaly Type</label>
+                <select value={anomalyType} onChange={e => setAnomalyType(e.target.value)} className="w-full border border-outline-variant rounded p-2 outline-none focus:border-error text-body-md">
                   <option value="machine_breakdown">Machine Breakdown</option>
                   <option value="power_failure">Power Failure</option>
                   <option value="material_shortage">Material Shortage</option>
@@ -187,12 +396,12 @@ export const ManufacturingOrder = () => {
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-bold mb-1">Description (Optional)</label>
-                <textarea value={anomalyDesc} onChange={e => setAnomalyDesc(e.target.value)} className="w-full border rounded p-2 h-24" placeholder="Describe the issue..."></textarea>
+                <label className="block text-sm font-bold text-on-surface-variant mb-1 uppercase tracking-wider">Description (Optional)</label>
+                <textarea value={anomalyDesc} onChange={e => setAnomalyDesc(e.target.value)} className="w-full border border-outline-variant rounded p-2 outline-none focus:border-error text-body-md h-24" placeholder="Describe the issue..."></textarea>
               </div>
-              <div className="flex justify-end gap-2 mt-6">
-                <button type="button" onClick={() => setIsAnomalyModalOpen(false)} className="px-4 py-2 border rounded hover:bg-gray-50">Cancel</button>
-                <button type="submit" disabled={isReporting} className="px-4 py-2 bg-error text-white rounded hover:bg-error/90 disabled:opacity-50">
+              <div className="flex justify-end gap-2 mt-6 pt-4 border-t border-outline-variant">
+                <button type="button" onClick={() => setIsAnomalyModalOpen(false)} className="px-4 py-2 border border-outline-variant rounded text-on-surface font-bold hover:bg-surface-variant transition-colors">Cancel</button>
+                <button type="submit" disabled={isReporting} className="px-4 py-2 bg-error text-white rounded font-bold hover:opacity-90 disabled:opacity-50 transition-colors">
                   {isReporting ? 'Reporting...' : 'Submit Report'}
                 </button>
               </div>

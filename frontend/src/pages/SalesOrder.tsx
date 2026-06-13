@@ -36,8 +36,16 @@ export const SalesOrder = () => {
   const [error, setError] = useState('');
   const [actionError, setActionError] = useState<string | null>(null);
 
+  const isNew = id === 'new';
   const orderId = parseInt(id || '0', 10);
   const role = user?.shiv_role || '';
+
+  // New order creation states
+  const [customers, setCustomers] = useState<{ id: number; name: string }[]>([]);
+  const [productList, setProductList] = useState<{ id: number; name: string; sale_price: number }[]>([]);
+  const [selectedCustomerId, setSelectedCustomerId] = useState<number | ''>('');
+  const [deliveryDate, setDeliveryDate] = useState('');
+  const [newLines, setNewLines] = useState<{ product_id: number; qty_ordered: number; unit_price: number }[]>([]);
 
   // Role capabilities
   const isSalesUser = role === 'sales_user';
@@ -52,7 +60,31 @@ export const SalesOrder = () => {
   const isOwner = !order?.create_uid || order.create_uid[0] === user?.uid;
   const effectiveCanCancel = canCancel && (isSalesManager || isAdmin || isOwner);
 
+  // Fetch for new order creation
   useEffect(() => {
+    if (isNew) {
+      const fetchNewFormData = async () => {
+        try {
+          setLoading(true);
+          const [customersData, productsData] = await Promise.all([
+            odooSearchRead('shiv.customer', [['is_active', '=', true]], ['name']),
+            odooSearchRead('shiv.product', [['state', '=', 'active']], ['name', 'sale_price'])
+          ]);
+          setCustomers(customersData as any);
+          setProductList(productsData as any);
+        } catch (err: any) {
+          setError(err.message || 'Failed to load form data');
+        } finally {
+          setLoading(false);
+        }
+      };
+      fetchNewFormData();
+    }
+  }, [isNew]);
+
+  // Fetch existing order details
+  useEffect(() => {
+    if (isNew) return;
     if (!orderId) {
       setError('Invalid Order ID');
       setLoading(false);
@@ -82,9 +114,10 @@ export const SalesOrder = () => {
       }
     };
     fetchOrder();
-  }, [orderId]);
+  }, [orderId, isNew]);
 
   const handleAction = async (actionMethod: string) => {
+    if (isNew) return;
     try {
       setActionError(null);
       setLoading(true);
@@ -96,8 +129,254 @@ export const SalesOrder = () => {
     }
   };
 
+  const handleCreateOrder = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedCustomerId) {
+      setActionError('Please select a customer');
+      return;
+    }
+    if (!deliveryDate) {
+      setActionError('Please select a delivery date');
+      return;
+    }
+    if (newLines.length === 0) {
+      setActionError('Add at least one product line');
+      return;
+    }
+    try {
+      setActionError(null);
+      setLoading(true);
+      
+      const lineIds = newLines.map(line => [0, 0, {
+        product_id: line.product_id,
+        qty_ordered: line.qty_ordered,
+        unit_price: line.unit_price,
+      }]);
+      
+      const newOrderId = await odooCall('shiv.sale.order', 'create', [{
+        customer_id: selectedCustomerId,
+        delivery_date: deliveryDate,
+        line_ids: lineIds,
+      }]);
+      
+      navigate(`/sales/${newOrderId}`);
+    } catch (err: any) {
+      setActionError(`Failed to create order: ${err.message}`);
+      setLoading(false);
+    }
+  };
+
   if (loading) return <div className="p-8 text-center text-on-surface-variant animate-pulse font-bold">Loading Order Details...</div>;
   if (error) return <div className="p-8 text-center text-error font-bold">{error}</div>;
+
+  const calculatedTotal = newLines.reduce((sum, line) => sum + (line.qty_ordered * line.unit_price), 0);
+
+  if (isNew) {
+    return (
+      <div className="p-container-padding w-full max-w-[1200px] mx-auto">
+        {actionError && (
+          <div className="bg-error-container text-error px-4 py-3 rounded-lg text-sm font-bold mb-4 flex items-center gap-2 shadow-sm">
+            <span className="material-symbols-outlined text-[18px]">error</span>
+            {actionError}
+          </div>
+        )}
+
+        {/* Header & Breadcrumbs */}
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-end mb-lg gap-4">
+          <div>
+            <nav className="flex gap-2 text-on-surface-variant font-label-md mb-1">
+              <button onClick={() => navigate('/sales')} className="hover:text-primary">Sales</button>
+              <span>/</span>
+              <span className="text-on-surface">New Sales Order</span>
+            </nav>
+            <h1 className="font-headline-lg text-headline-lg text-on-surface">Create New Sales Order</h1>
+          </div>
+        </div>
+
+        <form onSubmit={handleCreateOrder} className="space-y-lg">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-lg">
+            {/* Left Column (Customer & Lines) */}
+            <div className="lg:col-span-2 space-y-lg">
+              {/* Customer Selection */}
+              <section className="bg-white border border-outline-variant rounded-xl p-lg shadow-sm">
+                <h3 className="font-headline-sm text-headline-sm text-primary mb-lg flex items-center gap-2">
+                  <span className="material-symbols-outlined">person</span>
+                  Customer Details
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-lg">
+                  <div>
+                    <label className="block font-label-md text-label-md text-on-surface-variant mb-2 uppercase tracking-wider">Customer Name *</label>
+                    <select
+                      required
+                      value={selectedCustomerId}
+                      onChange={e => setSelectedCustomerId(Number(e.target.value))}
+                      className="w-full border border-outline-variant rounded-lg px-3 py-2 bg-white focus:ring-1 focus:ring-primary outline-none"
+                    >
+                      <option value="">-- Select Customer --</option>
+                      {customers.map(c => (
+                        <option key={c.id} value={c.id}>{c.name}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block font-label-md text-label-md text-on-surface-variant mb-2 uppercase tracking-wider">Requested Delivery Date *</label>
+                    <input
+                      required
+                      type="date"
+                      value={deliveryDate}
+                      onChange={e => setDeliveryDate(e.target.value)}
+                      className="w-full border border-outline-variant rounded-lg px-3 py-2 bg-white focus:ring-1 focus:ring-primary outline-none"
+                    />
+                  </div>
+                </div>
+              </section>
+
+              {/* Order Lines */}
+              <section className="bg-white border border-outline-variant rounded-xl overflow-hidden shadow-sm">
+                <div className="px-lg py-md border-b border-outline-variant flex justify-between items-center bg-surface-container-low/50">
+                  <h3 className="font-headline-sm text-headline-sm text-primary">Order Lines</h3>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (productList.length > 0) {
+                        setNewLines([
+                          ...newLines,
+                          {
+                            product_id: productList[0].id,
+                            qty_ordered: 1,
+                            unit_price: productList[0].sale_price,
+                          }
+                        ]);
+                      }
+                    }}
+                    className="bg-primary text-white px-3 py-1.5 rounded-lg hover:opacity-90 transition-all flex items-center gap-1 font-label-md shadow-sm"
+                  >
+                    <span className="material-symbols-outlined text-[16px]">add</span> Add Product
+                  </button>
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left">
+                    <thead>
+                      <tr className="bg-surface-container text-on-surface-variant text-[11px] uppercase tracking-wider font-bold">
+                        <th className="px-lg py-3">Product</th>
+                        <th className="px-lg py-3 text-center w-24">Qty</th>
+                        <th className="px-lg py-3 text-right w-36">Unit Price (₹)</th>
+                        <th className="px-lg py-3 text-right w-36">Subtotal</th>
+                        <th className="px-lg py-3 text-center w-16">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-outline-variant">
+                      {newLines.map((line, idx) => (
+                        <tr key={idx} className="hover:bg-black/5 transition-colors">
+                          <td className="px-lg py-3">
+                            <select
+                              value={line.product_id}
+                              onChange={e => {
+                                const pid = Number(e.target.value);
+                                const prod = productList.find(p => p.id === pid);
+                                const updated = [...newLines];
+                                updated[idx] = {
+                                  ...line,
+                                  product_id: pid,
+                                  unit_price: prod?.sale_price || 0,
+                                };
+                                setNewLines(updated);
+                              }}
+                              className="w-full border border-outline-variant rounded-lg px-2 py-1.5 bg-white focus:ring-1 focus:ring-primary outline-none text-body-sm font-bold"
+                            >
+                              {productList.map(p => (
+                                <option key={p.id} value={p.id}>{p.name}</option>
+                              ))}
+                            </select>
+                          </td>
+                          <td className="px-lg py-3 text-center">
+                            <input
+                              type="number"
+                              min="1"
+                              step="1"
+                              value={line.qty_ordered}
+                              onChange={e => {
+                                const updated = [...newLines];
+                                updated[idx] = {
+                                  ...line,
+                                  qty_ordered: Math.max(1, Number(e.target.value)),
+                                };
+                                setNewLines(updated);
+                              }}
+                              className="w-20 border border-outline-variant rounded-lg px-2 py-1 bg-white text-center focus:ring-1 focus:ring-primary outline-none font-mono"
+                            />
+                          </td>
+                          <td className="px-lg py-3 text-right">
+                            <input
+                              type="number"
+                              min="0"
+                              step="0.01"
+                              value={line.unit_price}
+                              disabled={!canDiscount}
+                              onChange={e => {
+                                const updated = [...newLines];
+                                updated[idx] = {
+                                  ...line,
+                                  unit_price: Math.max(0, parseFloat(e.target.value) || 0),
+                                };
+                                setNewLines(updated);
+                              }}
+                              className="w-28 border border-outline-variant rounded-lg px-2 py-1 bg-white text-right focus:ring-1 focus:ring-primary outline-none font-mono disabled:bg-surface-variant/30"
+                            />
+                          </td>
+                          <td className="px-lg py-3 text-right font-mono font-bold">
+                            ₹{(line.qty_ordered * line.unit_price).toFixed(2)}
+                          </td>
+                          <td className="px-lg py-3 text-center">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setNewLines(newLines.filter((_, i) => i !== idx));
+                              }}
+                              className="text-error hover:bg-error-container/20 p-1.5 rounded-lg transition-colors"
+                            >
+                              <span className="material-symbols-outlined text-[18px]">delete</span>
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                      {newLines.length === 0 && (
+                        <tr>
+                          <td colSpan={5} className="text-center py-8 text-on-surface-variant font-bold">
+                            No product lines added yet. Click "Add Product" to start.
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </section>
+            </div>
+
+            {/* Right Column (Summary & Submit) */}
+            <div className="space-y-lg">
+              <section className="bg-white border border-outline-variant rounded-xl p-lg shadow-sm">
+                <h3 className="font-headline-sm text-headline-sm text-on-surface mb-lg">Order Summary</h3>
+                <div className="pt-lg border-t border-outline-variant flex justify-between items-center mb-6">
+                  <span className="font-headline-sm text-on-surface">Total Amount</span>
+                  <span className="font-headline-sm text-primary font-bold">₹{calculatedTotal.toFixed(2)}</span>
+                </div>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full bg-primary text-white py-2.5 rounded-lg font-label-md hover:opacity-90 transition-all flex items-center justify-center gap-2 shadow-md hover:shadow-lg active:scale-95 disabled:opacity-50"
+                >
+                  <span className="material-symbols-outlined">save</span>
+                  Save Sales Order
+                </button>
+              </section>
+            </div>
+          </div>
+        </form>
+      </div>
+    );
+  }
+
   if (!order) return null;
 
   return (

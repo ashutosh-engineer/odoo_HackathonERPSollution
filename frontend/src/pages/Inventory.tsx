@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { odooSearchRead, odooCall } from '../utils/api';
+import { exportToCSV } from '../utils/export';
 import { RoleGuard } from '../components/RoleGuard';
 
 interface StockSummary {
@@ -104,6 +105,20 @@ export const Inventory = () => {
     return { bg: 'bg-surface-variant', text: 'text-on-surface' };
   };
 
+  const handleExport = () => {
+    const headers = ['Date', 'Reference', 'Product', 'From', 'To', 'Qty Change', 'Type'];
+    const data = ledger.map(r => [
+      r.timestamp, 
+      r.source_ref || 'Manual', 
+      r.product_id[1], 
+      r.location_from, 
+      r.location_to, 
+      r.qty_change, 
+      r.movement_type
+    ]);
+    exportToCSV(`inventory_ledger_${new Date().toISOString().split('T')[0]}.csv`, headers, data);
+  };
+
   return (
     <div className="flex flex-col min-h-screen bg-surface-base text-on-surface font-body-md">
       {/* Main Workspace */}
@@ -116,7 +131,7 @@ export const Inventory = () => {
           </div>
           <div className="flex gap-sm">
             <RoleGuard allowedRoles={['admin', 'warehouse_manager', 'warehouse_user']}>
-              <button className="px-md py-sm bg-surface-container-lowest border border-outline text-on-surface font-label-md rounded-lg hover:bg-surface-container-high transition-all flex items-center gap-sm shadow-sm">
+              <button onClick={handleExport} className="px-md py-sm bg-surface-container-lowest border border-outline text-on-surface font-label-md rounded-lg hover:bg-surface-container-high transition-all flex items-center gap-sm shadow-sm">
                 <span className="material-symbols-outlined text-[18px]">download</span>
                 Export Ledger
               </button>
@@ -136,15 +151,15 @@ export const Inventory = () => {
         )}
 
         {isAdjModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-            <div className="bg-white p-6 rounded-xl w-full max-w-md shadow-lg">
-              <h3 className="text-lg font-bold mb-4 flex items-center gap-2 text-primary">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(15,23,42,0.5)]">
+            <div className="bg-white p-6 rounded-lg w-full max-w-[450px] shadow-soft border border-outline-variant">
+              <h3 className="text-lg font-bold mb-4 flex items-center gap-2 text-on-surface border-b border-outline-variant pb-2">
                 <span className="material-symbols-outlined">edit_square</span> Stock Adjustment
               </h3>
               <form onSubmit={handleStockAdjustment} className="space-y-4">
                 <div>
-                  <label className="block text-sm font-bold mb-1">Adjustment Type</label>
-                  <select value={adjType} onChange={e => setAdjType(e.target.value)} className="w-full border rounded p-2">
+                  <label className="block text-sm font-bold text-on-surface-variant mb-1">Adjustment Type</label>
+                  <select value={adjType} onChange={e => setAdjType(e.target.value)} className="w-full border border-outline-variant rounded p-2 focus:border-primary focus:ring-1 focus:ring-primary outline-none">
                     <option value="correction">Correction</option>
                     <option value="stocktake">Physical Stocktake</option>
                     <option value="writeoff">Write-off / Damage</option>
@@ -152,8 +167,8 @@ export const Inventory = () => {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-bold mb-1">Product</label>
-                  <select required value={adjProductId} onChange={e => setAdjProductId(e.target.value)} className="w-full border rounded p-2">
+                  <label className="block text-sm font-bold text-on-surface-variant mb-1">Product</label>
+                  <select required value={adjProductId} onChange={e => setAdjProductId(e.target.value)} className="w-full border border-outline-variant rounded p-2 focus:border-primary focus:ring-1 focus:ring-primary outline-none">
                     <option value="">-- Select Product --</option>
                     {summaries.map(s => (
                       <option key={s.product_id[0]} value={s.product_id[0]}>{s.product_id[1]}</option>
@@ -161,16 +176,16 @@ export const Inventory = () => {
                   </select>
                 </div>
                 <div>
-                  <label className="block text-sm font-bold mb-1">New Physical Quantity</label>
-                  <input required type="number" step="0.01" value={adjQtyPhysical} onChange={e => setAdjQtyPhysical(e.target.value)} className="w-full border rounded p-2" placeholder="e.g. 50" />
+                  <label className="block text-sm font-bold text-on-surface-variant mb-1">New Physical Quantity</label>
+                  <input required type="number" step="0.01" value={adjQtyPhysical} onChange={e => setAdjQtyPhysical(e.target.value)} className="w-full border border-outline-variant rounded p-2 focus:border-primary focus:ring-1 focus:ring-primary outline-none" placeholder="e.g. 50" />
                 </div>
                 <div>
-                  <label className="block text-sm font-bold mb-1">Notes</label>
-                  <textarea value={adjNotes} onChange={e => setAdjNotes(e.target.value)} className="w-full border rounded p-2 h-20" placeholder="Reason for adjustment..."></textarea>
+                  <label className="block text-sm font-bold text-on-surface-variant mb-1">Notes</label>
+                  <textarea value={adjNotes} onChange={e => setAdjNotes(e.target.value)} className="w-full border border-outline-variant rounded p-2 h-20 focus:border-primary focus:ring-1 focus:ring-primary outline-none" placeholder="Reason for adjustment..."></textarea>
                 </div>
-                <div className="flex justify-end gap-2 mt-6">
-                  <button type="button" onClick={() => setIsAdjModalOpen(false)} className="px-4 py-2 border rounded hover:bg-gray-50">Cancel</button>
-                  <button type="submit" disabled={isSubmitting} className="px-4 py-2 bg-primary text-white rounded hover:bg-primary/90 disabled:opacity-50">
+                <div className="flex justify-end gap-2 mt-6 pt-4 border-t border-outline-variant">
+                  <button type="button" onClick={() => setIsAdjModalOpen(false)} className="px-4 py-2 border border-outline-variant rounded text-on-surface font-bold hover:bg-surface-variant transition-colors">Cancel</button>
+                  <button type="submit" disabled={isSubmitting} className="px-4 py-2 bg-primary text-white font-bold rounded hover:opacity-90 disabled:opacity-50 transition-colors">
                     {isSubmitting ? 'Processing...' : 'Apply Adjustment'}
                   </button>
                 </div>

@@ -31,7 +31,7 @@ class ShivBom(models.Model):
     display_name_computed = fields.Char(
         compute='_compute_display_name', store=True)
 
-    @api.depends('product_id', 'version')
+    @api.depends('product_id.name', 'version')
     def _compute_display_name(self):
         for bom in self:
             bom.display_name_computed = f'BoM: {bom.product_id.name} v{bom.version}'

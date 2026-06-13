@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { apiFetch, odooSearchRead } from '../utils/api';
+import { useAuth } from '../contexts/AuthContext';
+import { exportToCSV } from '../utils/export';
 
 interface DashboardKPIs {
   sales: { orders_today: number; orders_this_month: number; pipeline_value: number; on_time_delivery_pct: number };
@@ -33,6 +35,33 @@ export const OperationalDashboard = () => {
   const [pendingDeliveries, setPendingDeliveries] = useState<any[]>([]);
   const [workCenters, setWorkCenters] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [activeFilter, setActiveFilter] = useState<string>('today');
+  const [showFilterDropdown, setShowFilterDropdown] = useState(false);
+
+  const handleExport = () => {
+    if (!kpis) return;
+    const headers = ['Category', 'Metric', 'Value'];
+    const data = [
+      ['Sales', 'Pipeline Value', kpis.sales.pipeline_value],
+      ['Sales', 'Orders Today', kpis.sales.orders_today],
+      ['Sales', 'Orders This Month', kpis.sales.orders_this_month],
+      ['Sales', 'On Time Delivery %', kpis.sales.on_time_delivery_pct],
+      ['Inventory', 'Low Stock Count', kpis.inventory.low_stock_count],
+      ['Procurement', 'Open POs', kpis.procurement.open_purchase_orders],
+      ['Procurement', 'Pending Approval', kpis.procurement.pending_approval],
+      ['Manufacturing', 'Active Orders', kpis.manufacturing.active_orders],
+      ['Manufacturing', 'Avg Utilization %', kpis.manufacturing.avg_utilization_pct]
+    ];
+    exportToCSV(`dashboard_report_${new Date().toISOString().split('T')[0]}.csv`, headers, data);
+    setToastMessage('Report exported successfully');
+    setTimeout(() => setToastMessage(null), 3000);
+  };
+
+  const handleActionClick = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => setToastMessage(null), 3000);
+  };
 
   useEffect(() => {
     const fetchDashboardData = async () => {
@@ -78,15 +107,30 @@ export const OperationalDashboard = () => {
           <h1 className="font-headline-lg text-headline-lg text-on-surface mb-1">Operational Dashboard</h1>
           <p className="text-on-surface-variant font-body-md">Real-time workshop performance and exception monitoring.</p>
         </div>
-        <div className="flex gap-3">
-          <button className="px-5 py-2.5 bg-white border border-outline-variant text-on-surface font-semibold rounded-xl flex items-center gap-2 hover:border-primary/30 hover:bg-surface-variant transition-all shadow-soft">
-            <span className="material-symbols-outlined text-primary">calendar_today</span>
+        <div className="flex gap-3 relative">
+          <button 
+            onClick={() => { setActiveFilter('today'); handleActionClick('Dashboard filtered to Today'); }} 
+            className={`px-5 py-2.5 border border-outline-variant font-semibold rounded-xl flex items-center gap-2 hover:border-primary/30 transition-all shadow-soft ${activeFilter === 'today' ? 'bg-primary/10 text-primary border-primary/30' : 'bg-white text-on-surface hover:bg-surface-variant'}`}
+          >
+            <span className="material-symbols-outlined text-[20px]">calendar_today</span>
             Today
           </button>
-          <button className="px-5 py-2.5 bg-white border border-outline-variant text-on-surface font-semibold rounded-xl flex items-center gap-2 hover:border-primary/30 hover:bg-surface-variant transition-all shadow-soft">
-            <span className="material-symbols-outlined text-primary">filter_list</span>
-            Filters
-          </button>
+          <div className="relative">
+            <button 
+              onClick={() => setShowFilterDropdown(!showFilterDropdown)} 
+              className={`px-5 py-2.5 border border-outline-variant font-semibold rounded-xl flex items-center gap-2 hover:border-primary/30 transition-all shadow-soft ${activeFilter !== 'today' ? 'bg-primary/10 text-primary border-primary/30' : 'bg-white text-on-surface hover:bg-surface-variant'}`}
+            >
+              <span className="material-symbols-outlined text-[20px]">filter_list</span>
+              {activeFilter === 'today' ? 'Filters' : activeFilter === 'this_week' ? 'This Week' : 'This Month'}
+            </button>
+            {showFilterDropdown && (
+              <div className="absolute right-0 mt-2 w-48 bg-white border border-outline-variant rounded-xl shadow-lg z-20 py-2">
+                <button onClick={() => { setActiveFilter('today'); setShowFilterDropdown(false); handleActionClick('Dashboard filtered to Today'); }} className="w-full text-left px-4 py-2 hover:bg-surface-container-low font-medium">Today</button>
+                <button onClick={() => { setActiveFilter('this_week'); setShowFilterDropdown(false); handleActionClick('Dashboard filtered to This Week'); }} className="w-full text-left px-4 py-2 hover:bg-surface-container-low font-medium">This Week</button>
+                <button onClick={() => { setActiveFilter('this_month'); setShowFilterDropdown(false); handleActionClick('Dashboard filtered to This Month'); }} className="w-full text-left px-4 py-2 hover:bg-surface-container-low font-medium">This Month</button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -290,14 +334,20 @@ export const OperationalDashboard = () => {
 
       {/* Floating Action Buttons */}
       <div className="fixed bottom-8 right-8 flex flex-col gap-4 z-50">
-        <button className="w-16 h-16 bg-primary text-white rounded-2xl shadow-soft-lg hover:scale-105 active:scale-95 transition-all flex items-center justify-center group relative border-2 border-white/20">
+        <button onClick={() => window.location.href='/sales/new'} className="w-16 h-16 bg-primary text-white rounded-2xl shadow-soft-lg hover:scale-105 active:scale-95 transition-all flex items-center justify-center group relative border-2 border-white/20">
           <span className="material-symbols-outlined !text-[36px]">add</span>
           <span className="absolute right-20 bg-inverse-surface text-white px-4 py-2 rounded-xl text-label-md opacity-0 group-hover:opacity-100 transition-all whitespace-nowrap pointer-events-none shadow-xl translate-x-4 group-hover:translate-x-0 font-bold">Create New Order</span>
         </button>
-        <button className="w-16 h-16 bg-white border border-outline-variant text-primary rounded-2xl shadow-soft-lg hover:scale-105 active:scale-95 transition-all flex items-center justify-center group relative">
+        <button onClick={handleExport} className="w-16 h-16 bg-white border border-outline-variant text-primary rounded-2xl shadow-soft-lg hover:scale-105 active:scale-95 transition-all flex items-center justify-center group relative">
           <span className="material-symbols-outlined !text-[28px]">print</span>
           <span className="absolute right-20 bg-inverse-surface text-white px-4 py-2 rounded-xl text-label-md opacity-0 group-hover:opacity-100 transition-all whitespace-nowrap pointer-events-none shadow-xl translate-x-4 group-hover:translate-x-0 font-bold">Export Report</span>
         </button>
+      </div>
+
+      {/* Toast Notification */}
+      <div className={`fixed bottom-8 left-8 bg-inverse-surface text-inverse-on-surface px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3 transition-transform duration-300 z-50 ${toastMessage ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0 pointer-events-none'}`}>
+        <span className="material-symbols-outlined text-primary-container">info</span>
+        <p className="font-label-md">{toastMessage}</p>
       </div>
     </div>
   );

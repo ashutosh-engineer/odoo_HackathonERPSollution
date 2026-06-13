@@ -642,7 +642,7 @@ class ShivWCAnomalyEvent(models.Model):
     display_name_computed = fields.Char(
         compute='_compute_display_name', store=True)
 
-    @api.depends('work_center_id', 'anomaly_type', 'reported_at')
+    @api.depends('work_center_id.name', 'anomaly_type', 'reported_at')
     def _compute_display_name(self):
         for ev in self:
             ev.display_name_computed = (

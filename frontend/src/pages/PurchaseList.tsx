@@ -10,7 +10,7 @@ interface PurchaseOrderData {
   state: string;
   total_amount: number;
   date_order: string;
-  receipt_date: string;
+  date_expected: string;
   is_auto_generated: boolean;
   create_uid: [number, string] | false;
 }
@@ -46,7 +46,7 @@ export const PurchaseList = () => {
         const data = await odooSearchRead(
           'shiv.purchase.order',
           domain,
-          ['name', 'vendor_id', 'state', 'total_amount', 'date_order', 'receipt_date', 'is_auto_generated', 'create_uid'],
+          ['name', 'vendor_id', 'state', 'total_amount', 'date_order', 'date_expected', 'is_auto_generated', 'create_uid'],
           { limit: 50, order: 'id desc' }
         );
         setOrders(data as PurchaseOrderData[]);
@@ -113,7 +113,7 @@ export const PurchaseList = () => {
                       </span>
                     </td>
                     <td className="px-6 py-4 text-body-sm">{order.date_order}</td>
-                    <td className="px-6 py-4 text-body-sm">{order.receipt_date || '—'}</td>
+                    <td className="px-6 py-4 text-body-sm">{order.date_expected || '—'}</td>
                     <td className="px-6 py-4 text-right font-bold">₹{(order.total_amount ?? 0).toFixed(2)}</td>
                     <td className="px-6 py-4 text-center">
                       {order.is_auto_generated ? (

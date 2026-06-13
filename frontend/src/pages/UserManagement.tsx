@@ -122,25 +122,27 @@ export const UserManagement = () => {
       </div>
 
       {isAddModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
-          <div className="bg-white p-6 rounded-xl w-full max-w-md shadow-lg">
-            <h3 className="text-lg font-bold mb-4">Add New User</h3>
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(15,23,42,0.5)]">
+          <div className="bg-white p-6 rounded-lg w-full max-w-[450px] shadow-soft border border-outline-variant">
+            <h3 className="text-lg font-bold mb-4 text-on-surface border-b border-outline-variant pb-2 flex items-center gap-2">
+              <span className="material-symbols-outlined text-primary">person_add</span> Add New User
+            </h3>
             <form onSubmit={handleAddUser} className="space-y-4">
               <div>
-                <label className="block text-sm font-bold mb-1">Name</label>
-                <input required type="text" value={newUserName} onChange={e => setNewUserName(e.target.value)} className="w-full border rounded p-2" />
+                <label className="block text-sm font-bold text-on-surface-variant mb-1 uppercase tracking-wider">Name</label>
+                <input required type="text" value={newUserName} onChange={e => setNewUserName(e.target.value)} className="w-full border border-outline-variant rounded p-2 outline-none focus:border-primary focus:ring-1 focus:ring-primary text-body-md" />
               </div>
               <div>
-                <label className="block text-sm font-bold mb-1">Login / Email</label>
-                <input required type="text" value={newUserLogin} onChange={e => setNewUserLogin(e.target.value)} className="w-full border rounded p-2" />
+                <label className="block text-sm font-bold text-on-surface-variant mb-1 uppercase tracking-wider">Login / Email</label>
+                <input required type="text" value={newUserLogin} onChange={e => setNewUserLogin(e.target.value)} className="w-full border border-outline-variant rounded p-2 outline-none focus:border-primary focus:ring-1 focus:ring-primary text-body-md" />
               </div>
               <div>
-                <label className="block text-sm font-bold mb-1">Password</label>
-                <input required type="password" value={newUserPassword} onChange={e => setNewUserPassword(e.target.value)} className="w-full border rounded p-2" />
+                <label className="block text-sm font-bold text-on-surface-variant mb-1 uppercase tracking-wider">Password</label>
+                <input required type="password" value={newUserPassword} onChange={e => setNewUserPassword(e.target.value)} className="w-full border border-outline-variant rounded p-2 outline-none focus:border-primary focus:ring-1 focus:ring-primary text-body-md" />
               </div>
               <div>
-                <label className="block text-sm font-bold mb-1">Role</label>
-                <select value={newUserRole} onChange={e => setNewUserRole(e.target.value)} className="w-full border rounded p-2">
+                <label className="block text-sm font-bold text-on-surface-variant mb-1 uppercase tracking-wider">Role</label>
+                <select value={newUserRole} onChange={e => setNewUserRole(e.target.value)} className="w-full border border-outline-variant rounded p-2 outline-none focus:border-primary focus:ring-1 focus:ring-primary text-body-md">
                   <option value="viewer">Viewer</option>
                   <option value="admin">Admin</option>
                   <option value="sales_manager">Sales Manager</option>
@@ -154,9 +156,9 @@ export const UserManagement = () => {
                   <option value="auditor">Auditor</option>
                 </select>
               </div>
-              <div className="flex justify-end gap-2 mt-6">
-                <button type="button" onClick={() => setIsAddModalOpen(false)} className="px-4 py-2 border rounded hover:bg-gray-50">Cancel</button>
-                <button type="submit" disabled={isAdding} className="px-4 py-2 bg-primary text-white rounded hover:bg-primary/90 disabled:opacity-50">
+              <div className="flex justify-end gap-2 mt-6 pt-4 border-t border-outline-variant">
+                <button type="button" onClick={() => setIsAddModalOpen(false)} className="px-4 py-2 border border-outline-variant rounded text-on-surface font-bold hover:bg-surface-variant transition-colors">Cancel</button>
+                <button type="submit" disabled={isAdding} className="px-4 py-2 bg-primary text-white rounded font-bold hover:opacity-90 disabled:opacity-50 transition-colors">
                   {isAdding ? 'Adding...' : 'Create User'}
                 </button>
               </div>

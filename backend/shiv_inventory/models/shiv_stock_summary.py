@@ -8,8 +8,8 @@ Real-time inventory snapshot per product.
 Computed from shiv_stock_ledger aggregation.
 Cached in Redis for <5ms dashboard reads.
 """
-from odoo import api, fields, models, _
-from odoo.exceptions import ValidationError
+from odoo import api, fields, models, _  # type: ignore
+from odoo.exceptions import ValidationError  # type: ignore
 
 
 class ShivStockSummary(models.Model):
@@ -100,6 +100,7 @@ class ShivStockSummary(models.Model):
         Recompute summary from ledger aggregation.
         Called after every ledger entry write.
         """
+        self.env.flush_all()
         self.env.cr.execute("""
             SELECT
                 COALESCE(SUM(CASE
@@ -128,6 +129,7 @@ class ShivStockSummary(models.Model):
         qty_on_hand, qty_reserved, last_movement_at = row
         qty_on_hand = max(0.0, qty_on_hand)
         qty_reserved = max(0.0, qty_reserved)
+        qty_available = max(0.0, qty_on_hand - qty_reserved)
 
         summary = self._get_or_create(product_id)
         # Direct SQL update for performance (bypasses ORM overhead on hot path)
@@ -135,10 +137,16 @@ class ShivStockSummary(models.Model):
             UPDATE shiv_stock_summary
             SET qty_on_hand = %s,
                 qty_reserved = %s,
+                qty_available = %s,
+                qty_forecasted = %s + COALESCE(qty_incoming, 0.0),
                 last_movement_at = %s,
                 write_date = NOW()
             WHERE product_id = %s
-        """, (qty_on_hand, qty_reserved, last_movement_at, product_id))
+        """, (qty_on_hand, qty_reserved, qty_available, qty_available, last_movement_at, product_id))
+
+        summary.invalidate_recordset()
+        if 'shiv.kpi' in self.env:
+            self.env['shiv.kpi'].sudo().invalidate_cache()
 
     def action_view_ledger(self):
         """Open ledger history for this product."""

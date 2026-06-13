@@ -65,7 +65,7 @@ class ShivVendorProduct(models.Model):
     display_name_computed = fields.Char(
         compute='_compute_display_name', store=True)
 
-    @api.depends('vendor_id', 'product_id')
+    @api.depends('vendor_id.name', 'product_id.name')
     def _compute_display_name(self):
         for rec in self:
             rec.display_name_computed = f'{rec.vendor_id.name} → {rec.product_id.name}'

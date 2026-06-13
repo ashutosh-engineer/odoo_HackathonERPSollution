@@ -178,7 +178,7 @@ class TestAnomalyReporting(TransactionCase):
         self.assertIn('switch', self.wc_primary.anomaly_description.lower())
 
     def test_anomaly_records_reporter(self):
-        self.wc_primary.action_report_anomaly('tool_failure', 'Drill bit broken')
+        self.wc_primary.with_user(self.admin).action_report_anomaly('tool_failure', 'Drill bit broken')
         self.assertEqual(self.wc_primary.anomaly_reported_by.id, self.admin.id)
         self.assertIsNotNone(self.wc_primary.anomaly_reported_at)
 

@@ -63,6 +63,19 @@ class ShivProductCategory(models.Model):
         if not self._check_recursion():
             raise ValidationError(_('Category cannot be its own parent (circular reference).'))
 
+    def write(self, vals):
+        if 'parent_id' in vals:
+            for rec in self:
+                if vals['parent_id'] == rec.id:
+                    raise ValidationError(_('Category cannot be its own parent (circular reference).'))
+                if vals['parent_id']:
+                    parent = self.browse(vals['parent_id'])
+                    while parent:
+                        if parent.id == rec.id:
+                            raise ValidationError(_('Category cannot be its own parent (circular reference).'))
+                        parent = parent.parent_id
+        return super().write(vals)
+
     def unlink(self):
         for cat in self:
             if cat.product_count > 0:
@@ -70,3 +83,4 @@ class ShivProductCategory(models.Model):
                     _('Cannot delete category "%s" — %d product(s) are assigned to it.')
                     % (cat.name, cat.product_count))
         return super().unlink()
+

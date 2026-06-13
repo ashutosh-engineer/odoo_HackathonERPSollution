@@ -253,15 +253,15 @@ export const FloorConsole = () => {
 
       {/* Report Modal */}
       {reportModalOpen && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl w-full max-w-md p-6 shadow-xl">
-            <h2 className="font-headline-md mb-4 text-error flex items-center gap-2">
+        <div className="fixed inset-0 bg-[rgba(15,23,42,0.5)] z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg w-full max-w-[450px] p-6 shadow-soft border border-outline-variant">
+            <h2 className="font-headline-md mb-4 text-error flex items-center gap-2 border-b border-outline-variant pb-2">
               <span className="material-symbols-outlined">report</span> Report Anomaly
             </h2>
             <div className="space-y-4">
               <div>
                 <label className="block text-label-sm font-bold text-on-surface-variant mb-1 uppercase tracking-wider">Anomaly Type</label>
-                <select value={anomalyType} onChange={e => setAnomalyType(e.target.value)} className="w-full border border-outline-variant rounded-lg p-2.5 outline-none focus:border-error text-body-md">
+                <select value={anomalyType} onChange={e => setAnomalyType(e.target.value)} className="w-full border border-outline-variant rounded p-2 outline-none focus:border-error text-body-md">
                   <option value="machine_breakdown">Machine Breakdown</option>
                   <option value="power_failure">Power Failure</option>
                   <option value="material_shortage">Material Shortage</option>
@@ -274,12 +274,12 @@ export const FloorConsole = () => {
               </div>
               <div>
                 <label className="block text-label-sm font-bold text-on-surface-variant mb-1 uppercase tracking-wider">Description</label>
-                <textarea rows={3} value={anomalyDesc} onChange={e => setAnomalyDesc(e.target.value)} className="w-full border border-outline-variant rounded-lg p-2.5 outline-none focus:border-error text-body-md" placeholder="Provide details..."></textarea>
+                <textarea rows={3} value={anomalyDesc} onChange={e => setAnomalyDesc(e.target.value)} className="w-full border border-outline-variant rounded p-2 outline-none focus:border-error text-body-md" placeholder="Provide details..."></textarea>
               </div>
             </div>
-            <div className="flex gap-3 mt-6">
-              <button onClick={() => setReportModalOpen(null)} className="flex-1 px-4 py-2 border border-outline-variant text-on-surface font-bold rounded-lg hover:bg-surface-variant">Cancel</button>
-              <button onClick={() => handleReport(reportModalOpen)} disabled={actionLoading} className="flex-1 px-4 py-2 bg-error text-white font-bold rounded-lg hover:opacity-90 disabled:opacity-50">Submit</button>
+            <div className="flex justify-end gap-2 mt-6 pt-4 border-t border-outline-variant">
+              <button onClick={() => setReportModalOpen(null)} className="px-4 py-2 border border-outline-variant text-on-surface font-bold rounded hover:bg-surface-variant transition-colors">Cancel</button>
+              <button onClick={() => handleReport(reportModalOpen)} disabled={actionLoading} className="px-4 py-2 bg-error text-white font-bold rounded hover:opacity-90 disabled:opacity-50 transition-colors">Submit</button>
             </div>
           </div>
         </div>
@@ -287,20 +287,20 @@ export const FloorConsole = () => {
 
       {/* Resolve Modal */}
       {resolveModalOpen && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl w-full max-w-md p-6 shadow-xl">
-            <h2 className="font-headline-md mb-4 text-success-forest flex items-center gap-2">
+        <div className="fixed inset-0 bg-[rgba(15,23,42,0.5)] z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg w-full max-w-[450px] p-6 shadow-soft border border-outline-variant">
+            <h2 className="font-headline-md mb-4 text-success-forest flex items-center gap-2 border-b border-outline-variant pb-2">
               <span className="material-symbols-outlined">build</span> Resolve Anomaly
             </h2>
             <div className="space-y-4">
               <div>
                 <label className="block text-label-sm font-bold text-on-surface-variant mb-1 uppercase tracking-wider">Resolution Notes</label>
-                <textarea rows={3} value={resolveNotes} onChange={e => setResolveNotes(e.target.value)} className="w-full border border-outline-variant rounded-lg p-2.5 outline-none focus:border-success-forest text-body-md" placeholder="How was this fixed?"></textarea>
+                <textarea rows={3} value={resolveNotes} onChange={e => setResolveNotes(e.target.value)} className="w-full border border-outline-variant rounded p-2 outline-none focus:border-success-forest text-body-md" placeholder="How was this fixed?"></textarea>
               </div>
             </div>
-            <div className="flex gap-3 mt-6">
-              <button onClick={() => setResolveModalOpen(null)} className="flex-1 px-4 py-2 border border-outline-variant text-on-surface font-bold rounded-lg hover:bg-surface-variant">Cancel</button>
-              <button onClick={() => handleResolve(resolveModalOpen)} disabled={actionLoading} className="flex-1 px-4 py-2 bg-success-forest text-white font-bold rounded-lg hover:opacity-90 disabled:opacity-50">Mark Resolved</button>
+            <div className="flex justify-end gap-2 mt-6 pt-4 border-t border-outline-variant">
+              <button onClick={() => setResolveModalOpen(null)} className="px-4 py-2 border border-outline-variant text-on-surface font-bold rounded hover:bg-surface-variant transition-colors">Cancel</button>
+              <button onClick={() => handleResolve(resolveModalOpen)} disabled={actionLoading} className="px-4 py-2 bg-success-forest text-white font-bold rounded hover:opacity-90 disabled:opacity-50 transition-colors">Mark Resolved</button>
             </div>
           </div>
         </div>
