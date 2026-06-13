@@ -1,28 +1,39 @@
 # Shiv Furniture Works - Complete ERP Solution
 
-**Production-Ready Furniture Manufacturing ERP | Odoo 16 | PostgreSQL | Enterprise Architecture**
+**A production-ready furniture manufacturing ERP built with Odoo 16, PostgreSQL, and an enterprise-grade deployment stack.**
 
-Solves ₹2Cr+/year operational waste: real-time inventory (99.9% accuracy with ACID guarantees), procurement automation (85% reduction in manual steps), immutable audit compliance (7-year retention), and enterprise scalability (100K → 10M+ records).
+<p align="left">
+  <img src="https://img.shields.io/badge/Odoo-875A7B?style=for-the-badge&logo=odoo&logoColor=white" alt="Odoo" />
+  <img src="https://img.shields.io/badge/PostgreSQL-4169E1?style=for-the-badge&logo=postgresql&logoColor=white" alt="PostgreSQL" />
+  <img src="https://img.shields.io/badge/Nginx-009639?style=for-the-badge&logo=nginx&logoColor=white" alt="Nginx" />
+  <img src="https://img.shields.io/badge/Redis-DC382D?style=for-the-badge&logo=redis&logoColor=white" alt="Redis" />
+  <img src="https://img.shields.io/badge/Grafana-F46800?style=for-the-badge&logo=grafana&logoColor=white" alt="Grafana" />
+  <img src="https://img.shields.io/badge/Prometheus-E6522C?style=for-the-badge&logo=prometheus&logoColor=white" alt="Prometheus" />
+  <img src="https://img.shields.io/badge/Sentry-362D59?style=for-the-badge&logo=sentry&logoColor=white" alt="Sentry" />
+  <img src="https://img.shields.io/badge/AWS-232F3E?style=for-the-badge&logo=amazonaws&logoColor=white" alt="AWS" />
+</p>
+
+This project is designed to cut more than ₹2Cr per year in operational waste by bringing inventory, procurement, manufacturing, audit, and scaling into one system. It focuses on real-time inventory with 99.9% accuracy through ACID guarantees, procurement automation that removes manual work, immutable audit compliance with 7-year retention, and a growth path from 100K to 10M+ records.
 
 ---
 
 ## Executive Summary
 
-**The Problem**: Shiv Furniture Works operates demand-to-delivery on fragmented systems (Excel, WhatsApp, paper registers):
+**The Problem**: Shiv Furniture Works currently runs demand-to-delivery operations across fragmented tools such as Excel, WhatsApp, and paper registers:
 - 15-20% inventory discrepancies (₹20L+ waste/year)
 - 60% fulfillment time lost to manual coordination
 - 3-5 day procurement cycle (vendor email → approval → PO)
 - 35% on-time delivery rate
 - Zero audit trail for compliance
 
-**The Solution**: Unified, purpose-built manufacturing ERP that automates the entire workflow:
-- **99.9% inventory accuracy** via ACID transactions + real-time ledger
-- **1-2 day fulfillment** (vs 5+ days manual)
-- **5-minute procurement** (vs 3-5 days manual)
-- **95% on-time delivery**
-- **100% audit-proof** (immutable ledger + forensic queries)
+**The Solution**: A unified, purpose-built manufacturing ERP that automates the full workflow end to end:
+- 99.9% inventory accuracy via ACID transactions and a real-time ledger
+- 1-2 day fulfillment instead of 5+ days of manual coordination
+- 5-minute procurement instead of 3-5 days of manual processing
+- 95% on-time delivery
+- 100% audit-proof operations through an immutable ledger and forensic queries
 
-**Technical Approach**: Odoo 16 with production-grade infrastructure (Nginx + load balancing, Redis caching, PostgreSQL replicas, immutable audit trails, automated backups, observability stack).
+**Technical Approach**: Odoo 16 on top of production-grade infrastructure, including Nginx load balancing, Redis caching, PostgreSQL replicas, immutable audit trails, automated backups, and an observability stack.
 
 ---
 
@@ -166,7 +177,7 @@ Client: Create Sales Order for 10 units
 | **Workflow Engine** | Built-in state transitions | Must implement | Maintainability |
 | **Community** | 15K+ apps, large ecosystem | Proprietary | Support ecosystem |
 
-**Verdict**: Pre-built components are battle-tested. Trade-off of less customization is worth the maturity and speed.
+**Verdict**: The built-in components are battle-tested, and the trade-off of less customization is worth the maturity and speed.
 
 **Rejected**: Django (3x longer RBAC), Firebase (no audit trail).
 
@@ -174,12 +185,12 @@ Client: Create Sales Order for 10 units
 
 | Requirement | PostgreSQL | MongoDB | DynamoDB |
 |---|---|---|---|
-| **ACID Transactions** | ✅ Full | ❌ Limited | ❌ No |
-| **Row-Level Locking** | ✅ SELECT FOR UPDATE | ❌ Doc-level | ❌ Not available |
-| **SERIALIZABLE Isolation** | ✅ Full support | ❌ Snapshot only | ❌ No |
-| **Referential Integrity** | ✅ FK constraints | ❌ App-enforced | ❌ No |
-| **Complex Queries** | ✅ Full SQL | ⚠️ Limited | ❌ Very limited |
-| **Scalability (10M records)** | ✅ Partitioning | ✅ Sharding | ✅ Sharding |
+| **ACID Transactions** | Full support | Limited | No |
+| **Row-Level Locking** | SELECT FOR UPDATE | Doc-level only | Not available |
+| **SERIALIZABLE Isolation** | Full support | Snapshot only | No |
+| **Referential Integrity** | FK constraints | App-enforced | No |
+| **Complex Queries** | Full SQL | Limited | Very limited |
+| **Scalability (10M records)** | Partitioning | Sharding | Sharding |
 
 **Real Example** (Why This Matters):
 ```
@@ -204,7 +215,7 @@ MongoDB (No cross-doc ACID):
 |--------|-------|-------|
 | **Speed** | Sub-millisecond | Milliseconds (disk I/O) |
 | **Horizontal Scaling** | Yes (all workers read same store) | Yes (same DB) |
-| **Distributed Locking** | ✅ SET NX (atomic) | ❌ Advisory locks needed |
+| **Distributed Locking** | SET NX (atomic) | Advisory locks needed |
 
 **Verdict**: Redis is standard for sessions. Faster, simpler locking model.
 
@@ -214,10 +225,10 @@ MongoDB (No cross-doc ACID):
 
 | Challenge | Microservices | Monolith |
 |-----------|---|---|
-| **ACID Transactions** | ❌ Distributed, complex | ✅ Single DB |
-| **Data Consistency** | ❌ Lag, eventual | ✅ Immediate |
-| **Deployment Speed** | ❌ 5 min × N services | ✅ 1 deployment |
-| **Debugging** | ❌ Spans 5 services | ✅ Single stack trace |
+| **ACID Transactions** | Distributed, complex | Single DB |
+| **Data Consistency** | Lag, eventual | Immediate |
+| **Deployment Speed** | 5 min × N services | 1 deployment |
+| **Debugging** | Spans 5 services | Single stack trace |
 
 **Extract Microservices When**: Multiple teams, independent scaling, different tech stacks.
 
@@ -268,9 +279,9 @@ server {
 
 **Benefits**:
 - Zero-downtime worker updates
-- TLS offloading (workers HTTP-only)
-- Request batching + compression
-- Rate limiting prevents abuse
+- TLS offloading so workers stay HTTP-only
+- Request batching and compression
+- Rate limiting to prevent abuse
 
 ### Connection Pooling (PgBouncer)
 
@@ -560,37 +571,37 @@ S3 Backups
 
 ## Roadmap
 
-**Immediate**: Core CRUD + inventory + RBAC + audit ✅
-**Month 2-3**: Procurement automation, mobile app, dashboards 🔄
-**Month 4-6**: Manufacturing execution, replicas, monitoring 📋
-**Month 7-12**: Forecasting (ML), supplier portal, EDI 🔮
+**Immediate**: Core CRUD + inventory + RBAC + audit
+**Month 2-3**: Procurement automation, mobile app, dashboards
+**Month 4-6**: Manufacturing execution, replicas, monitoring
+**Month 7-12**: Forecasting (ML), supplier portal, and EDI
 
 ---
 
 ## Why This Approach
 
-**Production Maturity**: Not a demo. ACID guarantees, disaster recovery, observability.
+**Production Maturity**: This is not a demo. It includes ACID guarantees, disaster recovery, and observability.
 
-**Data Integrity**: SERIALIZABLE isolation prevents overselling. Immutable audit trail prevents tampering.
+**Data Integrity**: SERIALIZABLE isolation prevents overselling, and the immutable audit trail prevents tampering.
 
-**Scalability**: Grows from 100K → 10M+ records without redesign.
+**Scalability**: The system is built to grow from 100K to 10M+ records without redesign.
 
-**Security**: Multi-layer RBAC, immutable audit, no privilege escalation possible.
+**Security**: Multi-layer RBAC, immutable audit, and no practical path to privilege escalation.
 
 ---
 
 ## Conclusion
 
-Shiv Furniture Works' ERP solves ₹2Cr+/year waste with a production-grade architecture. Every decision has trade-offs documented. Every claim is defensible.
+Shiv Furniture Works' ERP is built to solve more than ₹2Cr per year in waste with a production-grade architecture. Every decision has trade-offs documented, and every claim is defensible.
 
 **For Jury**:
-- ✅ **Business Impact**: 99.9% accuracy, 85% automation, 95% on-time delivery
-- ✅ **Technical Depth**: ACID, RBAC, observability, DR
-- ✅ **Production-Ready**: AWS deployment, 24/7 monitoring, daily backups
-- ✅ **Scalability**: Proven roadmap to 10M+ records
+- Business Impact: 99.9% accuracy, 85% automation, 95% on-time delivery
+- Technical Depth: ACID, RBAC, observability, and disaster recovery
+- Production-Ready: AWS deployment, 24/7 monitoring, and daily backups
+- Scalability: A proven roadmap to 10M+ records
 
 ---
 
 **GitHub**: [ashutosh-engineer/odoo_Hackathon_Team_adip1](https://github.com/ashutosh-engineer/odoo_Hackathon_Team_adip1)
 
-**Production-grade. Jury-defensible. Enterprise-ready.** 🚀
+**Production-grade. Jury-defensible. Enterprise-ready.**
