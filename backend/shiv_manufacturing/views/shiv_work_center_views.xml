@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo><data>
+
+    <record id="view_shiv_wc_list" model="ir.ui.view">
+        <field name="name">shiv.work.center.list</field>
+        <field name="model">shiv.work.center</field>
+        <field name="arch" type="xml">
+            <list string="Work Centers" decoration-muted="not is_active">
+                <field name="code"/>
+                <field name="name"/>
+                <field name="capacity" string="Capacity (units/day)"/>
+                <field name="utilization_pct" widget="progressbar"
+                       options="{'max_value': 100}" string="Utilization %"/>
+                <field name="is_active" widget="boolean"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_shiv_wc_form" model="ir.ui.view">
+        <field name="name">shiv.work.center.form</field>
+        <field name="model">shiv.work.center</field>
+        <field name="arch" type="xml">
+            <form string="Work Center">
+                <sheet>
+                    <group>
+                        <field name="name"/>
+                        <field name="code"/>
+                        <field name="capacity"/>
+                        <field name="utilization_pct" readonly="1"/>
+                        <field name="is_active"/>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_shiv_work_centers" model="ir.actions.act_window">
+        <field name="name">Work Centers</field>
+        <field name="res_model">shiv.work.center</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+</data></odoo>

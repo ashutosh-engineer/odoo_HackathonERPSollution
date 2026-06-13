@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo><data>
+    <menuitem id="menu_shiv_mfg_root" name="Manufacturing"
+              parent="shiv_auth.menu_shiv_root" sequence="60"/>
+    <menuitem id="menu_shiv_mo" name="Manufacturing Orders"
+              parent="menu_shiv_mfg_root"
+              action="shiv_manufacturing.action_shiv_manufacturing_orders"
+              sequence="10"/>
+    <menuitem id="menu_shiv_bom" name="Bills of Materials"
+              parent="menu_shiv_mfg_root"
+              action="shiv_manufacturing.action_shiv_bom"
+              sequence="20"
+              groups="shiv_auth.group_shiv_production_manager"/>
+    <menuitem id="menu_shiv_work_centers" name="Work Centers"
+              parent="menu_shiv_mfg_root"
+              action="shiv_manufacturing.action_shiv_work_centers"
+              sequence="30"
+              groups="shiv_auth.group_shiv_production_manager"/>
+</data></odoo>
