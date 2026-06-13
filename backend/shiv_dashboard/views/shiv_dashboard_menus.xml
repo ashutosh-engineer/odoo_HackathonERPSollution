@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo><data>
+    <menuitem id="menu_shiv_dashboard" name="Dashboard"
+              parent="shiv_auth.menu_shiv_root"
+              action="shiv_dashboard.action_shiv_dashboard"
+              sequence="1"/>
+</data></odoo>
