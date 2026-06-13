@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo><data noupdate="1">
+
+    <!-- SKU sequence -->
+    <record id="seq_shiv_product_sku" model="ir.sequence">
+        <field name="name">Shiv Product SKU</field>
+        <field name="code">shiv.product.sku</field>
+        <field name="prefix">SKU-</field>
+        <field name="padding">5</field>
+        <field name="number_next">1</field>
+        <field name="number_increment">1</field>
+    </record>
+
+    <!-- Default product categories -->
+    <record id="cat_finished_goods" model="shiv.product.category">
+        <field name="name">Finished Goods</field>
+    </record>
+    <record id="cat_sofa" model="shiv.product.category">
+        <field name="name">Sofas &amp; Seating</field>
+        <field name="parent_id" ref="cat_finished_goods"/>
+    </record>
+    <record id="cat_tables" model="shiv.product.category">
+        <field name="name">Tables &amp; Desks</field>
+        <field name="parent_id" ref="cat_finished_goods"/>
+    </record>
+    <record id="cat_bedroom" model="shiv.product.category">
+        <field name="name">Bedroom Furniture</field>
+        <field name="parent_id" ref="cat_finished_goods"/>
+    </record>
+    <record id="cat_raw_materials" model="shiv.product.category">
+        <field name="name">Raw Materials</field>
+    </record>
+    <record id="cat_wood" model="shiv.product.category">
+        <field name="name">Wood &amp; Timber</field>
+        <field name="parent_id" ref="cat_raw_materials"/>
+    </record>
+    <record id="cat_fabric" model="shiv.product.category">
+        <field name="name">Fabric &amp; Upholstery</field>
+        <field name="parent_id" ref="cat_raw_materials"/>
+    </record>
+    <record id="cat_hardware" model="shiv.product.category">
+        <field name="name">Hardware &amp; Fittings</field>
+        <field name="parent_id" ref="cat_raw_materials"/>
+    </record>
+
+</data></odoo>

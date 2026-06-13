@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo><data>
+    <menuitem id="menu_shiv_product_root" name="Products"
+              parent="shiv_auth.menu_shiv_root" sequence="20"/>
+    <menuitem id="menu_shiv_products" name="Product Catalog"
+              parent="menu_shiv_product_root" action="action_shiv_products" sequence="10"/>
+    <menuitem id="menu_shiv_categories" name="Categories"
+              parent="menu_shiv_product_root" action="action_shiv_categories" sequence="20"
+              groups="shiv_auth.group_shiv_warehouse_manager"/>
+</data></odoo>

@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo><data>
+
+    <!-- LIST -->
+    <record id="view_shiv_product_list" model="ir.ui.view">
+        <field name="name">shiv.product.list</field>
+        <field name="model">shiv.product</field>
+        <field name="arch" type="xml">
+            <list string="Products"
+                  decoration-muted="state == 'archived'"
+                  decoration-warning="state == 'discontinued'">
+                <field name="internal_ref"/>
+                <field name="name"/>
+                <field name="category_id"/>
+                <field name="product_type" widget="badge"/>
+                <field name="state" widget="badge"
+                       decoration-success="state == 'active'"
+                       decoration-warning="state == 'discontinued'"
+                       decoration-danger="state == 'archived'"/>
+                <field name="qty_on_hand" string="On Hand"/>
+                <field name="qty_available" string="Available"/>
+                <field name="sale_price"/>
+                <field name="uom_id"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- FORM -->
+    <record id="view_shiv_product_form" model="ir.ui.view">
+        <field name="name">shiv.product.form</field>
+        <field name="model">shiv.product</field>
+        <field name="arch" type="xml">
+            <form string="Product">
+                <header>
+                    <button name="action_activate" string="Activate"
+                            type="object" class="btn-success"
+                            attrs="{'invisible': [('state','=','active')]}"/>
+                    <button name="action_discontinue" string="Discontinue"
+                            type="object" class="btn-warning"
+                            attrs="{'invisible': [('state','!=','active')]}"/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="draft,active,discontinued"/>
+                </header>
+                <sheet>
+                    <group>
+                        <group string="Identity">
+                            <field name="name"/>
+                            <field name="internal_ref"/>
+                            <field name="barcode"/>
+                            <field name="category_id"/>
+                            <field name="product_type"/>
+                        </group>
+                        <group string="Pricing">
+                            <field name="sale_price"/>
+                            <field name="cost_price" groups="shiv_auth.group_shiv_purchase_user"/>
+                            <field name="uom_id"/>
+                            <field name="uom_purchase_id"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Inventory Control">
+                            <group>
+                                <field name="is_tracked"/>
+                                <field name="reorder_point"/>
+                                <field name="reorder_qty"/>
+                                <field name="lead_time_days"/>
+                                <field name="procurement_method"/>
+                                <field name="has_bom"/>
+                            </group>
+                            <group string="Current Stock (Live)">
+                                <field name="qty_on_hand" readonly="1"/>
+                                <field name="qty_reserved" readonly="1"/>
+                                <field name="qty_available" readonly="1"/>
+                            </group>
+                        </page>
+                        <page string="Descriptions">
+                            <field name="description"/>
+                            <field name="description_purchase"/>
+                            <field name="description_manufacture"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="message_ids"/>
+                    <field name="activity_ids"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <!-- SEARCH -->
+    <record id="view_shiv_product_search" model="ir.ui.view">
+        <field name="name">shiv.product.search</field>
+        <field name="model">shiv.product</field>
+        <field name="arch" type="xml">
+            <search>
+                <field name="name"/>
+                <field name="internal_ref"/>
+                <field name="barcode"/>
+                <field name="category_id"/>
+                <filter string="Active" name="filter_active" domain="[('state','=','active')]"/>
+                <filter string="Low Stock" name="filter_low_stock"
+                        domain="[('qty_available','&lt;=','reorder_point')]"/>
+                <filter string="Storable" name="filter_storable"
+                        domain="[('product_type','=','storable')]"/>
+                <separator/>
+                <group expand="0" string="Group By">
+                    <filter string="Category" name="groupby_cat" context="{'group_by':'category_id'}"/>
+                    <filter string="Type" name="groupby_type" context="{'group_by':'product_type'}"/>
+                    <filter string="Status" name="groupby_state" context="{'group_by':'state'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- ACTION -->
+    <record id="action_shiv_products" model="ir.actions.act_window">
+        <field name="name">Products</field>
+        <field name="res_model">shiv.product</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{'search_default_filter_active': True}</field>
+    </record>
+
+</data></odoo>
