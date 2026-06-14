@@ -44,6 +44,11 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
     inv: ['admin', 'warehouse_manager', 'warehouse_user', 'accountant', 'auditor'],
     floor_console: ['admin', 'production_manager', 'production_user'],
     audit: ['admin', 'auditor'],
+    // Create-specific roles (excludes read-only: auditor, accountant, viewer)
+    create_sales: ['admin', 'sales_manager', 'sales_user'],
+    create_purchase: ['admin', 'purchase_manager', 'purchase_user'],
+    create_mfg: ['admin', 'production_manager', 'production_user'],
+    create_inv: ['admin', 'warehouse_manager', 'warehouse_user'],
   };
 
   return (
@@ -202,14 +207,14 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
             <span className="font-label-md">Logout</span>
           </button>
         </div>
-        {(hasAccess(roles.sales) || hasAccess(roles.purchase) || hasAccess(roles.mfg) || hasAccess(roles.inv)) && (
+        {(hasAccess(roles.create_sales) || hasAccess(roles.create_purchase) || hasAccess(roles.create_mfg) || hasAccess(roles.create_inv)) && (
         <div className="px-4 mt-6 relative">
           {showNewEntryMenu && (
             <>
               <div className="fixed inset-0 z-40 bg-transparent" onClick={() => setShowNewEntryMenu(false)} />
               <div className="absolute bottom-16 left-4 right-4 bg-white rounded-lg shadow-xl border border-outline-variant p-2 z-50 animate-in fade-in slide-in-from-bottom-2 duration-200 text-on-surface">
                 <p className="text-[10px] font-bold text-on-surface-variant/60 uppercase tracking-widest px-3 py-1 mb-1 border-b border-outline-variant/30">Create New Record</p>
-                {hasAccess(roles.sales) && (
+                {hasAccess(roles.create_sales) && (
                   <Link
                     to="/sales/new"
                     onClick={() => setShowNewEntryMenu(false)}
@@ -219,7 +224,7 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
                     <span>New Sales Order</span>
                   </Link>
                 )}
-                {hasAccess(roles.purchase) && (
+                {hasAccess(roles.create_purchase) && (
                   <Link
                     to="/purchase/new"
                     onClick={() => setShowNewEntryMenu(false)}
@@ -229,7 +234,7 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
                     <span>New Purchase Order</span>
                   </Link>
                 )}
-                {hasAccess(roles.mfg) && (
+                {hasAccess(roles.create_mfg) && (
                   <Link
                     to="/manufacturing/new"
                     onClick={() => setShowNewEntryMenu(false)}
@@ -239,7 +244,7 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
                     <span>New Mfg Order</span>
                   </Link>
                 )}
-                {hasAccess(roles.inv) && (
+                {hasAccess(roles.create_inv) && (
                   <Link
                     to="/inventory"
                     onClick={() => setShowNewEntryMenu(false)}

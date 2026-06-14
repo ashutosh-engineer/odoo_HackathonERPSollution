@@ -321,7 +321,7 @@ export const OperationalDashboard = () => {
                     </div>
                     <div className="flex-1">
                       <p className="text-body-sm leading-snug">
-                        <span className="font-black text-on-surface">{log.user_id ? log.user_id[1] : 'System'}</span> {log.action} <span className="font-bold text-primary">{log.resource_model}</span> (ID: {log.resource_id})
+                        <span className="font-black text-on-surface">{log.actor_name || 'System'}</span> {log.action} <span className="font-bold text-primary">{log.model}</span> {log.record_name ? `(${log.record_name})` : log.record_id ? `(ID: ${log.record_id})` : ''}
                       </p>
                       <p className="text-[11px] font-bold text-on-surface-variant/60 mt-1 uppercase tracking-wider">{log.timestamp} • IP: {log.ip_address || 'Unknown'}</p>
                     </div>

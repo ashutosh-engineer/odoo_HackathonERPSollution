@@ -202,15 +202,15 @@ export const AuditLog = () => {
                 logs.map(log => (
                   <tr key={log.id} className="hover:bg-black/5 transition-colors">
                     <td className="px-6 py-4 text-[13px] font-mono whitespace-nowrap">{log.timestamp}</td>
-                    <td className="px-6 py-4 font-bold text-on-surface">{log.user_id ? log.user_id[1] : 'System'}</td>
-                    <td className="px-6 py-4 text-body-sm text-on-surface-variant capitalize">{log.role || '—'}</td>
+                    <td className="px-6 py-4 font-bold text-on-surface">{log.actor_name || 'System'}</td>
+                    <td className="px-6 py-4 text-body-sm text-on-surface-variant capitalize">{log.actor_role || '—'}</td>
                     <td className="px-6 py-4">
                       <span className={`px-2.5 py-1 rounded-md text-[11px] font-bold uppercase tracking-wider ${getActionColor(log.action)}`}>
                         {log.action}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-body-sm font-bold text-primary">{log.resource_model || '—'}</td>
-                    <td className="px-6 py-4 text-body-sm">{log.resource_id || '—'}</td>
+                    <td className="px-6 py-4 text-body-sm font-bold text-primary">{log.model || '—'}</td>
+                    <td className="px-6 py-4 text-body-sm">{log.record_name ? `${log.record_name} (#${log.record_id})` : (log.record_id || '—')}</td>
                     <td className="px-6 py-4 text-body-sm text-on-surface-variant max-w-[200px] truncate" title={log.notes}>{log.notes || '—'}</td>
                     <td className="px-6 py-4 text-[12px] font-mono text-on-surface-variant">{log.ip_address || '—'}</td>
                   </tr>
