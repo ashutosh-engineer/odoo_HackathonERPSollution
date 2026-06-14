@@ -36,6 +36,8 @@ class ShivProduct(models.Model):
     description_purchase = fields.Text(string='Purchase Description')
     description_manufacture = fields.Text(string='Manufacturing Notes')
 
+    image_1920 = fields.Image(string="Product Image", max_width=1920, max_height=1920)
+
     # ── Type & UoM ────────────────────────────────────────────
     product_type = fields.Selection([
         ('storable',      'Storable Product'),   # tracked in inventory
@@ -57,8 +59,8 @@ class ShivProduct(models.Model):
 
     cost_price = fields.Float(
         string='Cost Price (₹)', digits=(12, 2), default=0.0,
-        groups='shiv_auth.group_shiv_purchase_user',
-        help='Visible only to Purchase and above. Hidden from sales staff.')
+        groups='shiv_auth.group_shiv_purchase_user,shiv_auth.group_shiv_auditor,shiv_auth.group_shiv_accountant',
+        help='Visible only to Purchase, Auditors and Accountants. Hidden from sales staff.')
 
     # ── Inventory Control ─────────────────────────────────────
     is_tracked = fields.Boolean(
@@ -187,10 +189,15 @@ class ShivProduct(models.Model):
 
     # ── Actions ───────────────────────────────────────────────
     def action_activate(self):
-        self.write({'state': 'active'})
+        self.write({'state': 'active', 'is_active': True})
 
     def action_discontinue(self):
         self.write({'state': 'discontinued', 'is_active': False})
+        self.env['shiv.bom'].search([('product_id', 'in', self.ids)]).write({'is_active': False})
+
+    def action_archive(self):
+        self.write({'state': 'archived', 'is_active': False})
+        self.env['shiv.bom'].search([('product_id', 'in', self.ids)]).write({'is_active': False})
 
     @api.constrains('uom_id', 'uom_purchase_id')
     def _check_uom_category(self):

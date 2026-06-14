@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { odooSearchRead, odooCall } from '../utils/api';
 import { RoleGuard } from '../components/RoleGuard';
+import { useAuth } from '../contexts/AuthContext';
 
 interface ProductData {
   id: number;
@@ -13,6 +14,7 @@ interface ProductData {
   qty_on_hand: number;
   qty_reserved: number;
   qty_available: number;
+  image_1920?: string | null;
 }
 
 interface StockLedger {
@@ -50,6 +52,10 @@ interface BomLineData {
 }
 
 export const ProductMaster = () => {
+  const { user } = useAuth();
+  const role = user?.shiv_role || '';
+  const canSeeCost = ['admin', 'purchase_manager', 'purchase_user', 'auditor', 'accountant'].includes(role);
+  
   const [activeTab, setActiveTab] = useState('inventory');
   
   const [allProducts, setAllProducts] = useState<ProductData[]>([]);
@@ -71,7 +77,7 @@ export const ProductMaster = () => {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [editFormData, setEditFormData] = useState({ name: '', sale_price: 0, cost_price: 0, barcode: '' });
+  const [editFormData, setEditFormData] = useState({ name: '', sale_price: 0, cost_price: 0, barcode: '', image_1920: null as string | null });
   const [isSaving, setIsSaving] = useState(false);
 
   const fetchAllProducts = async () => {
@@ -82,14 +88,14 @@ export const ProductMaster = () => {
       try {
         products = await odooSearchRead('shiv.product', [], [
           'name', 'internal_ref', 'barcode', 'sale_price', 'cost_price',
-          'state', 'qty_on_hand', 'qty_reserved', 'qty_available'
+          'state', 'qty_on_hand', 'qty_reserved', 'qty_available', 'image_1920'
         ]);
       } catch (searchErr) {
         console.warn("search_read with all fields failed, retrying without restricted fields...", searchErr);
         // cost_price is group-restricted in backend — retry without it
         products = await odooSearchRead('shiv.product', [], [
           'name', 'internal_ref', 'barcode', 'sale_price',
-          'state', 'qty_on_hand', 'qty_reserved', 'qty_available'
+          'state', 'qty_on_hand', 'qty_reserved', 'qty_available', 'image_1920'
         ]);
       }
 
@@ -105,6 +111,7 @@ export const ProductMaster = () => {
         qty_on_hand: p.qty_on_hand ?? 0,
         qty_reserved: p.qty_reserved ?? 0,
         qty_available: p.qty_available ?? 0,
+        image_1920: p.image_1920 || null,
       }));
 
       // If stock quantities are all zero (possibly not returned by search_read for unstored computed fields),
@@ -149,7 +156,7 @@ export const ProductMaster = () => {
 
   const handleEditClick = () => {
     if (product) {
-      setEditFormData({ name: product.name, sale_price: product.sale_price, cost_price: product.cost_price, barcode: product.barcode || '' });
+      setEditFormData({ name: product.name, sale_price: product.sale_price, cost_price: product.cost_price, barcode: product.barcode || '', image_1920: product.image_1920 || null });
       setIsEditModalOpen(true);
     }
   };
@@ -203,30 +210,46 @@ export const ProductMaster = () => {
         }
         
         // Fetch stock movements
-        const movements = await odooSearchRead('shiv.stock.ledger', [['product_id', '=', selectedProductId]], [
-          'timestamp', 'source_ref', 'location_from', 'location_to', 'qty_change', 'movement_type'
-        ]);
-        setLedger(movements as StockLedger[]);
+        try {
+          const movements = await odooSearchRead('shiv.stock.ledger', [['product_id', '=', selectedProductId]], [
+            'timestamp', 'source_ref', 'location_from', 'location_to', 'qty_change', 'movement_type'
+          ]);
+          setLedger(movements as StockLedger[]);
+        } catch (e) {
+          console.warn('Failed to load stock movements', e);
+          setLedger([]);
+        }
 
         // Fetch vendor rules
-        const rules = await odooSearchRead('shiv.vendor.product', [['product_id', '=', selectedProductId]], [
-          'vendor_id', 'min_qty', 'price', 'lead_time'
-        ]);
-        setVendorRules(rules as VendorRule[]);
+        try {
+          const rules = await odooSearchRead('shiv.vendor.product', [['product_id', '=', selectedProductId]], [
+            'vendor_id', 'min_qty', 'price', 'lead_time'
+          ]);
+          setVendorRules(rules as VendorRule[]);
+        } catch (e) {
+          console.warn('Failed to load vendor rules', e);
+          setVendorRules([]);
+        }
 
         // Fetch BoMs
-        const bomsData = await odooSearchRead('shiv.bom', [['product_id', '=', selectedProductId]], [
-          'display_name_computed', 'product_qty', 'is_active'
-        ]);
-        setBoms(bomsData as BomData[]);
-
-        if (bomsData.length > 0) {
-          const bomIds = (bomsData as BomData[]).map(b => b.id);
-          const linesData = await odooSearchRead('shiv.bom.line', [['bom_id', 'in', bomIds]], [
-            'bom_id', 'product_id', 'qty_required', 'uom_id'
+        try {
+          const bomsData = await odooSearchRead('shiv.bom', [['product_id', '=', selectedProductId]], [
+            'display_name_computed', 'product_qty', 'is_active'
           ]);
-          setBomLines(linesData as BomLineData[]);
-        } else {
+          setBoms(bomsData as BomData[]);
+
+          if (bomsData.length > 0) {
+            const bomIds = (bomsData as BomData[]).map(b => b.id);
+            const linesData = await odooSearchRead('shiv.bom.line', [['bom_id', 'in', bomIds]], [
+              'bom_id', 'product_id', 'qty_required', 'uom_id'
+            ]);
+            setBomLines(linesData as BomLineData[]);
+          } else {
+            setBomLines([]);
+          }
+        } catch (e) {
+          console.warn('Failed to load BoMs', e);
+          setBoms([]);
           setBomLines([]);
         }
         
@@ -326,25 +349,53 @@ export const ProductMaster = () => {
           <div className="flex-1 overflow-y-auto">
             {/* Status Tracker (Steppers) */}
             <div className="flex border-b border-outline-variant bg-white">
-              <div className={`status-stepper-item relative px-8 py-3 font-bold text-label-md flex items-center gap-2 ${product.state === 'active' ? 'bg-primary text-on-primary' : 'bg-surface-container text-on-surface-variant'}`}>
-                <span className="material-symbols-outlined text-[18px]" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>
+              <button 
+                onClick={async () => {
+                  if (product.state !== 'active') {
+                    setToastMessage('Activating product...');
+                    await odooCall('shiv.product', 'action_activate', [[product.id]]);
+                    fetchAllProducts();
+                  }
+                }}
+                className={`status-stepper-item relative px-8 py-3 font-bold text-label-md flex items-center gap-2 ${product.state === 'active' ? 'bg-primary text-on-primary' : 'bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-colors cursor-pointer'}`}>
+                {product.state === 'active' && <span className="material-symbols-outlined text-[18px]" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>}
                 Active
-              </div>
-              <div className={`status-stepper-item relative px-8 py-3 font-bold text-label-md ${product.state === 'archived' ? 'bg-primary text-on-primary' : 'bg-surface-container text-on-surface-variant'}`}>
+              </button>
+              <button 
+                onClick={async () => {
+                  if (product.state !== 'archived') {
+                    setToastMessage('Archiving product...');
+                    await odooCall('shiv.product', 'action_archive', [[product.id]]);
+                    fetchAllProducts();
+                  }
+                }}
+                className={`status-stepper-item relative px-8 py-3 font-bold text-label-md ${product.state === 'archived' ? 'bg-primary text-on-primary' : 'bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-colors cursor-pointer'}`}>
                 Archived
-              </div>
-              <div className={`status-stepper-item relative px-8 py-3 font-bold text-label-md ${product.state === 'discontinued' ? 'bg-primary text-on-primary' : 'bg-surface-container text-on-surface-variant'}`}>
+              </button>
+              <button 
+                onClick={async () => {
+                  if (product.state !== 'discontinued') {
+                    setToastMessage('Discontinuing product...');
+                    await odooCall('shiv.product', 'action_discontinue', [[product.id]]);
+                    fetchAllProducts();
+                  }
+                }}
+                className={`status-stepper-item relative px-8 py-3 font-bold text-label-md ${product.state === 'discontinued' ? 'bg-primary text-on-primary' : 'bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-colors cursor-pointer'}`}>
                 Discontinued
-              </div>
+              </button>
             </div>
 
             {/* Main Form Canvas */}
             <div className="p-4 md:p-lg space-y-lg max-w-[1440px] mx-auto">
               {/* Summary Header Card */}
               <div className="bg-white border border-outline-variant rounded-xl overflow-hidden shadow-sm flex flex-col lg:flex-row">
-                <div className="w-full lg:w-[250px] aspect-video lg:aspect-square bg-surface-container flex items-center justify-center p-6 flex-shrink-0">
-                  <div className="product-image-container w-full h-full max-h-[200px] max-w-[200px] rounded-xl overflow-hidden bg-white shadow-md flex items-center justify-center">
-                    <span className="material-symbols-outlined text-[64px] text-outline">inventory_2</span>
+                <div className="w-full lg:w-[250px] aspect-video lg:aspect-square bg-surface-container flex items-center justify-center p-6 flex-shrink-0 relative group">
+                  <div className="product-image-container w-full h-full max-h-[200px] max-w-[200px] rounded-xl overflow-hidden bg-white shadow-md flex items-center justify-center relative">
+                    {product.image_1920 ? (
+                      <img src={`data:image/jpeg;base64,${product.image_1920}`} alt={product.name} className="w-full h-full object-contain" />
+                    ) : (
+                      <span className="material-symbols-outlined text-[64px] text-outline">inventory_2</span>
+                    )}
                   </div>
                 </div>
                 <div className="flex-grow p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -372,13 +423,15 @@ export const ProductMaster = () => {
                       </div>
                       <span className="material-symbols-outlined text-primary/30 text-[36px]">loyalty</span>
                     </div>
-                    <div className="flex justify-between items-center p-4 bg-secondary/10 border border-secondary/20 rounded-xl">
-                      <div>
-                        <label className="block text-label-sm uppercase text-secondary font-bold">Cost Price</label>
-                        <div className="text-headline-md font-black text-secondary">₹{product.cost_price.toLocaleString()}</div>
+                    {canSeeCost && (
+                      <div className="flex justify-between items-center p-4 bg-secondary/10 border border-secondary/20 rounded-xl">
+                        <div>
+                          <label className="block text-label-sm uppercase text-secondary font-bold">Cost Price</label>
+                          <div className="text-headline-md font-black text-secondary">₹{product.cost_price.toLocaleString()}</div>
+                        </div>
+                        <span className="material-symbols-outlined text-secondary/30 text-[36px]">account_balance_wallet</span>
                       </div>
-                      <span className="material-symbols-outlined text-secondary/30 text-[36px]">account_balance_wallet</span>
-                    </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -606,6 +659,20 @@ export const ProductMaster = () => {
               <div>
                 <label className="block text-sm font-bold text-on-surface-variant mb-1">Product Name</label>
                 <input required type="text" value={editFormData.name} onChange={e => setEditFormData({...editFormData, name: e.target.value})} className="w-full border border-outline-variant rounded p-2 focus:border-primary focus:ring-1 focus:ring-primary outline-none" />
+              </div>
+              <div>
+                <label className="block text-sm font-bold text-on-surface-variant mb-1">Product Image</label>
+                <input type="file" accept="image/*" onChange={e => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    const reader = new FileReader();
+                    reader.onloadend = () => {
+                      const base64String = (reader.result as string).split(',')[1];
+                      setEditFormData({...editFormData, image_1920: base64String});
+                    };
+                    reader.readAsDataURL(file);
+                  }
+                }} className="w-full border border-outline-variant rounded p-2 focus:border-primary focus:ring-1 focus:ring-primary outline-none text-sm" />
               </div>
               <div>
                 <label className="block text-sm font-bold text-on-surface-variant mb-1">Barcode</label>

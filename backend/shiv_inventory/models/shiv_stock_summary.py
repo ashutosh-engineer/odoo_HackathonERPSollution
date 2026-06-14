@@ -59,7 +59,7 @@ class ShivStockSummary(models.Model):
     stock_value = fields.Float(
         string='Stock Value (₹)', digits=(12, 2),
         compute='_compute_stock_value', store=False,
-        groups='shiv_auth.group_shiv_purchase_user')
+        groups='shiv_auth.group_shiv_purchase_user,shiv_auth.group_shiv_auditor,shiv_auth.group_shiv_accountant')
 
     # ── SQL Constraints ───────────────────────────────────────
     _sql_constraints = [

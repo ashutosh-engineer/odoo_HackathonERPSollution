@@ -52,7 +52,7 @@
                         </group>
                         <group string="Pricing">
                             <field name="sale_price"/>
-                            <field name="cost_price" groups="shiv_auth.group_shiv_purchase_user"/>
+                            <field name="cost_price" groups="shiv_auth.group_shiv_purchase_user,shiv_auth.group_shiv_auditor,shiv_auth.group_shiv_accountant"/>
                             <field name="uom_id"/>
                             <field name="uom_purchase_id"/>
                         </group>

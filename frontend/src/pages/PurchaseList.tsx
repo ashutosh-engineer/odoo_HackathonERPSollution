@@ -18,7 +18,7 @@ interface PurchaseOrderData {
 const STATE_BADGE: Record<string, string> = {
   draft: 'bg-surface-variant text-on-surface-variant',
   confirmed: 'bg-info-container text-info',
-  received: 'bg-primary-container text-primary',
+  received: 'bg-primary-container text-on-primary-container',
   done: 'bg-success-forest text-white',
   cancelled: 'bg-error-container text-error',
 };

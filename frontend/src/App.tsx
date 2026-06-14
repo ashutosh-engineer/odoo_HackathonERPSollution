@@ -53,58 +53,7 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <div className="bg-surface font-body-md text-on-surface antialiased min-h-screen">
-      {/* Floating Top-Right User Bar (replaces the full header) */}
-      <div className="fixed top-0 right-0 z-50 flex items-center gap-2 px-4 py-2.5 bg-white/90 backdrop-blur-md rounded-bl-2xl border-b border-l border-outline-variant/40 shadow-sm">
-        <div className="relative">
-          <button onClick={() => { setShowNotifications(!showNotifications); setShowHelp(false); }} className="p-2 hover:bg-surface-variant transition-colors rounded-lg relative group">
-            <span className="material-symbols-outlined text-on-surface-variant group-hover:text-primary text-[20px]">notifications</span>
-            <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-error rounded-full border-2 border-white"></span>
-          </button>
-          {showNotifications && (
-            <div className="absolute right-0 mt-2 w-72 bg-white border border-outline-variant rounded-xl shadow-xl z-50 p-4">
-              <h3 className="font-bold text-on-surface border-b border-outline-variant pb-2 mb-2">Notifications</h3>
-              <div className="space-y-3">
-                <div className="flex gap-2 p-2 hover:bg-surface-variant rounded-lg transition-colors cursor-pointer">
-                  <span className="material-symbols-outlined text-primary text-[20px]">info</span>
-                  <div>
-                    <p className="text-sm font-bold text-on-surface">System Update</p>
-                    <p className="text-xs text-on-surface-variant">ERP stabilization patch deployed successfully.</p>
-                  </div>
-                </div>
-                <div className="flex gap-2 p-2 hover:bg-surface-variant rounded-lg transition-colors cursor-pointer">
-                  <span className="material-symbols-outlined text-warning-amber text-[20px]">warning</span>
-                  <div>
-                    <p className="text-sm font-bold text-on-surface">Low Stock Alert</p>
-                    <p className="text-xs text-on-surface-variant">Office Desk is below reorder point.</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-        </div>
-        <div className="relative">
-          <button onClick={() => { setShowHelp(!showHelp); setShowNotifications(false); }} className="p-2 hover:bg-surface-variant transition-colors rounded-lg group">
-            <span className="material-symbols-outlined text-on-surface-variant group-hover:text-primary text-[20px]">help_outline</span>
-          </button>
-          {showHelp && (
-            <div className="absolute right-0 mt-2 w-48 bg-white border border-outline-variant rounded-xl shadow-xl z-50 p-2 flex flex-col gap-1">
-              <button onClick={() => setShowHelp(false)} className="w-full text-left px-4 py-2 hover:bg-surface-container-low font-medium rounded-lg text-sm text-on-surface">Documentation</button>
-              <button onClick={() => setShowHelp(false)} className="w-full text-left px-4 py-2 hover:bg-surface-container-low font-medium rounded-lg text-sm text-on-surface">Contact Support</button>
-              <button onClick={() => setShowHelp(false)} className="w-full text-left px-4 py-2 hover:bg-surface-container-low font-medium rounded-lg text-sm text-on-surface">Keyboard Shortcuts</button>
-            </div>
-          )}
-        </div>
-        <div className="h-6 w-px bg-outline-variant/40 mx-1"></div>
-        <div className="flex items-center gap-2.5 cursor-pointer group" onClick={() => window.location.href='/user-management'}>
-          <div className="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center font-bold text-sm shadow-sm">
-            {user?.name?.charAt(0)?.toUpperCase() || 'U'}
-          </div>
-          <div className="hidden lg:block">
-            <p className="text-xs font-bold text-on-surface leading-tight group-hover:text-primary transition-colors">{user?.name || 'User'}</p>
-            <p className="text-[10px] text-on-surface-variant capitalize leading-tight">{user?.shiv_role?.replace(/_/g, ' ') || ''}</p>
-          </div>
-        </div>
-      </div>
+
 
       {/* SideNavBar — full height, no top header offset */}
       <aside className="fixed left-0 top-0 h-full w-[260px] flex flex-col pt-lg pb-md px-sm z-40 bg-primary">
@@ -180,16 +129,25 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
             </Link>
           )}
         </nav>
-        <div className="mt-4 pt-6 border-t border-white/10 space-y-1 px-2">
+        <div className="mt-4 pt-4 border-t border-white/10 space-y-1 px-2">
+          <div className="flex items-center gap-3 px-4 py-3 cursor-pointer rounded-lg hover:bg-white/10 transition-all group" onClick={() => window.location.href='/user-management'}>
+            <div className="w-8 h-8 rounded-full bg-white/20 text-white flex items-center justify-center font-bold text-sm shadow-sm group-hover:bg-white group-hover:text-primary transition-colors">
+              {user?.name?.charAt(0)?.toUpperCase() || 'U'}
+            </div>
+            <div className="flex-1 overflow-hidden">
+              <p className="text-sm font-bold text-white leading-tight truncate">{user?.name || 'User'}</p>
+              <p className="text-xs text-white/60 capitalize leading-tight truncate">{user?.shiv_role?.replace(/_/g, ' ') || ''}</p>
+            </div>
+          </div>
           {hasAccess(roles.admin) && (
-            <Link to="/settings" className="flex items-center gap-3 px-4 py-3 cursor-pointer text-white/60 hover:text-white transition-all">
+            <Link to="/settings" className="flex items-center gap-3 px-4 py-3 cursor-pointer text-white/60 hover:text-white transition-all rounded-lg hover:bg-white/10">
               <span className="material-symbols-outlined">settings_suggest</span>
               <span className="font-label-md">Settings</span>
             </Link>
           )}
           <button onClick={() => {
             logout().then(() => window.location.href = '/login');
-          }} className="w-full flex items-center gap-3 px-4 py-3 cursor-pointer text-white/60 hover:text-white transition-all bg-transparent border-none text-left">
+          }} className="w-full flex items-center gap-3 px-4 py-3 cursor-pointer text-white/60 hover:text-white transition-all bg-transparent border-none text-left rounded-lg hover:bg-white/10">
             <span className="material-symbols-outlined">logout</span>
             <span className="font-label-md">Logout</span>
           </button>

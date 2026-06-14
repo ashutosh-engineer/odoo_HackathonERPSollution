@@ -103,6 +103,43 @@ export const OperationalDashboard = () => {
     fetchDashboardData();
   }, []);
 
+  const isDateInFilter = (dateStr: string | null | undefined, filter: string) => {
+    if (!dateStr) return true;
+    const d = new Date(dateStr);
+    const now = new Date();
+    if (filter === 'today') {
+      return d.toDateString() === now.toDateString();
+    }
+    if (filter === 'this_week') {
+      const diff = now.getTime() - d.getTime();
+      return diff >= 0 && diff <= 7 * 24 * 60 * 60 * 1000;
+    }
+    if (filter === 'this_month') {
+      return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+    }
+    return true;
+  };
+
+  const filteredDeliveries = pendingDeliveries.filter(d => 
+    (!searchQuery || 
+     d.name?.toLowerCase().includes(searchQuery.toLowerCase()) || 
+     (d.customer_id && d.customer_id[1]?.toLowerCase().includes(searchQuery.toLowerCase()))) &&
+    isDateInFilter(d.delivery_date, activeFilter)
+  );
+
+  const filteredWcs = workCenters.filter(wc => 
+    !searchQuery || wc.name?.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
+  const filteredLogs = auditLogs.filter(log => 
+    (!searchQuery || 
+     log.action?.toLowerCase().includes(searchQuery.toLowerCase()) || 
+     log.model?.toLowerCase().includes(searchQuery.toLowerCase()) || 
+     log.actor_name?.toLowerCase().includes(searchQuery.toLowerCase()) || 
+     log.record_name?.toLowerCase().includes(searchQuery.toLowerCase())) &&
+    isDateInFilter(log.timestamp, activeFilter)
+  );
+
   return (
     <div className="p-xl">
       {/* Header */}
@@ -248,10 +285,10 @@ export const OperationalDashboard = () => {
                   </tr>
                 </thead>
                 <tbody className="text-body-sm divide-y divide-outline-variant/30">
-                  {pendingDeliveries.length === 0 ? (
+                  {filteredDeliveries.length === 0 ? (
                     <tr><td colSpan={5} className="text-center py-8 text-on-surface-variant font-bold">No pending deliveries</td></tr>
                   ) : (
-                    pendingDeliveries.map((delivery) => (
+                    filteredDeliveries.map((delivery) => (
                       <tr key={delivery.id} className="group hover:bg-surface-variant/50 transition-colors cursor-pointer">
                         <td className="px-6 py-5 font-mono-md text-primary font-bold">{delivery.name}</td>
                         <td className="px-6 py-5 font-bold text-on-surface">{delivery.customer_id ? delivery.customer_id[1] : 'Unknown'}</td>
@@ -281,10 +318,10 @@ export const OperationalDashboard = () => {
               </h3>
             </div>
             <div className="p-8 grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-10">
-              {workCenters.length === 0 ? (
+              {filteredWcs.length === 0 ? (
                 <div className="col-span-1 md:col-span-2 text-center text-on-surface-variant font-bold py-4">No work centers active</div>
               ) : (
-                workCenters.map((wc, idx) => {
+                filteredWcs.map((wc, idx) => {
                   const util = wc.utilization_pct || 0;
                   const colorClass = util > 85 ? 'bg-error shadow-[0_0_10px_rgba(239,68,68,0.3)]' : 
                                      util > 70 ? 'bg-warning-amber shadow-[0_0_10px_rgba(245,158,11,0.3)]' : 
@@ -323,12 +360,12 @@ export const OperationalDashboard = () => {
               </h3>
             </div>
             <div className="flex-1 p-6 overflow-y-auto space-y-8 custom-scrollbar">
-              {!auditLogs || auditLogs.length === 0 ? (
-                <div className="text-center text-on-surface-variant font-bold p-4">No audit events yet</div>
+              {!filteredLogs || filteredLogs.length === 0 ? (
+                <div className="text-center text-on-surface-variant font-bold p-4">No audit events found</div>
               ) : (
-                (auditLogs || []).map((log, idx) => (
-                  <div key={log.id} className={`flex gap-4 ${idx !== auditLogs.length - 1 ? 'relative pb-2' : ''}`}>
-                    {idx !== auditLogs.length - 1 && (
+                (filteredLogs || []).map((log, idx) => (
+                  <div key={log.id} className={`flex gap-4 ${idx !== filteredLogs.length - 1 ? 'relative pb-2' : ''}`}>
+                    {idx !== filteredLogs.length - 1 && (
                       <div className="absolute left-[17px] top-10 bottom-[-32px] w-[2px] bg-outline-variant/40"></div>
                     )}
                     <div className="w-9 h-9 rounded-xl bg-surface-variant flex-shrink-0 flex items-center justify-center border border-outline-variant/20 shadow-sm z-10 bg-white">

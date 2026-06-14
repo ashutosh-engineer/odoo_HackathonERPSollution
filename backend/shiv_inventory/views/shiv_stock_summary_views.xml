@@ -14,7 +14,7 @@
                 <field name="qty_forecasted" string="Forecasted"/>
                 <field name="last_movement_at" string="Last Movement"/>
                 <field name="stock_value" string="Value (₹)"
-                       groups="shiv_auth.group_shiv_purchase_user"/>
+                       groups="shiv_auth.group_shiv_purchase_user,shiv_auth.group_shiv_auditor,shiv_auth.group_shiv_accountant"/>
                 <button name="action_view_ledger" string="Ledger"
                         type="object" class="btn-sm btn-info"/>
             </tree>
