@@ -161,7 +161,11 @@ Client: Create Sales Order for 10 units
 - Budget health scoring with anomaly detection
 - Manufacturing utilization % by work center
 
-
+**Reporting & Data Export**
+- **Dynamic Excel/CSV Export**: Live data exports for Sales Orders, Purchase Orders, and Inventory Stock lists.
+- **Auditable Ledger Export**: Download the complete, immutable inventory ledger as CSV for accounting audits.
+- **Compliance JSON Export**: Fully structured JSON export of all audit logs for import into external security info & event management (SIEM) systems.
+- **Materialized View Exports**: Generate real-time summary statistics for stock valuation.
 
 ---
 
