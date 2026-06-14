@@ -29,6 +29,9 @@ export const OperationalDashboard = () => {
   const showPurchase = ['admin', 'auditor', 'accountant', 'purchase_manager', 'purchase_user', 'viewer'].includes(role);
   const showMfg = ['admin', 'auditor', 'production_manager', 'production_user', 'viewer'].includes(role);
   const showInv = ['admin', 'auditor', 'accountant', 'warehouse_manager', 'warehouse_user', 'viewer'].includes(role);
+  const showAudit = ['admin', 'auditor'].includes(role);
+  const canCreateSales = ['admin', 'sales_manager', 'sales_user'].includes(role);
+  const canCreateAny = ['admin', 'sales_manager', 'sales_user', 'purchase_manager', 'purchase_user', 'production_manager', 'production_user', 'warehouse_manager', 'warehouse_user'].includes(role);
 
   const [kpis, setKpis] = useState<DashboardKPIs | null>(null);
   const [auditLogs, setAuditLogs] = useState<any[]>([]);
@@ -203,9 +206,9 @@ export const OperationalDashboard = () => {
       </div>
 
       {/* Main Layout Split */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-xl">
+      <div className={`grid grid-cols-1 ${showAudit ? 'lg:grid-cols-12' : ''} gap-xl`}>
         {/* Tables Column */}
-        <div className="lg:col-span-8 space-y-xl">
+        <div className={`${showAudit ? 'lg:col-span-8' : ''} space-y-xl`}>
           {/* Pending Deliveries Table */}
           <div className="bg-white border border-outline-variant rounded-xl shadow-soft overflow-hidden">
             <div className="px-6 py-5 border-b border-outline-variant flex justify-between items-center bg-white/50">
@@ -294,7 +297,8 @@ export const OperationalDashboard = () => {
           </div>
         </div>
 
-        {/* Side Feed Column */}
+        {/* Side Feed Column — Audit Events (admin/auditor only) */}
+        {showAudit && (
         <div className="lg:col-span-4">
           <div className="bg-white border border-outline-variant rounded-xl shadow-soft flex flex-col h-full overflow-hidden">
             <div className="px-6 py-5 border-b border-outline-variant bg-white/50">
@@ -330,14 +334,17 @@ export const OperationalDashboard = () => {
             </div>
           </div>
         </div>
+        )}
       </div>
 
-      {/* Floating Action Buttons */}
+      {/* Floating Action Buttons — role-gated */}
       <div className="fixed bottom-8 right-8 flex flex-col gap-4 z-50">
+        {canCreateSales && (
         <button onClick={() => window.location.href='/sales/new'} className="w-16 h-16 bg-primary text-white rounded-2xl shadow-soft-lg hover:scale-105 active:scale-95 transition-all flex items-center justify-center group relative border-2 border-white/20">
           <span className="material-symbols-outlined !text-[36px]">add</span>
           <span className="absolute right-20 bg-inverse-surface text-white px-4 py-2 rounded-xl text-label-md opacity-0 group-hover:opacity-100 transition-all whitespace-nowrap pointer-events-none shadow-xl translate-x-4 group-hover:translate-x-0 font-bold">Create New Order</span>
         </button>
+        )}
         <button onClick={handleExport} className="w-16 h-16 bg-white border border-outline-variant text-primary rounded-2xl shadow-soft-lg hover:scale-105 active:scale-95 transition-all flex items-center justify-center group relative">
           <span className="material-symbols-outlined !text-[28px]">print</span>
           <span className="absolute right-20 bg-inverse-surface text-white px-4 py-2 rounded-xl text-label-md opacity-0 group-hover:opacity-100 transition-all whitespace-nowrap pointer-events-none shadow-xl translate-x-4 group-hover:translate-x-0 font-bold">Export Report</span>

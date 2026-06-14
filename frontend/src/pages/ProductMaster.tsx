@@ -77,13 +77,64 @@ export const ProductMaster = () => {
   const fetchAllProducts = async () => {
     try {
       setLoadingList(true);
-      const products = await odooSearchRead('shiv.product', [], [
-        'name', 'internal_ref', 'barcode', 'sale_price', 'cost_price',
-        'state', 'qty_on_hand', 'qty_reserved', 'qty_available'
-      ]);
-      setAllProducts(products as ProductData[]);
-      if (products.length > 0 && !selectedProductId) {
-        setSelectedProductId((products[0] as ProductData).id);
+      // Step 1: Fetch stored fields via search_read (computed unstored fields may not be returned)
+      let products: any[] = [];
+      try {
+        products = await odooSearchRead('shiv.product', [], [
+          'name', 'internal_ref', 'barcode', 'sale_price', 'cost_price',
+          'state', 'qty_on_hand', 'qty_reserved', 'qty_available'
+        ]);
+      } catch (searchErr) {
+        console.warn("search_read with all fields failed, retrying without restricted fields...", searchErr);
+        // cost_price is group-restricted in backend — retry without it
+        products = await odooSearchRead('shiv.product', [], [
+          'name', 'internal_ref', 'barcode', 'sale_price',
+          'state', 'qty_on_hand', 'qty_reserved', 'qty_available'
+        ]);
+      }
+
+      // Step 2: If computed stock fields are missing (unstored), fetch via read
+      const normalizedProducts = (products as any[]).map((p: any) => ({
+        id: p.id,
+        name: p.name || '',
+        internal_ref: p.internal_ref || '',
+        barcode: p.barcode || '',
+        sale_price: p.sale_price ?? 0,
+        cost_price: p.cost_price ?? 0,
+        state: p.state || 'draft',
+        qty_on_hand: p.qty_on_hand ?? 0,
+        qty_reserved: p.qty_reserved ?? 0,
+        qty_available: p.qty_available ?? 0,
+      }));
+
+      // If stock quantities are all zero (possibly not returned by search_read for unstored computed fields),
+      // try fetching them separately via the 'read' method which triggers compute
+      const allZeroStock = normalizedProducts.length > 0 && normalizedProducts.every(
+        (p: ProductData) => p.qty_on_hand === 0 && p.qty_reserved === 0 && p.qty_available === 0
+      );
+      if (allZeroStock && normalizedProducts.length > 0) {
+        try {
+          const ids = normalizedProducts.map((p: ProductData) => p.id);
+          const stockData = await odooCall('shiv.product', 'read', [ids, ['qty_on_hand', 'qty_reserved', 'qty_available']]);
+          if (Array.isArray(stockData)) {
+            const stockMap = new Map(stockData.map((s: any) => [s.id, s]));
+            normalizedProducts.forEach((p: ProductData) => {
+              const sd = stockMap.get(p.id);
+              if (sd) {
+                p.qty_on_hand = sd.qty_on_hand ?? 0;
+                p.qty_reserved = sd.qty_reserved ?? 0;
+                p.qty_available = sd.qty_available ?? 0;
+              }
+            });
+          }
+        } catch (stockErr) {
+          console.warn("Could not fetch computed stock quantities", stockErr);
+        }
+      }
+
+      setAllProducts(normalizedProducts as ProductData[]);
+      if (normalizedProducts.length > 0 && !selectedProductId) {
+        setSelectedProductId((normalizedProducts[0] as ProductData).id);
       }
     } catch (err) {
       console.error("Failed to load products list", err);

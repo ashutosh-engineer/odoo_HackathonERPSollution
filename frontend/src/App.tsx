@@ -202,6 +202,7 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
             <span className="font-label-md">Logout</span>
           </button>
         </div>
+        {(hasAccess(roles.sales) || hasAccess(roles.purchase) || hasAccess(roles.mfg) || hasAccess(roles.inv)) && (
         <div className="px-4 mt-6 relative">
           {showNewEntryMenu && (
             <>
@@ -259,6 +260,7 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
             <span>New Entry</span>
           </button>
         </div>
+        )}
 
       </aside>
 
