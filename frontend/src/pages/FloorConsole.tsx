@@ -18,7 +18,7 @@ export const FloorConsole = () => {
   const { user } = useAuth();
   const role = user?.shiv_role || '';
   
-  const [data, setData] = useState<{ work_centers: WorkCenter[], summary: any, alerts: string[] } | null>(null);
+  const [data, setData] = useState<{ work_centers: WorkCenter[], summary: any, alerts: any[] } | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [lastUpdated, setLastUpdated] = useState<number>(Date.now());
@@ -76,7 +76,7 @@ export const FloorConsole = () => {
       setActionLoading(true);
       await apiFetch(`/shiv/floor/work-centers/${wcId}/report-anomaly`, {
         method: 'POST',
-        body: JSON.stringify({ type: anomalyType, description: anomalyDesc })
+        body: JSON.stringify({ anomaly_type: anomalyType, description: anomalyDesc })
       });
       setReportModalOpen(null);
       setAnomalyDesc('');
@@ -160,9 +160,14 @@ export const FloorConsole = () => {
       {data?.alerts && data.alerts.length > 0 && (
         <div className="mb-6 space-y-2">
           {data.alerts.map((alt, idx) => (
-            <div key={idx} className="bg-error-container text-error px-4 py-3 rounded-lg flex items-center gap-3 font-bold border border-error/20">
-              <span className="material-symbols-outlined">warning</span>
-              {alt}
+            <div key={idx} className={`px-4 py-3 rounded-lg flex items-center gap-3 font-bold border ${alt.level === 'critical' ? 'bg-error-container text-error border-error/20' : alt.level === 'warning' ? 'bg-warning-amber/10 text-warning-amber border-warning-amber/20' : 'bg-info/10 text-info border-info/20'}`}>
+              <span className="material-symbols-outlined">
+                {alt.level === 'critical' ? 'error' : alt.level === 'warning' ? 'warning' : 'info'}
+              </span>
+              <div>
+                <span className="mr-2 uppercase tracking-wider text-[11px] px-1.5 py-0.5 rounded-sm bg-black/5 opacity-80">{alt.work_center}</span>
+                {alt.message}
+              </div>
             </div>
           ))}
         </div>

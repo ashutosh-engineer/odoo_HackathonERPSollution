@@ -85,6 +85,29 @@ def require_production(f):
     return wrapper
 
 
+def require_production_or_auditor(f):
+    """Production staff OR Auditor role."""
+    from functools import wraps
+    @wraps(f)
+    def wrapper(*args, **kwargs):
+        if not request.session.uid:
+            return json_err('Authentication required.', 'UNAUTHENTICATED', 401)
+        user = request.env.user
+        allowed = (
+            user.has_group('shiv_auth.group_shiv_production_user') or
+            user.has_group('shiv_auth.group_shiv_production_manager') or
+            user.has_group('shiv_auth.group_shiv_admin') or
+            user.has_group('shiv_auth.group_shiv_auditor')
+        )
+        if not allowed:
+            return json_err(
+                'Production staff or Auditor access required.',
+                'FORBIDDEN', 403
+            )
+        return f(*args, **kwargs)
+    return wrapper
+
+
 def require_production_manager(f):
     """Minimum: production_manager role."""
     from functools import wraps
@@ -178,7 +201,7 @@ class ShivFloorConsoleController(http.Controller):
 
     @http.route('/shiv/floor/console', type='http', auth='user',
                 methods=['GET'], csrf=False)
-    @require_production
+    @require_production_or_auditor
     def get_console(self, **kwargs):
         """
         Full floor console payload — all work centers, live MOs, alerts.
@@ -195,7 +218,7 @@ class ShivFloorConsoleController(http.Controller):
 
     @http.route('/shiv/floor/work-centers', type='http', auth='user',
                 methods=['GET'], csrf=False)
-    @require_production
+    @require_production_or_auditor
     def list_work_centers(self, **kwargs):
         """List all active work centers with live status."""
         wcs = request.env['shiv.work.center'].sudo().search(
@@ -205,7 +228,7 @@ class ShivFloorConsoleController(http.Controller):
 
     @http.route('/shiv/floor/work-centers/<int:wc_id>', type='http', auth='user',
                 methods=['GET'], csrf=False)
-    @require_production
+    @require_production_or_auditor
     def get_work_center(self, wc_id, **kwargs):
         """Single work center detail with active + on-hold MOs."""
         wc = request.env['shiv.work.center'].sudo().browse(wc_id)
@@ -448,7 +471,7 @@ class ShivFloorConsoleController(http.Controller):
 
     @http.route('/shiv/floor/manufacturing-orders', type='http', auth='user',
                 methods=['GET'], csrf=False)
-    @require_production
+    @require_production_or_auditor
     def list_floor_mos(self, **kwargs):
         """
         Live MO list for the floor.
@@ -554,7 +577,7 @@ class ShivFloorConsoleController(http.Controller):
 
     @http.route('/shiv/floor/alerts', type='http', auth='user',
                 methods=['GET'], csrf=False)
-    @require_production
+    @require_production_or_auditor
     def get_alerts(self, **kwargs):
         """
         Active floor alerts:

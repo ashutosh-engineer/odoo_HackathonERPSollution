@@ -42,7 +42,7 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
     purchase: ['admin', 'purchase_manager', 'purchase_user', 'accountant', 'auditor'],
     mfg: ['admin', 'production_manager', 'production_user', 'auditor'],
     inv: ['admin', 'warehouse_manager', 'warehouse_user', 'accountant', 'auditor'],
-    floor_console: ['admin', 'production_manager', 'production_user'],
+    floor_console: ['admin', 'production_manager', 'production_user', 'auditor'],
     audit: ['admin', 'auditor'],
     // Create-specific roles (excludes read-only: auditor, accountant, viewer)
     create_sales: ['admin', 'sales_manager', 'sales_user'],
@@ -255,7 +255,7 @@ function App() {
             <Route path="/manufacturing/:id" element={<AppLayout><ManufacturingOrder /></AppLayout>} />
           </Route>
 
-          <Route element={<ProtectedRoute allowedRoles={['admin', 'production_manager', 'production_user']} />}>
+          <Route element={<ProtectedRoute allowedRoles={['admin', 'production_manager', 'production_user', 'auditor']} />}>
             <Route path="/floor-console" element={<AppLayout><FloorConsole /></AppLayout>} />
           </Route>
 
