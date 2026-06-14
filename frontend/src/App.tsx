@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { BrowserRouter as Router, Routes, Route, Link, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Link, useLocation, useNavigate } from 'react-router-dom';
 import { LandingPage } from './pages/LandingPage';
 import { SignIn } from './pages/SignIn';
 import { AdminLogin } from './pages/AdminLogin';
@@ -53,75 +53,62 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
 
   return (
     <div className="bg-surface font-body-md text-on-surface antialiased min-h-screen">
-      {/* TopNavBar */}
-      <nav className="flex justify-between items-center w-full px-gutter h-16 sticky top-0 z-50 bg-white border-b border-outline-variant shadow-sm">
-        <div className="flex items-center gap-8">
-          <div className="flex items-center gap-2">
-            <svg viewBox="0 0 40 40" className="w-7 h-7 text-primary" fill="currentColor">
-              <path d="M10 20C10 14.4772 14.4772 10 20 10V20H10Z" opacity="0.8"/>
-              <path d="M20 10C25.5228 10 30 14.4772 30 20H20V10Z" />
-              <path d="M30 20C30 25.5228 25.5228 30 20 30V20H30Z" opacity="0.6"/>
-              <path d="M20 30C14.4772 30 10 25.5228 10 20H20V30Z" opacity="0.4"/>
-            </svg>
-            <span className="font-headline-sm text-headline-sm font-extrabold tracking-tight text-slate-900">SHIV<span className="text-primary font-light">ERP</span></span>
-          </div>
-          <div className="hidden md:flex items-center bg-surface-variant rounded-lg px-4 py-2 gap-3 border border-outline-variant transition-all focus-within:border-primary/50 focus-within:bg-white focus-within:shadow-sm">
-            <span className="material-symbols-outlined text-on-surface-variant">search</span>
-            <input className="bg-transparent border-none focus:ring-0 text-body-sm w-72 p-0 placeholder-on-surface-variant/60 outline-none" placeholder="Search for orders, products or customers..." type="text"/>
-          </div>
-        </div>
-        <div className="flex items-center gap-3">
-          <div className="relative">
-            <button onClick={() => { setShowNotifications(!showNotifications); setShowHelp(false); }} className="p-2.5 hover:bg-surface-variant transition-colors rounded-lg relative group">
-              <span className="material-symbols-outlined text-on-surface-variant group-hover:text-primary">notifications</span>
-              <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-error rounded-full border-2 border-white"></span>
-            </button>
-            {showNotifications && (
-              <div className="absolute right-0 mt-2 w-72 bg-white border border-outline-variant rounded-xl shadow-xl z-50 p-4">
-                <h3 className="font-bold text-on-surface border-b border-outline-variant pb-2 mb-2">Notifications</h3>
-                <div className="space-y-3">
-                  <div className="flex gap-2 p-2 hover:bg-surface-variant rounded-lg transition-colors cursor-pointer">
-                    <span className="material-symbols-outlined text-primary text-[20px]">info</span>
-                    <div>
-                      <p className="text-sm font-bold text-on-surface">System Update</p>
-                      <p className="text-xs text-on-surface-variant">ERP stabilization patch deployed successfully.</p>
-                    </div>
+      {/* Floating Top-Right User Bar (replaces the full header) */}
+      <div className="fixed top-0 right-0 z-50 flex items-center gap-2 px-4 py-2.5 bg-white/90 backdrop-blur-md rounded-bl-2xl border-b border-l border-outline-variant/40 shadow-sm">
+        <div className="relative">
+          <button onClick={() => { setShowNotifications(!showNotifications); setShowHelp(false); }} className="p-2 hover:bg-surface-variant transition-colors rounded-lg relative group">
+            <span className="material-symbols-outlined text-on-surface-variant group-hover:text-primary text-[20px]">notifications</span>
+            <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-error rounded-full border-2 border-white"></span>
+          </button>
+          {showNotifications && (
+            <div className="absolute right-0 mt-2 w-72 bg-white border border-outline-variant rounded-xl shadow-xl z-50 p-4">
+              <h3 className="font-bold text-on-surface border-b border-outline-variant pb-2 mb-2">Notifications</h3>
+              <div className="space-y-3">
+                <div className="flex gap-2 p-2 hover:bg-surface-variant rounded-lg transition-colors cursor-pointer">
+                  <span className="material-symbols-outlined text-primary text-[20px]">info</span>
+                  <div>
+                    <p className="text-sm font-bold text-on-surface">System Update</p>
+                    <p className="text-xs text-on-surface-variant">ERP stabilization patch deployed successfully.</p>
                   </div>
-                  <div className="flex gap-2 p-2 hover:bg-surface-variant rounded-lg transition-colors cursor-pointer">
-                    <span className="material-symbols-outlined text-warning-amber text-[20px]">warning</span>
-                    <div>
-                      <p className="text-sm font-bold text-on-surface">Low Stock Alert</p>
-                      <p className="text-xs text-on-surface-variant">Office Desk is below reorder point.</p>
-                    </div>
+                </div>
+                <div className="flex gap-2 p-2 hover:bg-surface-variant rounded-lg transition-colors cursor-pointer">
+                  <span className="material-symbols-outlined text-warning-amber text-[20px]">warning</span>
+                  <div>
+                    <p className="text-sm font-bold text-on-surface">Low Stock Alert</p>
+                    <p className="text-xs text-on-surface-variant">Office Desk is below reorder point.</p>
                   </div>
                 </div>
               </div>
-            )}
-          </div>
-          <button onClick={() => window.location.href='/settings'} className="p-2.5 hover:bg-surface-variant transition-colors rounded-lg group">
-            <span className="material-symbols-outlined text-on-surface-variant group-hover:text-primary">settings</span>
+            </div>
+          )}
+        </div>
+        <div className="relative">
+          <button onClick={() => { setShowHelp(!showHelp); setShowNotifications(false); }} className="p-2 hover:bg-surface-variant transition-colors rounded-lg group">
+            <span className="material-symbols-outlined text-on-surface-variant group-hover:text-primary text-[20px]">help_outline</span>
           </button>
-          <div className="relative">
-            <button onClick={() => { setShowHelp(!showHelp); setShowNotifications(false); }} className="p-2.5 hover:bg-surface-variant transition-colors rounded-lg group">
-              <span className="material-symbols-outlined text-on-surface-variant group-hover:text-primary">help_outline</span>
-            </button>
-            {showHelp && (
-              <div className="absolute right-0 mt-2 w-48 bg-white border border-outline-variant rounded-xl shadow-xl z-50 p-2 flex flex-col gap-1">
-                <button onClick={() => setShowHelp(false)} className="w-full text-left px-4 py-2 hover:bg-surface-container-low font-medium rounded-lg text-sm text-on-surface">Documentation</button>
-                <button onClick={() => setShowHelp(false)} className="w-full text-left px-4 py-2 hover:bg-surface-container-low font-medium rounded-lg text-sm text-on-surface">Contact Support</button>
-                <button onClick={() => setShowHelp(false)} className="w-full text-left px-4 py-2 hover:bg-surface-container-low font-medium rounded-lg text-sm text-on-surface">Keyboard Shortcuts</button>
-              </div>
-            )}
+          {showHelp && (
+            <div className="absolute right-0 mt-2 w-48 bg-white border border-outline-variant rounded-xl shadow-xl z-50 p-2 flex flex-col gap-1">
+              <button onClick={() => setShowHelp(false)} className="w-full text-left px-4 py-2 hover:bg-surface-container-low font-medium rounded-lg text-sm text-on-surface">Documentation</button>
+              <button onClick={() => setShowHelp(false)} className="w-full text-left px-4 py-2 hover:bg-surface-container-low font-medium rounded-lg text-sm text-on-surface">Contact Support</button>
+              <button onClick={() => setShowHelp(false)} className="w-full text-left px-4 py-2 hover:bg-surface-container-low font-medium rounded-lg text-sm text-on-surface">Keyboard Shortcuts</button>
+            </div>
+          )}
+        </div>
+        <div className="h-6 w-px bg-outline-variant/40 mx-1"></div>
+        <div className="flex items-center gap-2.5 cursor-pointer group" onClick={() => window.location.href='/user-management'}>
+          <div className="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center font-bold text-sm shadow-sm">
+            {user?.name?.charAt(0)?.toUpperCase() || 'U'}
           </div>
-          <div onClick={() => window.location.href='/user-management'} className="ml-2 w-9 h-9 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center text-primary font-bold overflow-hidden cursor-pointer hover:ring-2 hover:ring-primary/20 transition-all">
-            <img alt="User profile" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD9nPQnPwiyFACYIPnvMJjPGpK9C_afxFIxEIdwTSghixSRtkn2ZQT-Da0TaPd0cKhwTB5chX3IJzrQrj_T5NM90mas94xO9ZxY02cbP35cTEMP8iC7gCQon0CMzExNndE_iq-B3hFj3bpdf-8nYbddYY-T8hTK6O1IRg9MZd1yGH4RHBKpAJ_cUemlSttRhfh2fIDlUcTZSTSRM4BM3DMuSL4pknCZT4Hf3x9oEGizfg8mdqvbVaVzV5diKd6S8hE8-pMLaBrEyibG"/>
+          <div className="hidden lg:block">
+            <p className="text-xs font-bold text-on-surface leading-tight group-hover:text-primary transition-colors">{user?.name || 'User'}</p>
+            <p className="text-[10px] text-on-surface-variant capitalize leading-tight">{user?.shiv_role?.replace(/_/g, ' ') || ''}</p>
           </div>
         </div>
-      </nav>
+      </div>
 
-      {/* SideNavBar */}
+      {/* SideNavBar — full height, no top header offset */}
       <aside className="fixed left-0 top-0 h-full w-[260px] flex flex-col pt-lg pb-md px-sm z-40 bg-primary">
-        <div className="flex items-center gap-3 mb-10 px-4 mt-16">
+        <div className="flex items-center gap-3 mb-10 px-4 mt-4">
           <div className="w-10 h-10 flex items-center justify-center text-white">
             <svg viewBox="0 0 40 40" className="w-full h-full text-white" fill="currentColor">
               <path d="M10 20C10 14.4772 14.4772 10 20 10V20H10Z" opacity="0.8"/>
@@ -269,7 +256,7 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
 
       </aside>
 
-      <main className="ml-[260px] min-h-[calc(100vh-64px)] bg-surface">
+      <main className="ml-[260px] min-h-screen bg-surface">
         {children}
       </main>
     </div>

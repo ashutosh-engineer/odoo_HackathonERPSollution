@@ -253,7 +253,7 @@ export const ProductMaster = () => {
       )}
 
       {/* Left Sidebar for Product Selection */}
-      <aside className={`fixed md:sticky top-16 left-0 h-[calc(100vh-64px)] w-[280px] bg-white border-r border-outline-variant flex flex-col z-40 transition-transform duration-300 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
+      <aside className={`fixed md:sticky top-0 left-0 h-screen w-[280px] bg-white border-r border-outline-variant flex flex-col z-40 transition-transform duration-300 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}`}>
         <div className="p-4 border-b border-outline-variant bg-surface-container-lowest">
           <h2 className="font-headline-sm text-primary font-bold flex items-center gap-2">
             <span className="material-symbols-outlined">inventory</span>
@@ -280,7 +280,7 @@ export const ProductMaster = () => {
       {/* Main Content Area */}
       <main className="flex-1 flex flex-col min-w-0 max-w-full">
         {/* Header & Action Bar */}
-        <div className="bg-white border-b border-outline-variant p-4 md:px-lg sticky top-16 z-30 flex-shrink-0 shadow-sm">
+        <div className="bg-white border-b border-outline-variant p-4 md:px-lg sticky top-0 z-30 flex-shrink-0 shadow-sm">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div className="flex items-center gap-3">
               <button 

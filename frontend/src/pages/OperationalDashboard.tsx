@@ -41,6 +41,7 @@ export const OperationalDashboard = () => {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [activeFilter, setActiveFilter] = useState<string>('today');
   const [showFilterDropdown, setShowFilterDropdown] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const handleExport = () => {
     if (!kpis) return;
@@ -105,34 +106,48 @@ export const OperationalDashboard = () => {
   return (
     <div className="p-xl">
       {/* Header */}
-      <div className="flex justify-between items-end mb-xl">
+      <div className="flex flex-col xl:flex-row justify-between items-start xl:items-end gap-4 mb-xl w-full">
         <div>
           <h1 className="font-headline-lg text-headline-lg text-on-surface mb-1">Operational Dashboard</h1>
           <p className="text-on-surface-variant font-body-md">Real-time workshop performance and exception monitoring.</p>
         </div>
-        <div className="flex gap-3 relative">
-          <button 
-            onClick={() => { setActiveFilter('today'); handleActionClick('Dashboard filtered to Today'); }} 
-            className={`px-5 py-2.5 border border-outline-variant font-semibold rounded-xl flex items-center gap-2 hover:border-primary/30 transition-all shadow-soft ${activeFilter === 'today' ? 'bg-primary/10 text-primary border-primary/30' : 'bg-white text-on-surface hover:bg-surface-variant'}`}
-          >
-            <span className="material-symbols-outlined text-[20px]">calendar_today</span>
-            Today
-          </button>
-          <div className="relative">
+        <div className="flex flex-col sm:flex-row items-center gap-3 w-full xl:w-auto">
+          {/* Search Bar */}
+          <div className="flex items-center bg-white rounded-xl px-4 py-2.5 gap-3 border border-outline-variant transition-all focus-within:border-primary/50 focus-within:shadow-soft w-full sm:w-auto">
+            <span className="material-symbols-outlined text-on-surface-variant text-[20px]">search</span>
+            <input 
+              className="bg-transparent border-none focus:ring-0 text-body-sm w-full sm:w-64 p-0 placeholder-on-surface-variant/60 outline-none" 
+              placeholder="Search orders, products or customers..." 
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+
+          <div className="flex gap-3 relative w-full sm:w-auto">
             <button 
-              onClick={() => setShowFilterDropdown(!showFilterDropdown)} 
-              className={`px-5 py-2.5 border border-outline-variant font-semibold rounded-xl flex items-center gap-2 hover:border-primary/30 transition-all shadow-soft ${activeFilter !== 'today' ? 'bg-primary/10 text-primary border-primary/30' : 'bg-white text-on-surface hover:bg-surface-variant'}`}
+              onClick={() => { setActiveFilter('today'); handleActionClick('Dashboard filtered to Today'); }} 
+              className={`flex-1 sm:flex-none px-5 py-2.5 border border-outline-variant font-semibold rounded-xl flex items-center justify-center gap-2 hover:border-primary/30 transition-all shadow-soft ${activeFilter === 'today' ? 'bg-primary/10 text-primary border-primary/30' : 'bg-white text-on-surface hover:bg-surface-variant'}`}
             >
-              <span className="material-symbols-outlined text-[20px]">filter_list</span>
-              {activeFilter === 'today' ? 'Filters' : activeFilter === 'this_week' ? 'This Week' : 'This Month'}
+              <span className="material-symbols-outlined text-[20px]">calendar_today</span>
+              Today
             </button>
-            {showFilterDropdown && (
-              <div className="absolute right-0 mt-2 w-48 bg-white border border-outline-variant rounded-xl shadow-lg z-20 py-2">
-                <button onClick={() => { setActiveFilter('today'); setShowFilterDropdown(false); handleActionClick('Dashboard filtered to Today'); }} className="w-full text-left px-4 py-2 hover:bg-surface-container-low font-medium">Today</button>
-                <button onClick={() => { setActiveFilter('this_week'); setShowFilterDropdown(false); handleActionClick('Dashboard filtered to This Week'); }} className="w-full text-left px-4 py-2 hover:bg-surface-container-low font-medium">This Week</button>
-                <button onClick={() => { setActiveFilter('this_month'); setShowFilterDropdown(false); handleActionClick('Dashboard filtered to This Month'); }} className="w-full text-left px-4 py-2 hover:bg-surface-container-low font-medium">This Month</button>
-              </div>
-            )}
+            <div className="relative flex-1 sm:flex-none">
+              <button 
+                onClick={() => setShowFilterDropdown(!showFilterDropdown)} 
+                className={`w-full px-5 py-2.5 border border-outline-variant font-semibold rounded-xl flex items-center justify-center gap-2 hover:border-primary/30 transition-all shadow-soft ${activeFilter !== 'today' ? 'bg-primary/10 text-primary border-primary/30' : 'bg-white text-on-surface hover:bg-surface-variant'}`}
+              >
+                <span className="material-symbols-outlined text-[20px]">filter_list</span>
+                {activeFilter === 'today' ? 'Filters' : activeFilter === 'this_week' ? 'This Week' : 'This Month'}
+              </button>
+              {showFilterDropdown && (
+                <div className="absolute right-0 mt-2 w-48 bg-white border border-outline-variant rounded-xl shadow-lg z-20 py-2">
+                  <button onClick={() => { setActiveFilter('today'); setShowFilterDropdown(false); handleActionClick('Dashboard filtered to Today'); }} className="w-full text-left px-4 py-2 hover:bg-surface-container-low font-medium">Today</button>
+                  <button onClick={() => { setActiveFilter('this_week'); setShowFilterDropdown(false); handleActionClick('Dashboard filtered to This Week'); }} className="w-full text-left px-4 py-2 hover:bg-surface-container-low font-medium">This Week</button>
+                  <button onClick={() => { setActiveFilter('this_month'); setShowFilterDropdown(false); handleActionClick('Dashboard filtered to This Month'); }} className="w-full text-left px-4 py-2 hover:bg-surface-container-low font-medium">This Month</button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -216,7 +231,7 @@ export const OperationalDashboard = () => {
                 <span className="material-symbols-outlined text-warning-amber !text-[24px]">local_shipping</span>
                 Pending Deliveries
               </h3>
-              <a className="text-primary font-bold text-label-md hover:text-primary/80 flex items-center gap-1 group" href="#">
+              <a className="text-primary font-bold text-label-md hover:text-primary/80 flex items-center gap-1 group" href="/sales">
                 View All
                 <span className="material-symbols-outlined !text-[16px] group-hover:translate-x-1 transition-transform">arrow_forward</span>
               </a>
