@@ -55,22 +55,22 @@ export const ProductMaster = () => {
   const { user } = useAuth();
   const role = user?.shiv_role || '';
   const canSeeCost = ['admin', 'purchase_manager', 'purchase_user', 'auditor', 'accountant'].includes(role);
-  
+
   const [activeTab, setActiveTab] = useState('inventory');
-  
+
   const [allProducts, setAllProducts] = useState<ProductData[]>([]);
   const [selectedProductId, setSelectedProductId] = useState<number | null>(null);
-  
+
   const [product, setProduct] = useState<ProductData | null>(null);
   const [ledger, setLedger] = useState<StockLedger[]>([]);
-  
+
   // Procurement
   const [vendorRules, setVendorRules] = useState<VendorRule[]>([]);
-  
+
   // BoM
   const [boms, setBoms] = useState<BomData[]>([]);
   const [bomLines, setBomLines] = useState<BomLineData[]>([]);
-  
+
   const [loadingList, setLoadingList] = useState(true);
   const [loadingDetails, setLoadingDetails] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -200,7 +200,7 @@ export const ProductMaster = () => {
 
   useEffect(() => {
     if (!selectedProductId) return;
-    
+
     const fetchProductDetails = async () => {
       try {
         setLoadingDetails(true);
@@ -208,7 +208,7 @@ export const ProductMaster = () => {
         if (selectedProd) {
           setProduct(selectedProd);
         }
-        
+
         // Fetch stock movements
         try {
           const movements = await odooSearchRead('shiv.stock.ledger', [['product_id', '=', selectedProductId]], [
@@ -252,7 +252,7 @@ export const ProductMaster = () => {
           setBoms([]);
           setBomLines([]);
         }
-        
+
       } catch (err) {
         console.error("Failed to load product details", err);
       } finally {
@@ -269,8 +269,8 @@ export const ProductMaster = () => {
     <div className="flex h-full w-full bg-surface">
       {/* Sidebar Overlay (Mobile) */}
       {sidebarOpen && (
-        <div 
-          className="fixed inset-0 bg-black/50 z-40 md:hidden" 
+        <div
+          className="fixed inset-0 bg-black/50 z-40 md:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
@@ -306,7 +306,7 @@ export const ProductMaster = () => {
         <div className="bg-white border-b border-outline-variant p-4 md:px-lg sticky top-0 z-30 flex-shrink-0 shadow-sm">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
             <div className="flex items-center gap-3">
-              <button 
+              <button
                 onClick={() => setSidebarOpen(true)}
                 className="md:hidden p-2 rounded-lg bg-surface-container hover:bg-surface-variant text-on-surface"
               >
@@ -342,14 +342,14 @@ export const ProductMaster = () => {
         </div>
 
         {loadingDetails ? (
-           <div className="flex-1 p-8 text-center text-on-surface-variant animate-pulse font-bold">Loading Details...</div>
+          <div className="flex-1 p-8 text-center text-on-surface-variant animate-pulse font-bold">Loading Details...</div>
         ) : !product ? (
-           <div className="flex-1 p-8 text-center text-error font-bold">Product not selected</div>
+          <div className="flex-1 p-8 text-center text-error font-bold">Product not selected</div>
         ) : (
           <div className="flex-1 overflow-y-auto">
             {/* Status Tracker (Steppers) */}
             <div className="flex border-b border-outline-variant bg-white">
-              <button 
+              <button
                 onClick={async () => {
                   if (product.state !== 'active') {
                     setToastMessage('Activating product...');
@@ -361,7 +361,7 @@ export const ProductMaster = () => {
                 {product.state === 'active' && <span className="material-symbols-outlined text-[18px]" style={{ fontVariationSettings: "'FILL' 1" }}>verified</span>}
                 Active
               </button>
-              <button 
+              <button
                 onClick={async () => {
                   if (product.state !== 'archived') {
                     setToastMessage('Archiving product...');
@@ -372,7 +372,7 @@ export const ProductMaster = () => {
                 className={`status-stepper-item relative px-8 py-3 font-bold text-label-md ${product.state === 'archived' ? 'bg-primary text-on-primary' : 'bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-colors cursor-pointer'}`}>
                 Archived
               </button>
-              <button 
+              <button
                 onClick={async () => {
                   if (product.state !== 'discontinued') {
                     setToastMessage('Discontinuing product...');
@@ -440,19 +440,19 @@ export const ProductMaster = () => {
               <div className="bg-white border border-outline-variant rounded-xl shadow-sm overflow-hidden">
                 {/* Tabs Header */}
                 <div className="flex border-b border-outline-variant bg-surface-container overflow-x-auto">
-                  <button 
+                  <button
                     onClick={() => setActiveTab('inventory')}
                     className={`py-3 px-6 font-bold flex items-center gap-2 transition-colors whitespace-nowrap ${activeTab === 'inventory' ? 'border-b-4 border-primary text-primary bg-white' : 'text-on-surface-variant hover:text-primary hover:bg-white/50'}`}
                   >
                     <span className="material-symbols-outlined text-[20px]">warehouse</span> Inventory
                   </button>
-                  <button 
+                  <button
                     onClick={() => setActiveTab('procurement')}
                     className={`py-3 px-6 font-bold flex items-center gap-2 transition-colors whitespace-nowrap ${activeTab === 'procurement' ? 'border-b-4 border-primary text-primary bg-white' : 'text-on-surface-variant hover:text-primary hover:bg-white/50'}`}
                   >
                     <span className="material-symbols-outlined text-[20px]">local_shipping</span> Procurement
                   </button>
-                  <button 
+                  <button
                     onClick={() => setActiveTab('bom')}
                     className={`py-3 px-6 font-bold flex items-center gap-2 transition-colors whitespace-nowrap ${activeTab === 'bom' ? 'border-b-4 border-primary text-primary bg-white' : 'text-on-surface-variant hover:text-primary hover:bg-white/50'}`}
                   >
@@ -658,7 +658,7 @@ export const ProductMaster = () => {
             <form onSubmit={submitEdit} className="space-y-4">
               <div>
                 <label className="block text-sm font-bold text-on-surface-variant mb-1">Product Name</label>
-                <input required type="text" value={editFormData.name} onChange={e => setEditFormData({...editFormData, name: e.target.value})} className="w-full border border-outline-variant rounded p-2 focus:border-primary focus:ring-1 focus:ring-primary outline-none" />
+                <input required type="text" value={editFormData.name} onChange={e => setEditFormData({ ...editFormData, name: e.target.value })} className="w-full border border-outline-variant rounded p-2 focus:border-primary focus:ring-1 focus:ring-primary outline-none" />
               </div>
               <div>
                 <label className="block text-sm font-bold text-on-surface-variant mb-1">Product Image</label>
@@ -668,7 +668,7 @@ export const ProductMaster = () => {
                     const reader = new FileReader();
                     reader.onloadend = () => {
                       const base64String = (reader.result as string).split(',')[1];
-                      setEditFormData({...editFormData, image_1920: base64String});
+                      setEditFormData({ ...editFormData, image_1920: base64String });
                     };
                     reader.readAsDataURL(file);
                   }
@@ -676,16 +676,16 @@ export const ProductMaster = () => {
               </div>
               <div>
                 <label className="block text-sm font-bold text-on-surface-variant mb-1">Barcode</label>
-                <input type="text" value={editFormData.barcode} onChange={e => setEditFormData({...editFormData, barcode: e.target.value})} className="w-full border border-outline-variant rounded p-2 focus:border-primary focus:ring-1 focus:ring-primary outline-none" />
+                <input type="text" value={editFormData.barcode} onChange={e => setEditFormData({ ...editFormData, barcode: e.target.value })} className="w-full border border-outline-variant rounded p-2 focus:border-primary focus:ring-1 focus:ring-primary outline-none" />
               </div>
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-bold text-on-surface-variant mb-1">Sale Price (₹)</label>
-                  <input required type="number" step="0.01" value={editFormData.sale_price} onChange={e => setEditFormData({...editFormData, sale_price: parseFloat(e.target.value) || 0})} className="w-full border border-outline-variant rounded p-2 focus:border-primary focus:ring-1 focus:ring-primary outline-none" />
+                  <input required type="number" step="0.01" value={editFormData.sale_price} onChange={e => setEditFormData({ ...editFormData, sale_price: parseFloat(e.target.value) || 0 })} className="w-full border border-outline-variant rounded p-2 focus:border-primary focus:ring-1 focus:ring-primary outline-none" />
                 </div>
                 <div>
                   <label className="block text-sm font-bold text-on-surface-variant mb-1">Cost Price (₹)</label>
-                  <input required type="number" step="0.01" value={editFormData.cost_price} onChange={e => setEditFormData({...editFormData, cost_price: parseFloat(e.target.value) || 0})} className="w-full border border-outline-variant rounded p-2 focus:border-primary focus:ring-1 focus:ring-primary outline-none" />
+                  <input required type="number" step="0.01" value={editFormData.cost_price} onChange={e => setEditFormData({ ...editFormData, cost_price: parseFloat(e.target.value) || 0 })} className="w-full border border-outline-variant rounded p-2 focus:border-primary focus:ring-1 focus:ring-primary outline-none" />
                 </div>
               </div>
               <div className="flex justify-end gap-2 mt-6 pt-4 border-t border-outline-variant">

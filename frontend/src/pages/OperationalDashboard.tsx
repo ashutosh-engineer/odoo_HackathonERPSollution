@@ -24,7 +24,7 @@ interface AuditLog {
 export const OperationalDashboard = () => {
   const { user } = useAuth();
   const role = user?.shiv_role || '';
-  
+
   const showSales = ['admin', 'auditor', 'accountant', 'sales_manager', 'sales_user', 'viewer'].includes(role);
   const showPurchase = ['admin', 'auditor', 'accountant', 'purchase_manager', 'purchase_user', 'viewer'].includes(role);
   const showMfg = ['admin', 'auditor', 'production_manager', 'production_user', 'viewer'].includes(role);
@@ -75,21 +75,21 @@ export const OperationalDashboard = () => {
       } catch (err) {
         console.error("Failed to load KPIs", err);
       }
-      
+
       try {
-        const deliveries = await odooSearchRead('shiv.sale.order', [['state','in',['confirmed','picking']]], ['name','customer_id','delivery_date','state'], {limit: 5});
+        const deliveries = await odooSearchRead('shiv.sale.order', [['state', 'in', ['confirmed', 'picking']]], ['name', 'customer_id', 'delivery_date', 'state'], { limit: 5 });
         setPendingDeliveries(deliveries as any[]);
       } catch (err) {
         console.error("Failed to load pending deliveries", err);
       }
-      
+
       try {
-        const wcs = await odooSearchRead('shiv.work.center', [['is_active','=',true]], ['name','utilization_pct','status'], {limit: 6});
+        const wcs = await odooSearchRead('shiv.work.center', [['is_active', '=', true]], ['name', 'utilization_pct', 'status'], { limit: 6 });
         setWorkCenters(wcs as any[]);
       } catch (err) {
         console.error("Failed to load work centers", err);
       }
-      
+
       try {
         const logsRes = await apiFetch('/shiv/audit-logs?limit=5');
         const logsData = logsRes.data || logsRes;
@@ -120,23 +120,23 @@ export const OperationalDashboard = () => {
     return true;
   };
 
-  const filteredDeliveries = pendingDeliveries.filter(d => 
-    (!searchQuery || 
-     d.name?.toLowerCase().includes(searchQuery.toLowerCase()) || 
-     (d.customer_id && d.customer_id[1]?.toLowerCase().includes(searchQuery.toLowerCase()))) &&
+  const filteredDeliveries = pendingDeliveries.filter(d =>
+    (!searchQuery ||
+      d.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (d.customer_id && d.customer_id[1]?.toLowerCase().includes(searchQuery.toLowerCase()))) &&
     isDateInFilter(d.delivery_date, activeFilter)
   );
 
-  const filteredWcs = workCenters.filter(wc => 
+  const filteredWcs = workCenters.filter(wc =>
     !searchQuery || wc.name?.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const filteredLogs = auditLogs.filter(log => 
-    (!searchQuery || 
-     log.action?.toLowerCase().includes(searchQuery.toLowerCase()) || 
-     log.model?.toLowerCase().includes(searchQuery.toLowerCase()) || 
-     log.actor_name?.toLowerCase().includes(searchQuery.toLowerCase()) || 
-     log.record_name?.toLowerCase().includes(searchQuery.toLowerCase())) &&
+  const filteredLogs = auditLogs.filter(log =>
+    (!searchQuery ||
+      log.action?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      log.model?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      log.actor_name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      log.record_name?.toLowerCase().includes(searchQuery.toLowerCase())) &&
     isDateInFilter(log.timestamp, activeFilter)
   );
 
@@ -152,9 +152,9 @@ export const OperationalDashboard = () => {
           {/* Search Bar */}
           <div className="flex items-center bg-white rounded-xl px-4 py-2.5 gap-3 border border-outline-variant transition-all focus-within:border-primary/50 focus-within:shadow-soft w-full sm:w-auto">
             <span className="material-symbols-outlined text-on-surface-variant text-[20px]">search</span>
-            <input 
-              className="bg-transparent border-none focus:ring-0 text-body-sm w-full sm:w-64 p-0 placeholder-on-surface-variant/60 outline-none" 
-              placeholder="Search orders, products or customers..." 
+            <input
+              className="bg-transparent border-none focus:ring-0 text-body-sm w-full sm:w-64 p-0 placeholder-on-surface-variant/60 outline-none"
+              placeholder="Search orders, products or customers..."
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -162,16 +162,16 @@ export const OperationalDashboard = () => {
           </div>
 
           <div className="flex gap-3 relative w-full sm:w-auto">
-            <button 
-              onClick={() => { setActiveFilter('today'); handleActionClick('Dashboard filtered to Today'); }} 
+            <button
+              onClick={() => { setActiveFilter('today'); handleActionClick('Dashboard filtered to Today'); }}
               className={`flex-1 sm:flex-none px-5 py-2.5 border border-outline-variant font-semibold rounded-xl flex items-center justify-center gap-2 hover:border-primary/30 transition-all shadow-soft ${activeFilter === 'today' ? 'bg-primary/10 text-primary border-primary/30' : 'bg-white text-on-surface hover:bg-surface-variant'}`}
             >
               <span className="material-symbols-outlined text-[20px]">calendar_today</span>
               Today
             </button>
             <div className="relative flex-1 sm:flex-none">
-              <button 
-                onClick={() => setShowFilterDropdown(!showFilterDropdown)} 
+              <button
+                onClick={() => setShowFilterDropdown(!showFilterDropdown)}
                 className={`w-full px-5 py-2.5 border border-outline-variant font-semibold rounded-xl flex items-center justify-center gap-2 hover:border-primary/30 transition-all shadow-soft ${activeFilter !== 'today' ? 'bg-primary/10 text-primary border-primary/30' : 'bg-white text-on-surface hover:bg-surface-variant'}`}
               >
                 <span className="material-symbols-outlined text-[20px]">filter_list</span>
@@ -295,9 +295,8 @@ export const OperationalDashboard = () => {
                         <td className="px-6 py-5 text-on-surface-variant">Products</td>
                         <td className="px-6 py-5 font-medium">{delivery.delivery_date || 'N/A'}</td>
                         <td className="px-6 py-5 text-right">
-                          <span className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-tight shadow-sm ${
-                            delivery.state === 'picking' ? 'bg-warning-amber text-white' : 'bg-success-forest text-white'
-                          }`}>
+                          <span className={`px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-tight shadow-sm ${delivery.state === 'picking' ? 'bg-warning-amber text-white' : 'bg-success-forest text-white'
+                            }`}>
                             {delivery.state}
                           </span>
                         </td>
@@ -323,12 +322,12 @@ export const OperationalDashboard = () => {
               ) : (
                 filteredWcs.map((wc, idx) => {
                   const util = wc.utilization_pct || 0;
-                  const colorClass = util > 85 ? 'bg-error shadow-[0_0_10px_rgba(239,68,68,0.3)]' : 
-                                     util > 70 ? 'bg-warning-amber shadow-[0_0_10px_rgba(245,158,11,0.3)]' : 
-                                     util > 50 ? 'bg-odoo-teal shadow-[0_0_10px_rgba(13,148,136,0.3)]' : 
-                                     'bg-success-forest shadow-[0_0_10px_rgba(16,185,129,0.3)]';
+                  const colorClass = util > 85 ? 'bg-error shadow-[0_0_10px_rgba(239,68,68,0.3)]' :
+                    util > 70 ? 'bg-warning-amber shadow-[0_0_10px_rgba(245,158,11,0.3)]' :
+                      util > 50 ? 'bg-odoo-teal shadow-[0_0_10px_rgba(13,148,136,0.3)]' :
+                        'bg-success-forest shadow-[0_0_10px_rgba(16,185,129,0.3)]';
                   const textColor = util > 85 ? 'text-error' : util > 70 ? 'text-warning-amber' : util > 50 ? 'text-odoo-teal' : 'text-success-forest';
-                  
+
                   return (
                     <div key={wc.id} className="space-y-3">
                       <div className="flex justify-between items-end">
@@ -351,51 +350,51 @@ export const OperationalDashboard = () => {
 
         {/* Side Feed Column — Audit Events (admin/auditor only) */}
         {showAudit && (
-        <div className="lg:col-span-4">
-          <div className="bg-white border border-outline-variant rounded-xl shadow-soft flex flex-col h-full overflow-hidden">
-            <div className="px-6 py-5 border-b border-outline-variant bg-white/50">
-              <h3 className="font-headline-sm text-[18px] font-bold text-on-surface flex items-center gap-3">
-                <span className="material-symbols-outlined text-on-surface-variant !text-[24px]">history</span>
-                Recent Audit Events
-              </h3>
-            </div>
-            <div className="flex-1 p-6 overflow-y-auto space-y-8 custom-scrollbar">
-              {!filteredLogs || filteredLogs.length === 0 ? (
-                <div className="text-center text-on-surface-variant font-bold p-4">No audit events found</div>
-              ) : (
-                (filteredLogs || []).map((log, idx) => (
-                  <div key={log.id} className={`flex gap-4 ${idx !== filteredLogs.length - 1 ? 'relative pb-2' : ''}`}>
-                    {idx !== filteredLogs.length - 1 && (
-                      <div className="absolute left-[17px] top-10 bottom-[-32px] w-[2px] bg-outline-variant/40"></div>
-                    )}
-                    <div className="w-9 h-9 rounded-xl bg-surface-variant flex-shrink-0 flex items-center justify-center border border-outline-variant/20 shadow-sm z-10 bg-white">
-                      <span className="material-symbols-outlined text-[18px] text-primary">history</span>
+          <div className="lg:col-span-4">
+            <div className="bg-white border border-outline-variant rounded-xl shadow-soft flex flex-col h-full overflow-hidden">
+              <div className="px-6 py-5 border-b border-outline-variant bg-white/50">
+                <h3 className="font-headline-sm text-[18px] font-bold text-on-surface flex items-center gap-3">
+                  <span className="material-symbols-outlined text-on-surface-variant !text-[24px]">history</span>
+                  Recent Audit Events
+                </h3>
+              </div>
+              <div className="flex-1 p-6 overflow-y-auto space-y-8 custom-scrollbar">
+                {!filteredLogs || filteredLogs.length === 0 ? (
+                  <div className="text-center text-on-surface-variant font-bold p-4">No audit events found</div>
+                ) : (
+                  (filteredLogs || []).map((log, idx) => (
+                    <div key={log.id} className={`flex gap-4 ${idx !== filteredLogs.length - 1 ? 'relative pb-2' : ''}`}>
+                      {idx !== filteredLogs.length - 1 && (
+                        <div className="absolute left-[17px] top-10 bottom-[-32px] w-[2px] bg-outline-variant/40"></div>
+                      )}
+                      <div className="w-9 h-9 rounded-xl bg-surface-variant flex-shrink-0 flex items-center justify-center border border-outline-variant/20 shadow-sm z-10 bg-white">
+                        <span className="material-symbols-outlined text-[18px] text-primary">history</span>
+                      </div>
+                      <div className="flex-1">
+                        <p className="text-body-sm leading-snug">
+                          <span className="font-black text-on-surface">{log.actor_name || 'System'}</span> {log.action} <span className="font-bold text-primary">{log.model}</span> {log.record_name ? `(${log.record_name})` : log.record_id ? `(ID: ${log.record_id})` : ''}
+                        </p>
+                        <p className="text-[11px] font-bold text-on-surface-variant/60 mt-1 uppercase tracking-wider">{log.timestamp} • IP: {log.ip_address || 'Unknown'}</p>
+                      </div>
                     </div>
-                    <div className="flex-1">
-                      <p className="text-body-sm leading-snug">
-                        <span className="font-black text-on-surface">{log.actor_name || 'System'}</span> {log.action} <span className="font-bold text-primary">{log.model}</span> {log.record_name ? `(${log.record_name})` : log.record_id ? `(ID: ${log.record_id})` : ''}
-                      </p>
-                      <p className="text-[11px] font-bold text-on-surface-variant/60 mt-1 uppercase tracking-wider">{log.timestamp} • IP: {log.ip_address || 'Unknown'}</p>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-            <div className="p-4 border-t border-outline-variant bg-surface-variant/50 text-center">
-              <button className="text-label-md font-black text-primary hover:underline uppercase tracking-widest">Full Audit History</button>
+                  ))
+                )}
+              </div>
+              <div className="p-4 border-t border-outline-variant bg-surface-variant/50 text-center">
+                <button className="text-label-md font-black text-primary hover:underline uppercase tracking-widest">Full Audit History</button>
+              </div>
             </div>
           </div>
-        </div>
         )}
       </div>
 
       {/* Floating Action Buttons — role-gated */}
       <div className="fixed bottom-8 right-8 flex flex-col gap-4 z-50">
         {canCreateSales && (
-        <button onClick={() => window.location.href='/sales/new'} className="w-16 h-16 bg-primary text-white rounded-2xl shadow-soft-lg hover:scale-105 active:scale-95 transition-all flex items-center justify-center group relative border-2 border-white/20">
-          <span className="material-symbols-outlined !text-[36px]">add</span>
-          <span className="absolute right-20 bg-inverse-surface text-white px-4 py-2 rounded-xl text-label-md opacity-0 group-hover:opacity-100 transition-all whitespace-nowrap pointer-events-none shadow-xl translate-x-4 group-hover:translate-x-0 font-bold">Create New Order</span>
-        </button>
+          <button onClick={() => window.location.href = '/sales/new'} className="w-16 h-16 bg-primary text-white rounded-2xl shadow-soft-lg hover:scale-105 active:scale-95 transition-all flex items-center justify-center group relative border-2 border-white/20">
+            <span className="material-symbols-outlined !text-[36px]">add</span>
+            <span className="absolute right-20 bg-inverse-surface text-white px-4 py-2 rounded-xl text-label-md opacity-0 group-hover:opacity-100 transition-all whitespace-nowrap pointer-events-none shadow-xl translate-x-4 group-hover:translate-x-0 font-bold">Create New Order</span>
+          </button>
         )}
         <button onClick={handleExport} className="w-16 h-16 bg-white border border-outline-variant text-primary rounded-2xl shadow-soft-lg hover:scale-105 active:scale-95 transition-all flex items-center justify-center group relative">
           <span className="material-symbols-outlined !text-[28px]">print</span>

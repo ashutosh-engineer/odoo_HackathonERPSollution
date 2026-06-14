@@ -29,9 +29,9 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showHelp, setShowHelp] = useState(false);
   const isActive = (path: string) => location.pathname === path || location.pathname.startsWith(path + '/');
-  
+
   const role = user?.shiv_role || '';
-  
+
   const hasAccess = (allowed: string[]) => allowed.includes(role);
 
   const roles = {
@@ -60,10 +60,10 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
         <div className="flex items-center gap-3 mb-10 px-4 mt-4">
           <div className="w-10 h-10 flex items-center justify-center text-white">
             <svg viewBox="0 0 40 40" className="w-full h-full text-white" fill="currentColor">
-              <path d="M10 20C10 14.4772 14.4772 10 20 10V20H10Z" opacity="0.8"/>
+              <path d="M10 20C10 14.4772 14.4772 10 20 10V20H10Z" opacity="0.8" />
               <path d="M20 10C25.5228 10 30 14.4772 30 20H20V10Z" />
-              <path d="M30 20C30 25.5228 25.5228 30 20 30V20H30Z" opacity="0.6"/>
-              <path d="M20 30C14.4772 30 10 25.5228 10 20H20V30Z" opacity="0.4"/>
+              <path d="M30 20C30 25.5228 25.5228 30 20 30V20H30Z" opacity="0.6" />
+              <path d="M20 30C14.4772 30 10 25.5228 10 20H20V30Z" opacity="0.4" />
             </svg>
           </div>
           <div className="flex flex-col">
@@ -79,49 +79,49 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
             <span className="material-symbols-outlined">inventory</span>
             <span className="font-label-md">Products</span>
           </Link>
-          
+
           {hasAccess(roles.sales) && (
             <Link to="/sales" className={`flex items-center gap-3 px-4 py-3 cursor-pointer rounded-lg transition-all ${isActive('/sales') ? 'nav-active font-semibold' : 'text-white/70 hover:bg-white/10 hover:text-white'}`}>
               <span className="material-symbols-outlined">receipt_long</span>
               <span className="font-label-md">Sales</span>
             </Link>
           )}
-          
+
           {hasAccess(roles.purchase) && (
             <Link to="/purchase" className={`flex items-center gap-3 px-4 py-3 cursor-pointer rounded-lg transition-all ${isActive('/purchase') ? 'nav-active font-semibold' : 'text-white/70 hover:bg-white/10 hover:text-white'}`}>
               <span className="material-symbols-outlined">shopping_cart</span>
               <span className="font-label-md">Purchase</span>
             </Link>
           )}
-          
+
           {hasAccess(roles.mfg) && (
             <Link to="/manufacturing" className={`flex items-center gap-3 px-4 py-3 cursor-pointer rounded-lg transition-all ${isActive('/manufacturing') ? 'nav-active font-semibold' : 'text-white/70 hover:bg-white/10 hover:text-white'}`}>
               <span className="material-symbols-outlined">precision_manufacturing</span>
               <span className="font-label-md">Manufacturing</span>
             </Link>
           )}
-          
+
           {hasAccess(roles.inv) && (
             <Link to="/inventory" className={`flex items-center gap-3 px-4 py-3 cursor-pointer rounded-lg transition-all ${isActive('/inventory') ? 'nav-active font-semibold' : 'text-white/70 hover:bg-white/10 hover:text-white'}`}>
               <span className="material-symbols-outlined">warehouse</span>
               <span className="font-label-md">Inventory</span>
             </Link>
           )}
-          
+
           {hasAccess(roles.floor_console) && (
             <Link to="/floor-console" className={`flex items-center gap-3 px-4 py-3 cursor-pointer rounded-lg transition-all ${isActive('/floor-console') ? 'nav-active font-semibold' : 'text-white/70 hover:bg-white/10 hover:text-white'}`}>
               <span className="material-symbols-outlined">dashboard_customize</span>
               <span className="font-label-md">Floor Console</span>
             </Link>
           )}
-  
+
           {hasAccess(roles.audit) && (
             <Link to="/audit-log" className={`flex items-center gap-3 px-4 py-3 cursor-pointer rounded-lg transition-all ${isActive('/audit-log') ? 'nav-active font-semibold' : 'text-white/70 hover:bg-white/10 hover:text-white'}`}>
               <span className="material-symbols-outlined">history</span>
               <span className="font-label-md">Audit Log</span>
             </Link>
           )}
-          
+
           {hasAccess(roles.admin) && (
             <Link to="/user-management" className={`flex items-center gap-3 px-4 py-3 cursor-pointer rounded-lg transition-all ${isActive('/user-management') ? 'nav-active font-semibold' : 'text-white/70 hover:bg-white/10 hover:text-white'}`}>
               <span className="material-symbols-outlined">group</span>
@@ -130,7 +130,7 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
           )}
         </nav>
         <div className="mt-4 pt-4 border-t border-white/10 space-y-1 px-2">
-          <div className="flex items-center gap-3 px-4 py-3 cursor-pointer rounded-lg hover:bg-white/10 transition-all group" onClick={() => window.location.href='/user-management'}>
+          <div className="flex items-center gap-3 px-4 py-3 cursor-pointer rounded-lg hover:bg-white/10 transition-all group" onClick={() => window.location.href = '/user-management'}>
             <div className="w-8 h-8 rounded-full bg-white/20 text-white flex items-center justify-center font-bold text-sm shadow-sm group-hover:bg-white group-hover:text-primary transition-colors">
               {user?.name?.charAt(0)?.toUpperCase() || 'U'}
             </div>
@@ -153,63 +153,63 @@ const AppLayout = ({ children }: { children: React.ReactNode }) => {
           </button>
         </div>
         {(hasAccess(roles.create_sales) || hasAccess(roles.create_purchase) || hasAccess(roles.create_mfg) || hasAccess(roles.create_inv)) && (
-        <div className="px-4 mt-6 relative">
-          {showNewEntryMenu && (
-            <>
-              <div className="fixed inset-0 z-40 bg-transparent" onClick={() => setShowNewEntryMenu(false)} />
-              <div className="absolute bottom-16 left-4 right-4 bg-white rounded-lg shadow-xl border border-outline-variant p-2 z-50 animate-in fade-in slide-in-from-bottom-2 duration-200 text-on-surface">
-                <p className="text-[10px] font-bold text-on-surface-variant/60 uppercase tracking-widest px-3 py-1 mb-1 border-b border-outline-variant/30">Create New Record</p>
-                {hasAccess(roles.create_sales) && (
-                  <Link
-                    to="/sales/new"
-                    onClick={() => setShowNewEntryMenu(false)}
-                    className="flex items-center gap-2 px-3 py-2 rounded-lg text-body-sm text-on-surface hover:bg-primary/10 hover:text-primary transition-all font-semibold"
-                  >
-                    <span className="material-symbols-outlined text-[18px]">receipt_long</span>
-                    <span>New Sales Order</span>
-                  </Link>
-                )}
-                {hasAccess(roles.create_purchase) && (
-                  <Link
-                    to="/purchase/new"
-                    onClick={() => setShowNewEntryMenu(false)}
-                    className="flex items-center gap-2 px-3 py-2 rounded-lg text-body-sm text-on-surface hover:bg-primary/10 hover:text-primary transition-all font-semibold"
-                  >
-                    <span className="material-symbols-outlined text-[18px]">shopping_cart</span>
-                    <span>New Purchase Order</span>
-                  </Link>
-                )}
-                {hasAccess(roles.create_mfg) && (
-                  <Link
-                    to="/manufacturing/new"
-                    onClick={() => setShowNewEntryMenu(false)}
-                    className="flex items-center gap-2 px-3 py-2 rounded-lg text-body-sm text-on-surface hover:bg-primary/10 hover:text-primary transition-all font-semibold"
-                  >
-                    <span className="material-symbols-outlined text-[18px]">precision_manufacturing</span>
-                    <span>New Mfg Order</span>
-                  </Link>
-                )}
-                {hasAccess(roles.create_inv) && (
-                  <Link
-                    to="/inventory"
-                    onClick={() => setShowNewEntryMenu(false)}
-                    className="flex items-center gap-2 px-3 py-2 rounded-lg text-body-sm text-on-surface hover:bg-primary/10 hover:text-primary transition-all font-semibold"
-                  >
-                    <span className="material-symbols-outlined text-[18px]">warehouse</span>
-                    <span>New Stock Movement</span>
-                  </Link>
-                )}
-              </div>
-            </>
-          )}
-          <button
-            onClick={() => setShowNewEntryMenu(!showNewEntryMenu)}
-            className="w-full flex items-center justify-center gap-2 bg-white text-primary py-3.5 rounded-lg font-bold hover:bg-primary-fixed-dim transition-all shadow-sm active:scale-[0.98]"
-          >
-            <span className="material-symbols-outlined">add_circle</span>
-            <span>New Entry</span>
-          </button>
-        </div>
+          <div className="px-4 mt-6 relative">
+            {showNewEntryMenu && (
+              <>
+                <div className="fixed inset-0 z-40 bg-transparent" onClick={() => setShowNewEntryMenu(false)} />
+                <div className="absolute bottom-16 left-4 right-4 bg-white rounded-lg shadow-xl border border-outline-variant p-2 z-50 animate-in fade-in slide-in-from-bottom-2 duration-200 text-on-surface">
+                  <p className="text-[10px] font-bold text-on-surface-variant/60 uppercase tracking-widest px-3 py-1 mb-1 border-b border-outline-variant/30">Create New Record</p>
+                  {hasAccess(roles.create_sales) && (
+                    <Link
+                      to="/sales/new"
+                      onClick={() => setShowNewEntryMenu(false)}
+                      className="flex items-center gap-2 px-3 py-2 rounded-lg text-body-sm text-on-surface hover:bg-primary/10 hover:text-primary transition-all font-semibold"
+                    >
+                      <span className="material-symbols-outlined text-[18px]">receipt_long</span>
+                      <span>New Sales Order</span>
+                    </Link>
+                  )}
+                  {hasAccess(roles.create_purchase) && (
+                    <Link
+                      to="/purchase/new"
+                      onClick={() => setShowNewEntryMenu(false)}
+                      className="flex items-center gap-2 px-3 py-2 rounded-lg text-body-sm text-on-surface hover:bg-primary/10 hover:text-primary transition-all font-semibold"
+                    >
+                      <span className="material-symbols-outlined text-[18px]">shopping_cart</span>
+                      <span>New Purchase Order</span>
+                    </Link>
+                  )}
+                  {hasAccess(roles.create_mfg) && (
+                    <Link
+                      to="/manufacturing/new"
+                      onClick={() => setShowNewEntryMenu(false)}
+                      className="flex items-center gap-2 px-3 py-2 rounded-lg text-body-sm text-on-surface hover:bg-primary/10 hover:text-primary transition-all font-semibold"
+                    >
+                      <span className="material-symbols-outlined text-[18px]">precision_manufacturing</span>
+                      <span>New Mfg Order</span>
+                    </Link>
+                  )}
+                  {hasAccess(roles.create_inv) && (
+                    <Link
+                      to="/inventory"
+                      onClick={() => setShowNewEntryMenu(false)}
+                      className="flex items-center gap-2 px-3 py-2 rounded-lg text-body-sm text-on-surface hover:bg-primary/10 hover:text-primary transition-all font-semibold"
+                    >
+                      <span className="material-symbols-outlined text-[18px]">warehouse</span>
+                      <span>New Stock Movement</span>
+                    </Link>
+                  )}
+                </div>
+              </>
+            )}
+            <button
+              onClick={() => setShowNewEntryMenu(!showNewEntryMenu)}
+              className="w-full flex items-center justify-center gap-2 bg-white text-primary py-3.5 rounded-lg font-bold hover:bg-primary-fixed-dim transition-all shadow-sm active:scale-[0.98]"
+            >
+              <span className="material-symbols-outlined">add_circle</span>
+              <span>New Entry</span>
+            </button>
+          </div>
         )}
 
       </aside>
@@ -239,7 +239,7 @@ function App() {
             <Route path="/dashboard" element={<AppLayout><OperationalDashboard /></AppLayout>} />
             <Route path="/products" element={<AppLayout><ProductMaster /></AppLayout>} />
           </Route>
-          
+
           <Route element={<ProtectedRoute allowedRoles={['admin', 'sales_manager', 'sales_user', 'accountant', 'auditor']} />}>
             <Route path="/sales" element={<AppLayout><SalesList /></AppLayout>} />
             <Route path="/sales/:id" element={<AppLayout><SalesOrder /></AppLayout>} />
