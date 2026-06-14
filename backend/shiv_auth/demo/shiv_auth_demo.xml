@@ -17,6 +17,18 @@
             <field name="must_change_password">True</field>
         </record>
 
+        <!-- Demo Sales Manager -->
+        <record id="demo_user_sales_manager" model="res.users">
+            <field name="name">Anita Desai (Sales Manager)</field>
+            <field name="login">sales.mgr@shivfurniture.com</field>
+            <field name="password">DemoPass@123</field>
+            <field name="email">sales.mgr@shivfurniture.com</field>
+            <field name="shiv_role">sales_manager</field>
+            <field name="department">sales</field>
+            <field name="employee_id">DEMO004</field>
+            <field name="must_change_password">True</field>
+        </record>
+
         <!-- Demo Warehouse Manager -->
         <record id="demo_user_wh_manager" model="res.users">
             <field name="name">Priya Patel (Demo)</field>
@@ -29,6 +41,78 @@
             <field name="must_change_password">True</field>
         </record>
 
+        <!-- Demo Warehouse User -->
+        <record id="demo_user_wh_user" model="res.users">
+            <field name="name">Vikram Singh (Warehouse Staff)</field>
+            <field name="login">wh.user@shivfurniture.com</field>
+            <field name="password">DemoPass@123</field>
+            <field name="email">wh.user@shivfurniture.com</field>
+            <field name="shiv_role">warehouse_user</field>
+            <field name="department">warehouse</field>
+            <field name="employee_id">DEMO005</field>
+            <field name="must_change_password">True</field>
+        </record>
+
+        <!-- Demo Purchase Manager -->
+        <record id="demo_user_purchase_manager" model="res.users">
+            <field name="name">Meena Kumari (Purchase Manager)</field>
+            <field name="login">purchase.mgr@shivfurniture.com</field>
+            <field name="password">DemoPass@123</field>
+            <field name="email">purchase.mgr@shivfurniture.com</field>
+            <field name="shiv_role">purchase_manager</field>
+            <field name="department">purchase</field>
+            <field name="employee_id">DEMO006</field>
+            <field name="must_change_password">True</field>
+        </record>
+
+        <!-- Demo Purchase User -->
+        <record id="demo_user_purchase_user" model="res.users">
+            <field name="name">Ravi Kumar (Purchase Officer)</field>
+            <field name="login">purchase.user@shivfurniture.com</field>
+            <field name="password">DemoPass@123</field>
+            <field name="email">purchase.user@shivfurniture.com</field>
+            <field name="shiv_role">purchase_user</field>
+            <field name="department">purchase</field>
+            <field name="employee_id">DEMO007</field>
+            <field name="must_change_password">True</field>
+        </record>
+
+        <!-- Demo Production Manager -->
+        <record id="demo_user_prod_manager" model="res.users">
+            <field name="name">Deepak Verma (Production Manager)</field>
+            <field name="login">prod.mgr@shivfurniture.com</field>
+            <field name="password">DemoPass@123</field>
+            <field name="email">prod.mgr@shivfurniture.com</field>
+            <field name="shiv_role">production_manager</field>
+            <field name="department">production</field>
+            <field name="employee_id">DEMO008</field>
+            <field name="must_change_password">True</field>
+        </record>
+
+        <!-- Demo Production User -->
+        <record id="demo_user_prod_user" model="res.users">
+            <field name="name">Santosh Yadav (Production Staff)</field>
+            <field name="login">prod.user@shivfurniture.com</field>
+            <field name="password">DemoPass@123</field>
+            <field name="email">prod.user@shivfurniture.com</field>
+            <field name="shiv_role">production_user</field>
+            <field name="department">production</field>
+            <field name="employee_id">DEMO009</field>
+            <field name="must_change_password">True</field>
+        </record>
+
+        <!-- Demo Accountant -->
+        <record id="demo_user_accountant" model="res.users">
+            <field name="name">Kavita Joshi (Accountant)</field>
+            <field name="login">accountant@shivfurniture.com</field>
+            <field name="password">DemoPass@123</field>
+            <field name="email">accountant@shivfurniture.com</field>
+            <field name="shiv_role">accountant</field>
+            <field name="department">finance</field>
+            <field name="employee_id">DEMO010</field>
+            <field name="must_change_password">True</field>
+        </record>
+
         <!-- Demo Auditor -->
         <record id="demo_user_auditor" model="res.users">
             <field name="name">Suresh Gupta (Demo Auditor)</field>
@@ -38,6 +122,18 @@
             <field name="shiv_role">auditor</field>
             <field name="department">management</field>
             <field name="employee_id">DEMO003</field>
+            <field name="must_change_password">True</field>
+        </record>
+
+        <!-- Demo Viewer (Read-Only) -->
+        <record id="demo_user_viewer" model="res.users">
+            <field name="name">Guest Viewer (Read-Only)</field>
+            <field name="login">viewer@shivfurniture.com</field>
+            <field name="password">DemoPass@123</field>
+            <field name="email">viewer@shivfurniture.com</field>
+            <field name="shiv_role">viewer</field>
+            <field name="department">management</field>
+            <field name="employee_id">DEMO011</field>
             <field name="must_change_password">True</field>
         </record>
     </data>
